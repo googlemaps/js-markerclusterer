@@ -54,7 +54,7 @@ npm i -D @types/google.maps
 
 ## Documentation
 
-The [reference documentation](https://googlemaps.github.io/js-markerclusterer/index.html) is generated from the TypeScript definitions.
+The [reference documentation](https://googlemaps.github.io/js-markerclusterer/) is generated from the TypeScript definitions.
 
 ## Example
 
