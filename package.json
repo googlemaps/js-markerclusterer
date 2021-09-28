@@ -1,6 +1,6 @@
 {
-  "name": "@googlemaps/markerclustererplus",
-  "version": "1.2.0",
+  "name": "@googlemaps/markerclusterer",
+  "version": "1.0.0",
   "description": "Creates and manages per-zoom-level clusters for large amounts of markers.",
   "keywords": [
     "cluster",
@@ -8,19 +8,18 @@
     "maps",
     "marker"
   ],
-  "homepage": "https://github.com/googlemaps/js-markerclustererplus",
+  "homepage": "https://github.com/googlemaps/js-markerclusterer",
   "bugs": {
-    "url": "https://github.com/googlemaps/js-markerclustererplus/issues"
+    "url": "https://github.com/googlemaps/js-markerclusterer/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/googlemaps/js-markerclustererplus.git"
+    "url": "https://github.com/googlemaps/js-markerclusterer.git"
   },
   "license": "Apache-2.0",
   "author": "Justin Poehnelt",
   "files": [
-    "dist/*",
-    "images/*"
+    "dist/*"
   ],
   "main": "dist/index.umd.js",
   "unpkg": "dist/index.min.js",
