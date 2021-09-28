@@ -55,8 +55,13 @@ const markerCluster = new MarkerClusterer({ map, markers });
 
 View the package in action:
 
-- [Algorithm Comparisons](https://googlemaps.github.io/js-markerclusterer/public/algorithms)
-- [Renderer Usage](https://googlemaps.github.io/js-markerclusterer/public/renderers)
+- [Algorithm Comparisons](https://googlemaps.github.io/js-markerclusterer/public/algorithms) - This example demonstrates the different algorithms. Please note that spacing and many other options can be changed for each algorithm. 
+
+![Screen Shot 2021-09-28 at 1 43 40 PM](https://user-images.githubusercontent.com/3392975/135155255-196ea200-65fe-4a88-8ab9-22a05cd0375c.png)
+
+- [Renderer Usage](https://googlemaps.github.io/js-markerclusterer/public/renderers) - This example demonstrates different renderers similar to the image below.
+
+![Screen Shot 2021-09-28 at 1 41 06 PM](https://user-images.githubusercontent.com/3392975/135154898-a5abb5a4-3022-44e0-92d2-5dcefa247e87.png)
 
 ## History
 
