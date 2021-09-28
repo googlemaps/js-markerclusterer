@@ -14,7 +14,7 @@ The library creates and manages per-zoom-level clusters for large amounts of mar
 
 ![screenshot](https://user-images.githubusercontent.com/3392975/135143029-20abd824-0f3e-4e28-bad3-327acf7aec04.png)
 
-See the [history section](#history) for how this library relates to [@google/markerclusterer][@google/markerclusterer] and [@googlemaps/markerclustererplus][@googlemaps/markerclustererplus].
+See the [history section](#history) and [migration section](#migration) for how this library relates to [@google/markerclusterer][@google/markerclusterer] and [@googlemaps/markerclustererplus][@googlemaps/markerclustererplus].
 
 ## Install
 
@@ -24,12 +24,6 @@ Available via npm as the package [@googlemaps/markerclusterer](https://www.npmjs
 npm i @googlemaps/markerclusterer
 ```
 
-or
-
-```sh
-yarn add @googlemaps/markerclusterer
-```
-
 Alternativly you may add the umd package directly to the html document using the unpkg link.
 
 ```html
@@ -37,12 +31,6 @@ Alternativly you may add the umd package directly to the html document using the
 ```
 
 When adding via unpkg, the `MarkerClusterer` can be accessed at `markerclusterer.MarkerClusterer`.
-
-A version can be specified by using
-
-```
-https://unpkg.com/@googlemaps/markerclusterer@VERSION/dist/...
-```
 
 #### TypeScript
 
@@ -56,7 +44,7 @@ npm i -D @types/google.maps
 
 The [reference documentation](https://googlemaps.github.io/js-markerclusterer/) is generated from the TypeScript definitions.
 
-## Example
+## Examples
 
 ```js
 import { MarkerClusterer } from "@googlemaps/markerclusterer";
@@ -67,7 +55,7 @@ const markerCluster = new MarkerClusterer({ map, markers });
 
 View the package in action:
 
-- [Algorithms](https://googlemaps.github.io/js-markerclusterer/public/algorithms)
+- [Algorithm Comparisons](https://googlemaps.github.io/js-markerclusterer/public/algorithms)
 - [Renderer Usage](https://googlemaps.github.io/js-markerclusterer/public/renderers)
 
 ## History
@@ -87,7 +75,7 @@ This library has a heritage in [@google/markerclusterer][@google/markerclusterer
 
 The API of @googlemaps/markerclustererplus has changed in a number of ways from [@googlemaps/markerclustererplus][@googlemaps/markerclustererplus].
 
-- The `MarkerClusterer` class now accepts an algorithm and renderer parameter to allow for more flexibility. The interface looks like the following:
+- The `MarkerClusterer` class now accepts an `algorithm` and `renderer` parameter to allow for more flexibility. The interface looks like the following:
 
 ```js
 {
@@ -100,7 +88,7 @@ The API of @googlemaps/markerclustererplus has changed in a number of ways from 
 ```
 
 - The `MarkerClusterer` accepts a single options argument instead of positional parameters.
-- The traditional `GridAlgorithm` is still supported, **but is not the default**.
+- The traditional `GridAlgorithm` is still supported, **but is not the default**. The default is [supercluster](https://www.npmjs.com/package/supercluster) which uses [k-d trees](https://en.wikipedia.org/wiki/K-d_tree) for improved performance.
 - Styling of clusters has been simplifed and moved to the renderer interface.
 - The `MarkerClusterer` class is still an instance of `google.maps.OverlayView`, but uses `google.maps.Marker`s instead of `google.maps.Overlay` to render the clusters. This solves issues related to the usage of map panes and click handlers.
 - @googlemaps/markerclusterer supports Marker and Map [a11y improvements](https://cloud.google.com/blog/products/maps-platform/improved-accessibility-maps-javascript-api).
