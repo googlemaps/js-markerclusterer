@@ -12,7 +12,7 @@
 
 The library creates and manages per-zoom-level clusters for large amounts of markers.
 
-See the [history section](#history) for how this library relates to @googlemaps/markerclustererplus and @google/markerclusterer.
+See the [history section](#history) for how this library relates to [@google/markerclusterer][@google/markerclusterer] and [@googlemaps/markerclustererplus][@googlemaps/markerclustererplus].
 
 ## Install
 
