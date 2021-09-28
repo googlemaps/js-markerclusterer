@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { SuperClusterAlgorithm } from "./superCluster";
+import { SuperClusterAlgorithm } from "./supercluster";
 import { initialize } from "@googlemaps/jest-mocks";
 
 let map: google.maps.Map;
