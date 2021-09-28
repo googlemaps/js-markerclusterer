@@ -1,0 +1,73 @@
+<!DOCTYPE >
+<!--
+ Copyright 2021 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>Compare clustering renderers</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+    <!-- and it's easy to individually load additional languages -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/languages/typescript.min.js"></script>
+    <style type="text/css">
+      html,
+      body {
+        margin: 0;
+      }
+
+      #container {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: stretch;
+        align-content: stretch;
+        width: 100%;
+        min-height: 100vh;
+      }
+
+      .map {
+        min-width: 35%;
+        max-width: 50%;
+        flex-grow: 1;
+        margin: 1px;
+        min-height: 50vh;
+      }
+
+      .description {
+        margin: 12px;
+        padding: 1rem;
+        background-color: rgba(255, 255, 255, 1);
+        color: #333333;
+        max-height: 30%;
+        max-width: 70%;
+        overflow: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div class="map" id="default"></div>
+      <div class="map" id="simple"></div>
+      <div class="map" id="svg"></div>
+      <div class="map" id="interpolated"></div>
+    </div>
+    <script src="renderers.js" type="module"></script>
+    <script src="vendor.js" type="module"></script>
+  </body>
+</html>
