@@ -19,7 +19,7 @@ import { LoaderOptions } from "@googlemaps/js-api-loader";
 export const MAP_ID = "7b9a897acd0a63a4";
 
 export const LOADER_OPTIONS: LoaderOptions = {
-  apiKey: "AIzaSyD8xiaVPWB02OeQkJOenLiJzdeUHzlhu00",
+  apiKey: "AIzaSyDhRjl83cPVWeaEer-SnKIw7GTjBuqWxXI",
   version: "weekly",
   libraries: [],
 };
