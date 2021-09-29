@@ -19,7 +19,7 @@ import { filterMarkersToPaddedViewport } from "./utils";
 
 export interface AlgorithmInput {
   /**
-   * The map containing the makres and clusters.
+   * The map containing the markers and clusters.
    */
   map: google.maps.Map;
   /**
@@ -73,7 +73,7 @@ export abstract class AbstractAlgorithm implements Algorithm {
   }
   /**
    * Calculates an array of {@link Cluster}. Calculate is separate from
-   * {@link cluster} as it does prepocessing on the markers such as filtering
+   * {@link cluster} as it does preprocessing on the markers such as filtering
    * based upon the viewport as in {@link AbstractViewportAlgorithm}. Caching
    * and other optimizations can also be done here.
    */
