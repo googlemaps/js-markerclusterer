@@ -30,7 +30,7 @@ export interface MarkerClustererOptions {
   /**
    * An algorithm to cluster markers. Default is {@link GridAlgorithm}. Must
    * provide a `calculate` method accepting {@link AlgorithmInput} and returning
-   * an arry of {@link Cluster}.
+   * an array of {@link Cluster}.
    */
   algorithm?: Algorithm;
   map?: google.maps.Map | null;
