@@ -692,6 +692,9 @@ class MarkerClusterer extends OverlayViewSafe {
         }
     }
     addMarker(marker, noDraw) {
+        if (this.markers.includes(marker)) {
+            return;
+        }
         this.markers.push(marker);
         if (!noDraw) {
             this.render();
