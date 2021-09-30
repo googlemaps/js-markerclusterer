@@ -97,6 +97,10 @@ export class MarkerClusterer extends OverlayViewSafe {
   }
 
   public addMarker(marker: google.maps.Marker, noDraw?: boolean): void {
+    if (this.markers.includes(marker)) {
+      return;
+    }
+
     this.markers.push(marker);
     if (!noDraw) {
       this.render();
