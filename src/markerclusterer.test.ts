@@ -204,6 +204,18 @@ test("markerClusterer addMarker", () => {
   expect(markerClusterer["markers"]).toHaveLength(1);
 });
 
+test("markerClusterer addMarker does not add duplicate", () => {
+  const markerClusterer = new MarkerClusterer({
+    markers: [],
+  });
+
+  const marker = new google.maps.Marker();
+
+  markerClusterer.addMarker(marker, true);
+  markerClusterer.addMarker(marker, true);
+  expect(markerClusterer["markers"]).toHaveLength(1);
+});
+
 test("markerClusterer addMarkers", () => {
   const markerClusterer = new MarkerClusterer({
     markers: [],
