@@ -4713,14 +4713,16 @@ var markerClusterer = (function (exports) {
       _classCallCheck(this, SuperClusterAlgorithm);
 
       var maxZoom = _a.maxZoom,
-          options = __rest(_a, ["maxZoom"]);
+          _a$radius = _a.radius,
+          radius = _a$radius === void 0 ? 60 : _a$radius,
+          options = __rest(_a, ["maxZoom", "radius"]);
 
       _this = _super.call(this, {
         maxZoom: maxZoom
       });
       _this.superCluster = new Supercluster(Object.assign({
         maxZoom: _this.maxZoom,
-        radius: 60
+        radius: radius
       }, options));
       return _this;
     }

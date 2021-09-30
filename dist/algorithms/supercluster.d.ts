@@ -30,7 +30,7 @@ export declare type SuperClusterOptions = SuperCluster.Options<{
 export declare class SuperClusterAlgorithm extends AbstractAlgorithm {
     protected superCluster: SuperCluster;
     protected markers: google.maps.Marker[];
-    constructor({ maxZoom, ...options }: SuperClusterOptions);
+    constructor({ maxZoom, radius, ...options }: SuperClusterOptions);
     calculate(input: AlgorithmInput): Cluster[];
     cluster({ map }: AlgorithmInput): Cluster[];
     protected transformCluster({ geometry: { coordinates: [lng, lat], }, properties, }: ClusterFeature<{

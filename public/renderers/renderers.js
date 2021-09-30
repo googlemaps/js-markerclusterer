@@ -161,9 +161,9 @@ const noop = (markers) => {
  */
 class SuperClusterAlgorithm extends AbstractAlgorithm {
     constructor(_a) {
-        var { maxZoom } = _a, options = __rest(_a, ["maxZoom"]);
+        var { maxZoom, radius = 60 } = _a, options = __rest(_a, ["maxZoom", "radius"]);
         super({ maxZoom });
-        this.superCluster = new Supercluster(Object.assign({ maxZoom: this.maxZoom, radius: 60 }, options));
+        this.superCluster = new Supercluster(Object.assign({ maxZoom: this.maxZoom, radius }, options));
     }
     calculate(input) {
         if (!es6(input.markers, this.markers)) {
