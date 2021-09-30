@@ -28,7 +28,7 @@ export type onClusterClickHandler = (
 export interface MarkerClustererOptions {
   markers?: google.maps.Marker[];
   /**
-   * An algorithm to cluster markers. Default is {@link GridAlgorithm}. Must
+   * An algorithm to cluster markers. Default is {@link SuperClusterAlgorithm}. Must
    * provide a `calculate` method accepting {@link AlgorithmInput} and returning
    * an array of {@link Cluster}.
    */
