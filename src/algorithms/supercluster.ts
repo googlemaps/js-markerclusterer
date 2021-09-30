@@ -33,12 +33,12 @@ export type SuperClusterOptions = SuperCluster.Options<
 export class SuperClusterAlgorithm extends AbstractAlgorithm {
   protected superCluster: SuperCluster;
   protected markers: google.maps.Marker[];
-  constructor({ maxZoom, ...options }: SuperClusterOptions) {
+  constructor({ maxZoom, radius = 60, ...options }: SuperClusterOptions) {
     super({ maxZoom });
 
     this.superCluster = new SuperCluster({
       maxZoom: this.maxZoom,
-      radius: 60,
+      radius,
       ...options,
     });
   }
