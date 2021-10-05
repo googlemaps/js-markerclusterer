@@ -377,7 +377,7 @@ var markerClusterer = (function (exports) {
     (module.exports = function (key, value) {
       return sharedStore[key] || (sharedStore[key] = value !== undefined ? value : {});
     })('versions', []).push({
-      version: '3.18.1',
+      version: '3.18.2',
       mode: 'global',
       copyright: '© 2021 Denis Pushkarev (zloirock.ru)'
     });
@@ -389,9 +389,10 @@ var markerClusterer = (function (exports) {
     return Object(requireObjectCoercible(argument));
   };
 
-  var hasOwnProperty = {}.hasOwnProperty;
+  var hasOwnProperty = {}.hasOwnProperty; // `HasOwnProperty` abstract operation
+  // https://tc39.es/ecma262/#sec-hasownproperty
 
-  var has$1 = Object.hasOwn || function hasOwn(it, key) {
+  var hasOwnProperty_1 = Object.hasOwn || function hasOwn(it, key) {
     return hasOwnProperty.call(toObject(it), key);
   };
 
@@ -407,8 +408,8 @@ var markerClusterer = (function (exports) {
   var createWellKnownSymbol = useSymbolAsUid ? Symbol$1 : Symbol$1 && Symbol$1.withoutSetter || uid;
 
   var wellKnownSymbol = function (name) {
-    if (!has$1(WellKnownSymbolsStore, name) || !(nativeSymbol || typeof WellKnownSymbolsStore[name] == 'string')) {
-      if (nativeSymbol && has$1(Symbol$1, name)) {
+    if (!hasOwnProperty_1(WellKnownSymbolsStore, name) || !(nativeSymbol || typeof WellKnownSymbolsStore[name] == 'string')) {
+      if (nativeSymbol && hasOwnProperty_1(Symbol$1, name)) {
         WellKnownSymbolsStore[name] = Symbol$1[name];
       } else {
         WellKnownSymbolsStore[name] = createWellKnownSymbol('Symbol.' + name);
@@ -472,7 +473,7 @@ var markerClusterer = (function (exports) {
     } catch (error) {
       /* empty */
     }
-    if (has$1(O, P)) return createPropertyDescriptor(!objectPropertyIsEnumerable.f.call(O, P), O[P]);
+    if (hasOwnProperty_1(O, P)) return createPropertyDescriptor(!objectPropertyIsEnumerable.f.call(O, P), O[P]);
   };
   var objectGetOwnPropertyDescriptor = {
     f: f$3
@@ -576,18 +577,18 @@ var markerClusterer = (function (exports) {
     hiddenKeys$1[STATE] = true;
 
     set = function (it, metadata) {
-      if (has$1(it, STATE)) throw new TypeError(OBJECT_ALREADY_INITIALIZED);
+      if (hasOwnProperty_1(it, STATE)) throw new TypeError(OBJECT_ALREADY_INITIALIZED);
       metadata.facade = it;
       createNonEnumerableProperty(it, STATE, metadata);
       return metadata;
     };
 
     get = function (it) {
-      return has$1(it, STATE) ? it[STATE] : {};
+      return hasOwnProperty_1(it, STATE) ? it[STATE] : {};
     };
 
     has = function (it) {
-      return has$1(it, STATE);
+      return hasOwnProperty_1(it, STATE);
     };
   }
 
@@ -602,7 +603,7 @@ var markerClusterer = (function (exports) {
   var FunctionPrototype = Function.prototype; // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
 
   var getDescriptor = descriptors && Object.getOwnPropertyDescriptor;
-  var EXISTS = has$1(FunctionPrototype, 'name'); // additional protection from minified / mangled / dropped function names
+  var EXISTS = hasOwnProperty_1(FunctionPrototype, 'name'); // additional protection from minified / mangled / dropped function names
 
   var PROPER = EXISTS && function something() {
     /* empty */
@@ -632,7 +633,7 @@ var markerClusterer = (function (exports) {
           name = '[' + String(name).replace(/^Symbol\(([^)]*)\)/, '$1') + ']';
         }
 
-        if (!has$1(value, 'name') || CONFIGURABLE_FUNCTION_NAME && value.name !== name) {
+        if (!hasOwnProperty_1(value, 'name') || CONFIGURABLE_FUNCTION_NAME && value.name !== name) {
           createNonEnumerableProperty(value, 'name', name);
         }
 
@@ -659,34 +660,42 @@ var markerClusterer = (function (exports) {
   });
 
   var ceil = Math.ceil;
-  var floor = Math.floor; // `ToInteger` abstract operation
-  // https://tc39.es/ecma262/#sec-tointeger
+  var floor = Math.floor; // `ToIntegerOrInfinity` abstract operation
+  // https://tc39.es/ecma262/#sec-tointegerorinfinity
 
-  var toInteger = function (argument) {
-    return isNaN(argument = +argument) ? 0 : (argument > 0 ? floor : ceil)(argument);
-  };
+  var toIntegerOrInfinity = function (argument) {
+    var number = +argument; // eslint-disable-next-line no-self-compare -- safe
 
-  var min$2 = Math.min; // `ToLength` abstract operation
-  // https://tc39.es/ecma262/#sec-tolength
-
-  var toLength = function (argument) {
-    return argument > 0 ? min$2(toInteger(argument), 0x1FFFFFFFFFFFFF) : 0; // 2 ** 53 - 1 == 9007199254740991
+    return number !== number || number === 0 ? 0 : (number > 0 ? floor : ceil)(number);
   };
 
   var max$1 = Math.max;
-  var min$1 = Math.min; // Helper for a popular repeating case of the spec:
+  var min$2 = Math.min; // Helper for a popular repeating case of the spec:
   // Let integer be ? ToInteger(index).
   // If integer < 0, let result be max((length + integer), 0); else let result be min(integer, length).
 
   var toAbsoluteIndex = function (index, length) {
-    var integer = toInteger(index);
-    return integer < 0 ? max$1(integer + length, 0) : min$1(integer, length);
+    var integer = toIntegerOrInfinity(index);
+    return integer < 0 ? max$1(integer + length, 0) : min$2(integer, length);
+  };
+
+  var min$1 = Math.min; // `ToLength` abstract operation
+  // https://tc39.es/ecma262/#sec-tolength
+
+  var toLength = function (argument) {
+    return argument > 0 ? min$1(toIntegerOrInfinity(argument), 0x1FFFFFFFFFFFFF) : 0; // 2 ** 53 - 1 == 9007199254740991
+  };
+
+  // https://tc39.es/ecma262/#sec-lengthofarraylike
+
+  var lengthOfArrayLike = function (obj) {
+    return toLength(obj.length);
   };
 
   var createMethod$3 = function (IS_INCLUDES) {
     return function ($this, el, fromIndex) {
       var O = toIndexedObject($this);
-      var length = toLength(O.length);
+      var length = lengthOfArrayLike(O);
       var index = toAbsoluteIndex(fromIndex, length);
       var value; // Array#includes uses SameValueZero equality algorithm
       // eslint-disable-next-line no-self-compare -- NaN check
@@ -719,10 +728,10 @@ var markerClusterer = (function (exports) {
     var result = [];
     var key;
 
-    for (key in O) !has$1(hiddenKeys$1, key) && has$1(O, key) && result.push(key); // Don't enum bug & hidden keys
+    for (key in O) !hasOwnProperty_1(hiddenKeys$1, key) && hasOwnProperty_1(O, key) && result.push(key); // Don't enum bug & hidden keys
 
 
-    while (names.length > i) if (has$1(O, key = names[i++])) {
+    while (names.length > i) if (hasOwnProperty_1(O, key = names[i++])) {
       ~indexOf(result, key) || result.push(key);
     }
 
@@ -763,7 +772,7 @@ var markerClusterer = (function (exports) {
 
     for (var i = 0; i < keys.length; i++) {
       var key = keys[i];
-      if (!has$1(target, key)) defineProperty(target, key, getOwnPropertyDescriptor(source, key));
+      if (!hasOwnProperty_1(target, key)) defineProperty(target, key, getOwnPropertyDescriptor(source, key));
     }
   };
 
@@ -987,7 +996,7 @@ var markerClusterer = (function (exports) {
       var O = toObject($this);
       var self = indexedObject(O);
       var boundFunction = functionBindContext(callbackfn, that, 3);
-      var length = toLength(self.length);
+      var length = lengthOfArrayLike(self);
       var index = 0;
       var create = specificCreate || arraySpeciesCreate;
       var target = IS_MAP ? create($this, length) : IS_FILTER || IS_FILTER_REJECT ? create($this, 0) : undefined;
@@ -1127,7 +1136,7 @@ var markerClusterer = (function (exports) {
       aCallable(callbackfn);
       var O = toObject(that);
       var self = indexedObject(O);
-      var length = toLength(O.length);
+      var length = lengthOfArrayLike(O);
       var index = IS_RIGHT ? length - 1 : 0;
       var i = IS_RIGHT ? -1 : 1;
       if (argumentsLength < 2) while (true) {
@@ -5025,7 +5034,7 @@ var markerClusterer = (function (exports) {
     /* , ...items */
     ) {
       var O = toObject(this);
-      var len = toLength(O.length);
+      var len = lengthOfArrayLike(O);
       var actualStart = toAbsoluteIndex(start, len);
       var argumentsLength = arguments.length;
       var insertCount, actualDeleteCount, A, k, from, to;
@@ -5037,7 +5046,7 @@ var markerClusterer = (function (exports) {
         actualDeleteCount = len - actualStart;
       } else {
         insertCount = argumentsLength - 2;
-        actualDeleteCount = min(max(toInteger(deleteCount), 0), len - actualStart);
+        actualDeleteCount = min(max(toIntegerOrInfinity(deleteCount), 0), len - actualStart);
       }
 
       if (len + insertCount - actualDeleteCount > MAX_SAFE_INTEGER) {
@@ -5119,6 +5128,13 @@ var markerClusterer = (function (exports) {
     return $this;
   };
 
+  var valueOf = 1.0.valueOf; // `thisNumberValue` abstract operation
+  // https://tc39.es/ecma262/#sec-thisnumbervalue
+
+  var thisNumberValue = function (value) {
+    return valueOf.call(value);
+  };
+
   // a string of all valid unicode whitespaces
   var whitespaces = '\u0009\u000A\u000B\u000C\u000D\u0020\u00A0\u1680\u2000\u2001\u2002' + '\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028\u2029\uFEFF';
 
@@ -5153,15 +5169,20 @@ var markerClusterer = (function (exports) {
   var trim = stringTrim.trim;
   var NUMBER = 'Number';
   var NativeNumber = global_1[NUMBER];
-  var NumberPrototype = NativeNumber.prototype; // Opera ~12 has broken Object#toString
+  var NumberPrototype = NativeNumber.prototype; // `ToNumeric` abstract operation
+  // https://tc39.es/ecma262/#sec-tonumeric
 
-  var BROKEN_CLASSOF = classofRaw(objectCreate(NumberPrototype)) == NUMBER; // `ToNumber` abstract operation
+  var toNumeric = function (value) {
+    var primValue = toPrimitive(value, 'number');
+    return typeof primValue === 'bigint' ? primValue : toNumber(primValue);
+  }; // `ToNumber` abstract operation
   // https://tc39.es/ecma262/#sec-tonumber
 
+
   var toNumber = function (argument) {
-    if (isSymbol(argument)) throw TypeError('Cannot convert a Symbol value to a number');
     var it = toPrimitive(argument, 'number');
     var first, third, radix, maxCode, digits, length, index, code;
+    if (isSymbol(it)) throw TypeError('Cannot convert a Symbol value to a number');
 
     if (typeof it == 'string' && it.length > 2) {
       it = trim(it);
@@ -5211,19 +5232,19 @@ var markerClusterer = (function (exports) {
 
   if (isForced_1(NUMBER, !NativeNumber(' 0o1') || !NativeNumber('0b1') || NativeNumber('+0x1'))) {
     var NumberWrapper = function Number(value) {
-      var it = arguments.length < 1 ? 0 : value;
-      var dummy = this;
-      return dummy instanceof NumberWrapper // check on 1..constructor(foo) case
-      && (BROKEN_CLASSOF ? fails(function () {
-        NumberPrototype.valueOf.call(dummy);
-      }) : classofRaw(dummy) != NUMBER) ? inheritIfRequired(new NativeNumber(toNumber(it)), dummy, NumberWrapper) : toNumber(it);
+      var n = arguments.length < 1 ? 0 : NativeNumber(toNumeric(value));
+      var dummy = this; // check on 1..constructor(foo) case
+
+      return dummy instanceof NumberWrapper && fails(function () {
+        thisNumberValue(dummy);
+      }) ? inheritIfRequired(Object(n), dummy, NumberWrapper) : n;
     };
 
     for (var keys = descriptors ? getOwnPropertyNames(NativeNumber) : ( // ES3:
     'MAX_VALUE,MIN_VALUE,NaN,NEGATIVE_INFINITY,POSITIVE_INFINITY,' + // ES2015 (in case, if modules with ES2015 Number statics required before):
-    'EPSILON,isFinite,isInteger,isNaN,isSafeInteger,MAX_SAFE_INTEGER,' + 'MIN_SAFE_INTEGER,parseFloat,parseInt,isInteger,' + // ESNext
+    'EPSILON,MAX_SAFE_INTEGER,MIN_SAFE_INTEGER,isFinite,isInteger,isNaN,isSafeInteger,parseFloat,parseInt,' + // ESNext
     'fromString,range').split(','), j = 0, key; keys.length > j; j++) {
-      if (has$1(NativeNumber, key = keys[j]) && !has$1(NumberWrapper, key)) {
+      if (hasOwnProperty_1(NativeNumber, key = keys[j]) && !hasOwnProperty_1(NumberWrapper, key)) {
         defineProperty(NumberWrapper, key, getOwnPropertyDescriptor(NativeNumber, key));
       }
     }
