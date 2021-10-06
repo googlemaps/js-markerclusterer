@@ -464,7 +464,8 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
     }
     calculate(input) {
         if (!equal(input.markers, this.markers)) {
-            this.markers = input.markers;
+            // TODO use proxy to avoid copy?
+            this.markers = [...input.markers];
             const points = this.markers.map((marker) => {
                 return {
                     type: "Feature",
@@ -589,7 +590,6 @@ class DefaultRenderer {
     <circle cx="120" cy="120" opacity=".6" r="70" />
     <circle cx="120" cy="120" opacity=".3" r="90" />
     <circle cx="120" cy="120" opacity=".2" r="110" />
-    <circle cx="120" cy="120" opacity=".1" r="130" />
   </svg>`);
         // create marker using svg icon
         return new google.maps.Marker({
@@ -686,7 +686,7 @@ const defaultOnClusterClickHandler = (_, cluster, map) => {
 class MarkerClusterer extends OverlayViewSafe {
     constructor({ map, markers = [], algorithm = new SuperClusterAlgorithm({}), renderer = new DefaultRenderer(), onClusterClick = defaultOnClusterClickHandler, }) {
         super();
-        this.markers = markers;
+        this.markers = [...markers];
         this.clusters = [];
         this.algorithm = algorithm;
         this.renderer = renderer;
@@ -728,7 +728,7 @@ class MarkerClusterer extends OverlayViewSafe {
     removeMarkers(markers, noDraw) {
         let removed = false;
         markers.forEach((marker) => {
-            removed = removed || this.removeMarker(marker, true);
+            removed = this.removeMarker(marker, true) || removed;
         });
         if (removed && !noDraw) {
             this.render();
@@ -736,7 +736,7 @@ class MarkerClusterer extends OverlayViewSafe {
         return removed;
     }
     clearMarkers(noDraw) {
-        this.markers.forEach((marker) => this.removeMarker(marker, true));
+        this.markers.length = 0;
         if (!noDraw) {
             this.render();
         }

@@ -4740,7 +4740,8 @@ var markerClusterer = (function (exports) {
       key: "calculate",
       value: function calculate(input) {
         if (!es6(input.markers, this.markers)) {
-          this.markers = input.markers;
+          // TODO use proxy to avoid copy?
+          this.markers = _toConsumableArray(input.markers);
           var points = this.markers.map(function (marker) {
             return {
               type: "Feature",
@@ -5347,7 +5348,7 @@ var markerClusterer = (function (exports) {
         // change color if this cluster has more markers than the mean cluster
         var color = count > Math.max(10, stats.clusters.markers.mean) ? "#ff0000" : "#0000ff"; // create svg url with fill color
 
-        var svg = window.btoa("\n  <svg fill=\"".concat(color, "\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 240 240\">\n    <circle cx=\"120\" cy=\"120\" opacity=\".6\" r=\"70\" />\n    <circle cx=\"120\" cy=\"120\" opacity=\".3\" r=\"90\" />\n    <circle cx=\"120\" cy=\"120\" opacity=\".2\" r=\"110\" />\n    <circle cx=\"120\" cy=\"120\" opacity=\".1\" r=\"130\" />\n  </svg>")); // create marker using svg icon
+        var svg = window.btoa("\n  <svg fill=\"".concat(color, "\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 240 240\">\n    <circle cx=\"120\" cy=\"120\" opacity=\".6\" r=\"70\" />\n    <circle cx=\"120\" cy=\"120\" opacity=\".3\" r=\"90\" />\n    <circle cx=\"120\" cy=\"120\" opacity=\".2\" r=\"110\" />\n  </svg>")); // create marker using svg icon
 
         return new google.maps.Marker({
           position: position,
@@ -5455,7 +5456,7 @@ var markerClusterer = (function (exports) {
       _classCallCheck(this, MarkerClusterer);
 
       _this = _super.call(this);
-      _this.markers = markers;
+      _this.markers = _toConsumableArray(markers);
       _this.clusters = [];
       _this.algorithm = algorithm;
       _this.renderer = renderer;
@@ -5520,7 +5521,7 @@ var markerClusterer = (function (exports) {
 
         var removed = false;
         markers.forEach(function (marker) {
-          removed = removed || _this3.removeMarker(marker, true);
+          removed = _this3.removeMarker(marker, true) || removed;
         });
 
         if (removed && !noDraw) {
@@ -5532,11 +5533,7 @@ var markerClusterer = (function (exports) {
     }, {
       key: "clearMarkers",
       value: function clearMarkers(noDraw) {
-        var _this4 = this;
-
-        this.markers.forEach(function (marker) {
-          return _this4.removeMarker(marker, true);
-        });
+        this.markers.length = 0;
 
         if (!noDraw) {
           this.render();
@@ -5595,7 +5592,7 @@ var markerClusterer = (function (exports) {
     }, {
       key: "renderClusters",
       value: function renderClusters() {
-        var _this5 = this;
+        var _this4 = this;
 
         // generate stats to pass to renderers
         var stats = new ClusterStats(this.markers, this.clusters);
@@ -5604,15 +5601,15 @@ var markerClusterer = (function (exports) {
           if (cluster.markers.length === 1) {
             cluster.marker = cluster.markers[0];
           } else {
-            cluster.marker = _this5.renderer.render(cluster, stats);
+            cluster.marker = _this4.renderer.render(cluster, stats);
 
-            if (_this5.onClusterClick) {
+            if (_this4.onClusterClick) {
               cluster.marker.addListener("click",
               /* istanbul ignore next */
               function (event) {
-                google.maps.event.trigger(_this5, exports.MarkerClustererEvents.CLUSTER_CLICK, cluster);
+                google.maps.event.trigger(_this4, exports.MarkerClustererEvents.CLUSTER_CLICK, cluster);
 
-                _this5.onClusterClick(event, cluster, map);
+                _this4.onClusterClick(event, cluster, map);
               });
             }
           }
