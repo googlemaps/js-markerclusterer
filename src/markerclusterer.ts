@@ -142,7 +142,7 @@ export class MarkerClusterer extends OverlayViewSafe {
     let removed = false;
 
     markers.forEach((marker) => {
-      removed = removed || this.removeMarker(marker, true);
+      removed = this.removeMarker(marker, true) || removed;
     });
 
     if (removed && !noDraw) {
