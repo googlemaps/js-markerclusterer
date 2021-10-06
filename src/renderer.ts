@@ -118,7 +118,6 @@ export class DefaultRenderer implements Renderer {
     <circle cx="120" cy="120" opacity=".6" r="70" />
     <circle cx="120" cy="120" opacity=".3" r="90" />
     <circle cx="120" cy="120" opacity=".2" r="110" />
-    <circle cx="120" cy="120" opacity=".1" r="130" />
   </svg>`);
 
     // create marker using svg icon
