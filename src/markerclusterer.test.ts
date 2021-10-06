@@ -289,6 +289,25 @@ test("markerClusterer removeMarkers if absent", () => {
   expect(markerClusterer["markers"]).toHaveLength(1);
 });
 
+test("markerClusterer removeMarkers if some absent", () => {
+  const markers = [new google.maps.Marker()];
+  const markerClusterer = new MarkerClusterer({
+    markers,
+  });
+
+  markerClusterer.render = jest.fn();
+
+  expect(
+    markerClusterer.removeMarkers([
+      new google.maps.Marker(),
+      ...markers,
+      new google.maps.Marker(),
+    ])
+  ).toBe(true);
+  expect(markerClusterer.render).toBeCalledTimes(1);
+  expect(markerClusterer["markers"]).toHaveLength(0);
+});
+
 test("markerClusterer clearMarkers", () => {
   const markers = [new google.maps.Marker()];
   const markerClusterer = new MarkerClusterer({

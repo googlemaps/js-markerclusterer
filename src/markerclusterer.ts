@@ -83,7 +83,7 @@ export class MarkerClusterer extends OverlayViewSafe {
     onClusterClick = defaultOnClusterClickHandler,
   }: MarkerClustererOptions) {
     super();
-    this.markers = markers;
+    this.markers = [...markers];
     this.clusters = [];
 
     this.algorithm = algorithm;
@@ -142,7 +142,7 @@ export class MarkerClusterer extends OverlayViewSafe {
     let removed = false;
 
     markers.forEach((marker) => {
-      removed = removed || this.removeMarker(marker, true);
+      removed = this.removeMarker(marker, true) || removed;
     });
 
     if (removed && !noDraw) {
@@ -153,7 +153,7 @@ export class MarkerClusterer extends OverlayViewSafe {
   }
 
   public clearMarkers(noDraw?: boolean): void {
-    this.markers.forEach((marker) => this.removeMarker(marker, true));
+    this.markers.length = 0;
 
     if (!noDraw) {
       this.render();

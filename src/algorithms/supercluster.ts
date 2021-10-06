@@ -44,7 +44,8 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
   }
   public calculate(input: AlgorithmInput): Cluster[] {
     if (!equal(input.markers, this.markers)) {
-      this.markers = input.markers;
+      // TODO use proxy to avoid copy?
+      this.markers = [...input.markers];
 
       const points = this.markers.map((marker) => {
         return {
