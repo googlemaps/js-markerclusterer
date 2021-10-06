@@ -5348,7 +5348,7 @@ var markerClusterer = (function (exports) {
         // change color if this cluster has more markers than the mean cluster
         var color = count > Math.max(10, stats.clusters.markers.mean) ? "#ff0000" : "#0000ff"; // create svg url with fill color
 
-        var svg = window.btoa("\n  <svg fill=\"".concat(color, "\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 240 240\">\n    <circle cx=\"120\" cy=\"120\" opacity=\".6\" r=\"70\" />\n    <circle cx=\"120\" cy=\"120\" opacity=\".3\" r=\"90\" />\n    <circle cx=\"120\" cy=\"120\" opacity=\".2\" r=\"110\" />\n  </svg>")); // create marker using svg icon
+        var svg = window.btoa("\n  <svg fill=\"".concat(color, "\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 240 240\">\n    <circle cx=\"120\" cy=\"120\" opacity=\".6\" r=\"70\" />\n    <circle cx=\"120\" cy=\"120\" opacity=\".3\" r=\"90\" />\n    <circle cx=\"120\" cy=\"120\" opacity=\".2\" r=\"110\" />\n    <circle cx=\"120\" cy=\"120\" opacity=\".1\" r=\"130\" />\n  </svg>")); // create marker using svg icon
 
         return new google.maps.Marker({
           position: position,
