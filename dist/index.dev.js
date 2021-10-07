@@ -1467,18 +1467,23 @@ var markerClusterer = (function (exports) {
             mapCanvasProjection = _ref3.mapCanvasProjection;
 
         if (map.getZoom() >= this.maxZoom) {
-          return this.noop({
-            markers: markers,
-            map: map,
-            mapCanvasProjection: mapCanvasProjection
-          });
+          return {
+            clusters: this.noop({
+              markers: markers,
+              map: map,
+              mapCanvasProjection: mapCanvasProjection
+            }),
+            changed: false
+          };
         }
 
-        return this.cluster({
-          markers: filterMarkersToPaddedViewport(map, mapCanvasProjection, markers, this.viewportPadding),
-          map: map,
-          mapCanvasProjection: mapCanvasProjection
-        });
+        return {
+          clusters: this.cluster({
+            markers: filterMarkersToPaddedViewport(map, mapCanvasProjection, markers, this.viewportPadding),
+            map: map,
+            mapCanvasProjection: mapCanvasProjection
+          })
+        };
       }
     }]);
 
@@ -1579,7 +1584,11 @@ var markerClusterer = (function (exports) {
   });
 
   /**
-   * The default Grid algorithm historically used in Google Maps marker clustering.
+   * The default Grid algorithm historically used in Google Maps marker
+   * clustering.
+   *
+   * The Grid algorithm does not implement caching and markers may flash as the
+   * viewport changes. Instead use {@link SuperClusterAlgorithm}.
    */
 
   var GridAlgorithm = /*#__PURE__*/function (_AbstractViewportAlgo) {
@@ -1674,11 +1683,14 @@ var markerClusterer = (function (exports) {
         var markers = _ref.markers,
             map = _ref.map,
             mapCanvasProjection = _ref.mapCanvasProjection;
-        return this.cluster({
-          markers: markers,
-          map: map,
-          mapCanvasProjection: mapCanvasProjection
-        });
+        return {
+          clusters: this.cluster({
+            markers: markers,
+            map: map,
+            mapCanvasProjection: mapCanvasProjection
+          }),
+          changed: false
+        };
       }
     }, {
       key: "cluster",
@@ -2720,6 +2732,9 @@ var markerClusterer = (function (exports) {
 
   /**
    * Experimental algorithm using Kmeans.
+   *
+   * The Grid algorithm does not implement caching and markers may flash as the
+   * viewport changes. Instead use {@link SuperClusterAlgorithm}.
    *
    * @see https://www.npmjs.com/package/@turf/clusters-kmeans
    */
@@ -3978,6 +3993,9 @@ var markerClusterer = (function (exports) {
    *
    * Experimental algorithm using DBScan.
    *
+   * The Grid algorithm does not implement caching and markers may flash as the
+   * viewport changes. Instead use {@link SuperClusterAlgorithm}.
+   *
    * @see https://www.npmjs.com/package/@turf/clusters-dbscan
    */
 
@@ -4733,14 +4751,20 @@ var markerClusterer = (function (exports) {
         maxZoom: _this.maxZoom,
         radius: radius
       }, options));
+      _this.state = {
+        zoom: null
+      };
       return _this;
     }
 
     _createClass(SuperClusterAlgorithm, [{
       key: "calculate",
       value: function calculate(input) {
+        var changed = false;
+
         if (!es6(input.markers, this.markers)) {
-          // TODO use proxy to avoid copy?
+          changed = true; // TODO use proxy to avoid copy?
+
           this.markers = _toConsumableArray(input.markers);
           var points = this.markers.map(function (marker) {
             return {
@@ -4757,20 +4781,32 @@ var markerClusterer = (function (exports) {
           this.superCluster.load(points);
         }
 
-        return this.cluster(input);
+        var state = {
+          zoom: input.map.getZoom()
+        };
+
+        if (!changed) {
+          if (this.state.zoom > this.maxZoom && state.zoom > this.maxZoom) ; else {
+            changed = changed || !es6(this.state, state);
+          }
+        }
+
+        this.state = state;
+
+        if (changed) {
+          this.clusters = this.cluster(input);
+        }
+
+        return {
+          clusters: this.clusters,
+          changed: changed
+        };
       }
     }, {
       key: "cluster",
       value: function cluster(_ref) {
         var map = _ref.map;
-
-        var _map$getBounds$toJSON = map.getBounds().toJSON(),
-            west = _map$getBounds$toJSON.west,
-            south = _map$getBounds$toJSON.south,
-            east = _map$getBounds$toJSON.east,
-            north = _map$getBounds$toJSON.north;
-
-        return this.superCluster.getClusters([west, south, east, north], map.getZoom()).map(this.transformCluster.bind(this));
+        return this.superCluster.getClusters([-180, -90, 180, 90], map.getZoom()).map(this.transformCluster.bind(this));
       }
     }, {
       key: "transformCluster",
@@ -5348,7 +5384,7 @@ var markerClusterer = (function (exports) {
         // change color if this cluster has more markers than the mean cluster
         var color = count > Math.max(10, stats.clusters.markers.mean) ? "#ff0000" : "#0000ff"; // create svg url with fill color
 
-        var svg = window.btoa("\n  <svg fill=\"".concat(color, "\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 240 240\">\n    <circle cx=\"120\" cy=\"120\" opacity=\".6\" r=\"70\" />\n    <circle cx=\"120\" cy=\"120\" opacity=\".3\" r=\"90\" />\n    <circle cx=\"120\" cy=\"120\" opacity=\".2\" r=\"110\" />\n    <circle cx=\"120\" cy=\"120\" opacity=\".1\" r=\"130\" />\n  </svg>")); // create marker using svg icon
+        var svg = window.btoa("\n  <svg fill=\"".concat(color, "\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 240 240\">\n    <circle cx=\"120\" cy=\"120\" opacity=\".6\" r=\"70\" />\n    <circle cx=\"120\" cy=\"120\" opacity=\".3\" r=\"90\" />\n    <circle cx=\"120\" cy=\"120\" opacity=\".2\" r=\"110\" />\n  </svg>")); // create marker using svg icon
 
         return new google.maps.Marker({
           position: position,
@@ -5550,16 +5586,24 @@ var markerClusterer = (function (exports) {
 
         if (map instanceof google.maps.Map && this.getProjection()) {
           google.maps.event.trigger(this, exports.MarkerClustererEvents.CLUSTERING_BEGIN, this);
-          var clusters = this.algorithm.calculate({
+
+          var _this$algorithm$calcu = this.algorithm.calculate({
             markers: this.markers,
             map: map,
             mapCanvasProjection: this.getProjection()
-          }); // reset visibility of markers and clusters
+          }),
+              clusters = _this$algorithm$calcu.clusters,
+              changed = _this$algorithm$calcu.changed; // allow algorithms to return flag on whether the clusters/markers have changed
 
-          this.reset(); // store new clusters
 
-          this.clusters = clusters;
-          this.renderClusters();
+          if (changed || changed == undefined) {
+            // reset visibility of markers and clusters
+            this.reset(); // store new clusters
+
+            this.clusters = clusters;
+            this.renderClusters();
+          }
+
           google.maps.event.trigger(this, exports.MarkerClustererEvents.CLUSTERING_END, this);
         }
       }

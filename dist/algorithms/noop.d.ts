@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { AbstractAlgorithm, AlgorithmInput, AlgorithmOptions } from "./core";
+import { AbstractAlgorithm, AlgorithmInput, AlgorithmOptions, AlgorithmOutput } from "./core";
 import { Cluster } from "../cluster";
 /**
  * Noop algorithm does not generate any clusters or filter markers by the an extended viewport.
  */
 export declare class NoopAlgorithm extends AbstractAlgorithm {
     constructor({ ...options }: AlgorithmOptions);
-    calculate({ markers, map, mapCanvasProjection, }: AlgorithmInput): Cluster[];
+    calculate({ markers, map, mapCanvasProjection, }: AlgorithmInput): AlgorithmOutput;
     protected cluster(input: AlgorithmInput): Cluster[];
 }

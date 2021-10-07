@@ -25,7 +25,11 @@ export interface GridOptions extends ViewportAlgorithmOptions {
     maxDistance?: number;
 }
 /**
- * The default Grid algorithm historically used in Google Maps marker clustering.
+ * The default Grid algorithm historically used in Google Maps marker
+ * clustering.
+ *
+ * The Grid algorithm does not implement caching and markers may flash as the
+ * viewport changes. Instead use {@link SuperClusterAlgorithm}.
  */
 export declare class GridAlgorithm extends AbstractViewportAlgorithm {
     protected gridSize: number;

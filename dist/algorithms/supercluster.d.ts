@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /// <reference types="google.maps" />
-import { AbstractAlgorithm, AlgorithmInput } from "./core";
+import { AbstractAlgorithm, AlgorithmInput, AlgorithmOutput } from "./core";
 import SuperCluster, { ClusterFeature } from "supercluster";
 import { Cluster } from "../cluster";
 export declare type SuperClusterOptions = SuperCluster.Options<{
@@ -30,8 +30,12 @@ export declare type SuperClusterOptions = SuperCluster.Options<{
 export declare class SuperClusterAlgorithm extends AbstractAlgorithm {
     protected superCluster: SuperCluster;
     protected markers: google.maps.Marker[];
+    protected clusters: Cluster[];
+    protected state: {
+        zoom: number;
+    };
     constructor({ maxZoom, radius, ...options }: SuperClusterOptions);
-    calculate(input: AlgorithmInput): Cluster[];
+    calculate(input: AlgorithmInput): AlgorithmOutput;
     cluster({ map }: AlgorithmInput): Cluster[];
     protected transformCluster({ geometry: { coordinates: [lng, lat], }, properties, }: ClusterFeature<{
         marker: google.maps.Marker;

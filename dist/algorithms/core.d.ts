@@ -34,11 +34,21 @@ export interface AlgorithmInput {
      */
     mapCanvasProjection: google.maps.MapCanvasProjection;
 }
+export interface AlgorithmOutput {
+    /**
+     * The clusters returned based upon the {@link AlgorithmInput}.
+     */
+    clusters: Cluster[];
+    /**
+     * A boolean flag indicating that the clusters have not changed.
+     */
+    changed?: boolean;
+}
 export interface Algorithm {
     /**
      * Calculates an array of {@link Cluster}.
      */
-    calculate: ({ markers, map }: AlgorithmInput) => Cluster[];
+    calculate: ({ markers, map }: AlgorithmInput) => AlgorithmOutput;
 }
 export interface AlgorithmOptions {
     maxZoom?: number;
@@ -68,7 +78,7 @@ export declare abstract class AbstractAlgorithm implements Algorithm {
      * based upon the viewport as in {@link AbstractViewportAlgorithm}. Caching
      * and other optimizations can also be done here.
      */
-    abstract calculate({ markers, map }: AlgorithmInput): Cluster[];
+    abstract calculate({ markers, map }: AlgorithmInput): AlgorithmOutput;
     /**
      * Clusters the markers and called from {@link calculate}.
      */
@@ -93,7 +103,7 @@ export interface ViewportAlgorithmOptions extends AlgorithmOptions {
 export declare abstract class AbstractViewportAlgorithm extends AbstractAlgorithm {
     protected viewportPadding: number;
     constructor({ viewportPadding, ...options }: ViewportAlgorithmOptions);
-    calculate({ markers, map, mapCanvasProjection, }: AlgorithmInput): Cluster[];
+    calculate({ markers, map, mapCanvasProjection, }: AlgorithmInput): AlgorithmOutput;
     protected abstract cluster({ markers, map }: AlgorithmInput): Cluster[];
 }
 /**

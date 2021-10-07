@@ -218,17 +218,22 @@ class AbstractViewportAlgorithm extends AbstractAlgorithm {
     }
     calculate({ markers, map, mapCanvasProjection, }) {
         if (map.getZoom() >= this.maxZoom) {
-            return this.noop({
-                markers,
+            return {
+                clusters: this.noop({
+                    markers,
+                    map,
+                    mapCanvasProjection,
+                }),
+                changed: false,
+            };
+        }
+        return {
+            clusters: this.cluster({
+                markers: filterMarkersToPaddedViewport(map, mapCanvasProjection, markers, this.viewportPadding),
                 map,
                 mapCanvasProjection,
-            });
-        }
-        return this.cluster({
-            markers: filterMarkersToPaddedViewport(map, mapCanvasProjection, markers, this.viewportPadding),
-            map,
-            mapCanvasProjection,
-        });
+            }),
+        };
     }
 }
 /**
@@ -258,7 +263,11 @@ const noop = (markers) => {
  * limitations under the License.
  */
 /**
- * The default Grid algorithm historically used in Google Maps marker clustering.
+ * The default Grid algorithm historically used in Google Maps marker
+ * clustering.
+ *
+ * The Grid algorithm does not implement caching and markers may flash as the
+ * viewport changes. Instead use {@link SuperClusterAlgorithm}.
  */
 class GridAlgorithm extends AbstractViewportAlgorithm {
     constructor(_a) {
@@ -321,7 +330,10 @@ class NoopAlgorithm extends AbstractAlgorithm {
         super(options);
     }
     calculate({ markers, map, mapCanvasProjection, }) {
-        return this.cluster({ markers, map, mapCanvasProjection });
+        return {
+            clusters: this.cluster({ markers, map, mapCanvasProjection }),
+            changed: false,
+        };
     }
     cluster(input) {
         return this.noop(input);
@@ -345,6 +357,9 @@ class NoopAlgorithm extends AbstractAlgorithm {
  */
 /**
  * Experimental algorithm using Kmeans.
+ *
+ * The Grid algorithm does not implement caching and markers may flash as the
+ * viewport changes. Instead use {@link SuperClusterAlgorithm}.
  *
  * @see https://www.npmjs.com/package/@turf/clusters-kmeans
  */
@@ -411,6 +426,9 @@ const DEFAULT_INTERNAL_DBSCAN_OPTION = {
  *
  * Experimental algorithm using DBScan.
  *
+ * The Grid algorithm does not implement caching and markers may flash as the
+ * viewport changes. Instead use {@link SuperClusterAlgorithm}.
+ *
  * @see https://www.npmjs.com/package/@turf/clusters-dbscan
  */
 class DBScanAlgorithm extends AbstractViewportAlgorithm {
@@ -461,9 +479,12 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
         var { maxZoom, radius = 60 } = _a, options = __rest(_a, ["maxZoom", "radius"]);
         super({ maxZoom });
         this.superCluster = new SuperCluster(Object.assign({ maxZoom: this.maxZoom, radius }, options));
+        this.state = { zoom: null };
     }
     calculate(input) {
+        let changed = false;
         if (!equal(input.markers, this.markers)) {
+            changed = true;
             // TODO use proxy to avoid copy?
             this.markers = [...input.markers];
             const points = this.markers.map((marker) => {
@@ -481,12 +502,22 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
             });
             this.superCluster.load(points);
         }
-        return this.cluster(input);
+        const state = { zoom: input.map.getZoom() };
+        if (!changed) {
+            if (this.state.zoom > this.maxZoom && state.zoom > this.maxZoom) ;
+            else {
+                changed = changed || !equal(this.state, state);
+            }
+        }
+        this.state = state;
+        if (changed) {
+            this.clusters = this.cluster(input);
+        }
+        return { clusters: this.clusters, changed };
     }
     cluster({ map }) {
-        const { west, south, east, north } = map.getBounds().toJSON();
         return this.superCluster
-            .getClusters([west, south, east, north], map.getZoom())
+            .getClusters([-180, -90, 180, 90], map.getZoom())
             .map(this.transformCluster.bind(this));
     }
     transformCluster({ geometry: { coordinates: [lng, lat], }, properties, }) {
@@ -590,7 +621,6 @@ class DefaultRenderer {
     <circle cx="120" cy="120" opacity=".6" r="70" />
     <circle cx="120" cy="120" opacity=".3" r="90" />
     <circle cx="120" cy="120" opacity=".2" r="110" />
-    <circle cx="120" cy="120" opacity=".1" r="130" />
   </svg>`);
         // create marker using svg icon
         return new google.maps.Marker({
@@ -749,16 +779,19 @@ class MarkerClusterer extends OverlayViewSafe {
         const map = this.getMap();
         if (map instanceof google.maps.Map && this.getProjection()) {
             google.maps.event.trigger(this, MarkerClustererEvents.CLUSTERING_BEGIN, this);
-            const clusters = this.algorithm.calculate({
+            const { clusters, changed } = this.algorithm.calculate({
                 markers: this.markers,
                 map,
                 mapCanvasProjection: this.getProjection(),
             });
-            // reset visibility of markers and clusters
-            this.reset();
-            // store new clusters
-            this.clusters = clusters;
-            this.renderClusters();
+            // allow algorithms to return flag on whether the clusters/markers have changed
+            if (changed || changed == undefined) {
+                // reset visibility of markers and clusters
+                this.reset();
+                // store new clusters
+                this.clusters = clusters;
+                this.renderClusters();
+            }
             google.maps.event.trigger(this, MarkerClustererEvents.CLUSTERING_END, this);
         }
     }
