@@ -38,7 +38,13 @@ export interface AlgorithmInput {
 }
 
 export interface AlgorithmOutput {
+  /**
+   * The clusters returned based upon the {@link AlgorithmInput}.
+   */
   clusters: Cluster[];
+  /**
+   * A boolean flag indicating that the clusters have not changed.
+   */
   changed?: boolean;
 }
 
