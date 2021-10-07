@@ -23,7 +23,7 @@ import {
 
 import { initialize } from "@googlemaps/jest-mocks";
 
-const calculate = jest.fn().mockImplementation(() => []);
+const calculate = jest.fn().mockReturnValue({ clusters: [] });
 const algorithm = { calculate };
 
 const render = jest.fn().mockImplementation(() => new google.maps.Marker());
@@ -75,6 +75,29 @@ test("markerClusterer calls calculate correctly", () => {
   expect(calculate).toBeCalledWith({ map, markers, mapCanvasProjection });
   expect(markerClusterer["reset"]).toHaveBeenCalledTimes(1);
   expect(markerClusterer["renderClusters"]).toHaveBeenCalledTimes(1);
+});
+
+test("markerClusterer does not reset and renderClusters if no change", () => {
+  const mapCanvasProjection = jest.fn();
+  const markers: google.maps.Marker[] = [];
+  const algorithm = {
+    calculate: jest.fn().mockReturnValue({ clusters: [], changed: false }),
+  };
+  const markerClusterer = new MarkerClusterer({
+    markers,
+    algorithm,
+  });
+
+  markerClusterer.getMap = jest.fn().mockImplementation(() => map);
+  markerClusterer.getProjection = jest
+    .fn()
+    .mockImplementation(() => mapCanvasProjection);
+  markerClusterer["reset"] = jest.fn();
+  markerClusterer["renderClusters"] = jest.fn();
+  markerClusterer.render();
+
+  expect(markerClusterer["reset"]).toHaveBeenCalledTimes(0);
+  expect(markerClusterer["renderClusters"]).toHaveBeenCalledTimes(0);
 });
 
 test("markerClusterer reset calls delete and setMap null", () => {
