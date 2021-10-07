@@ -171,19 +171,22 @@ export class MarkerClusterer extends OverlayViewSafe {
         MarkerClustererEvents.CLUSTERING_BEGIN,
         this
       );
-      const clusters = this.algorithm.calculate({
+      const { clusters, changed } = this.algorithm.calculate({
         markers: this.markers,
         map,
         mapCanvasProjection: this.getProjection(),
       });
 
-      // reset visibility of markers and clusters
-      this.reset();
+      // allow algorithms to return flag on whether the clusters/markers have changed
+      if (changed || changed == undefined) {
+        // reset visibility of markers and clusters
+        this.reset();
 
-      // store new clusters
-      this.clusters = clusters;
+        // store new clusters
+        this.clusters = clusters;
 
-      this.renderClusters();
+        this.renderClusters();
+      }
       google.maps.event.trigger(
         this,
         MarkerClustererEvents.CLUSTERING_END,

@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-import { AbstractAlgorithm, AlgorithmInput, AlgorithmOptions } from "./core";
+import {
+  AbstractAlgorithm,
+  AlgorithmInput,
+  AlgorithmOptions,
+  AlgorithmOutput,
+} from "./core";
 
 import { Cluster } from "../cluster";
 
@@ -29,8 +34,11 @@ export class NoopAlgorithm extends AbstractAlgorithm {
     markers,
     map,
     mapCanvasProjection,
-  }: AlgorithmInput): Cluster[] {
-    return this.cluster({ markers, map, mapCanvasProjection });
+  }: AlgorithmInput): AlgorithmOutput {
+    return {
+      clusters: this.cluster({ markers, map, mapCanvasProjection }),
+      changed: false,
+    };
   }
 
   protected cluster(input: AlgorithmInput): Cluster[] {

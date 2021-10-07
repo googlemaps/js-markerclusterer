@@ -31,6 +31,9 @@ export interface KmeansAlgorithmOptions extends ViewportAlgorithmOptions {
 /**
  * Experimental algorithm using Kmeans.
  *
+ * The Grid algorithm does not implement caching and markers may flash as the
+ * viewport changes. Instead use {@link SuperClusterAlgorithm}.
+ *
  * @see https://www.npmjs.com/package/@turf/clusters-kmeans
  */
 export class KmeansAlgorithm extends AbstractViewportAlgorithm {
