@@ -33,7 +33,11 @@ export interface GridOptions extends ViewportAlgorithmOptions {
 }
 
 /**
- * The default Grid algorithm historically used in Google Maps marker clustering.
+ * The default Grid algorithm historically used in Google Maps marker
+ * clustering.
+ *
+ * The Grid algorithm does not implement caching and markers may flash as the
+ * viewport changes. Instead use {@link SuperClusterAlgorithm}.
  */
 export class GridAlgorithm extends AbstractViewportAlgorithm {
   protected gridSize: number;

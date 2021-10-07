@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AbstractAlgorithm, AlgorithmInput } from "./core";
+import { AbstractAlgorithm, AlgorithmInput, AlgorithmOutput } from "./core";
 import SuperCluster, { ClusterFeature } from "supercluster";
 
 import { Cluster } from "../cluster";
@@ -33,6 +33,9 @@ export type SuperClusterOptions = SuperCluster.Options<
 export class SuperClusterAlgorithm extends AbstractAlgorithm {
   protected superCluster: SuperCluster;
   protected markers: google.maps.Marker[];
+  protected clusters: Cluster[];
+  protected state: { zoom: number };
+
   constructor({ maxZoom, radius = 60, ...options }: SuperClusterOptions) {
     super({ maxZoom });
 
@@ -41,9 +44,14 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
       radius,
       ...options,
     });
+
+    this.state = { zoom: null };
   }
-  public calculate(input: AlgorithmInput): Cluster[] {
+  public calculate(input: AlgorithmInput): AlgorithmOutput {
+    let changed = false;
+
     if (!equal(input.markers, this.markers)) {
+      changed = true;
       // TODO use proxy to avoid copy?
       this.markers = [...input.markers];
 
@@ -63,13 +71,29 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
 
       this.superCluster.load(points);
     }
-    return this.cluster(input);
+
+    const state = { zoom: input.map.getZoom() };
+
+    if (!changed) {
+      if (this.state.zoom > this.maxZoom && state.zoom > this.maxZoom) {
+        // still beyond maxZoom, no change
+      } else {
+        changed = changed || !equal(this.state, state);
+      }
+    }
+
+    this.state = state;
+
+    if (changed) {
+      this.clusters = this.cluster(input);
+    }
+
+    return { clusters: this.clusters, changed };
   }
 
   public cluster({ map }: AlgorithmInput): Cluster[] {
-    const { west, south, east, north } = map.getBounds().toJSON();
     return this.superCluster
-      .getClusters([west, south, east, north], map.getZoom())
+      .getClusters([-180, -90, 180, 90], map.getZoom())
       .map(this.transformCluster.bind(this));
   }
 

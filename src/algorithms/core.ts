@@ -37,11 +37,16 @@ export interface AlgorithmInput {
   mapCanvasProjection: google.maps.MapCanvasProjection;
 }
 
+export interface AlgorithmOutput {
+  clusters: Cluster[];
+  changed?: boolean;
+}
+
 export interface Algorithm {
   /**
    * Calculates an array of {@link Cluster}.
    */
-  calculate: ({ markers, map }: AlgorithmInput) => Cluster[];
+  calculate: ({ markers, map }: AlgorithmInput) => AlgorithmOutput;
 }
 
 export interface AlgorithmOptions {
@@ -77,7 +82,7 @@ export abstract class AbstractAlgorithm implements Algorithm {
    * based upon the viewport as in {@link AbstractViewportAlgorithm}. Caching
    * and other optimizations can also be done here.
    */
-  public abstract calculate({ markers, map }: AlgorithmInput): Cluster[];
+  public abstract calculate({ markers, map }: AlgorithmInput): AlgorithmOutput;
 
   /**
    * Clusters the markers and called from {@link calculate}.
@@ -113,25 +118,30 @@ export abstract class AbstractViewportAlgorithm extends AbstractAlgorithm {
     markers,
     map,
     mapCanvasProjection,
-  }: AlgorithmInput): Cluster[] {
+  }: AlgorithmInput): AlgorithmOutput {
     if (map.getZoom() >= this.maxZoom) {
-      return this.noop({
-        markers,
-        map,
-        mapCanvasProjection,
-      });
+      return {
+        clusters: this.noop({
+          markers,
+          map,
+          mapCanvasProjection,
+        }),
+        changed: false,
+      };
     }
 
-    return this.cluster({
-      markers: filterMarkersToPaddedViewport(
+    return {
+      clusters: this.cluster({
+        markers: filterMarkersToPaddedViewport(
+          map,
+          mapCanvasProjection,
+          markers,
+          this.viewportPadding
+        ),
         map,
         mapCanvasProjection,
-        markers,
-        this.viewportPadding
-      ),
-      map,
-      mapCanvasProjection,
-    });
+      }),
+    };
   }
   protected abstract cluster({ markers, map }: AlgorithmInput): Cluster[];
 }

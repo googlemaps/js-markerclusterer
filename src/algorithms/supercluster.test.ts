@@ -44,7 +44,6 @@ test("should only call load if markers change", () => {
       properties: { marker: markers[0] },
     },
   ]);
-  expect(superCluster.cluster).toHaveBeenCalledTimes(2);
 });
 
 test("should cluster markers", () => {
@@ -65,7 +64,7 @@ test("should cluster markers", () => {
       north: 90,
     }),
   });
-  const clusters = superCluster.calculate({
+  const { clusters } = superCluster.calculate({
     markers,
     map,
     mapCanvasProjection,
@@ -91,4 +90,56 @@ test("should transform to Cluster with single marker if not cluster", () => {
   });
   expect(cluster.markers.length).toEqual(1);
   expect(cluster.markers[0]).toBe(marker);
+});
+
+test("should not cluster if zoom didn't change", () => {
+  const mapCanvasProjection =
+    jest.fn() as unknown as google.maps.MapCanvasProjection;
+  const markers: google.maps.Marker[] = [
+    new google.maps.Marker(),
+    new google.maps.Marker(),
+  ];
+
+  const superCluster = new SuperClusterAlgorithm({});
+  superCluster["markers"] = markers;
+  superCluster["state"] = { zoom: 12 };
+  superCluster.cluster = jest.fn().mockReturnValue([]);
+  superCluster["clusters"] = [];
+
+  map.getZoom = jest.fn().mockReturnValue(superCluster["state"].zoom);
+
+  const { clusters, changed } = superCluster.calculate({
+    markers,
+    map,
+    mapCanvasProjection,
+  });
+
+  expect(changed).toBeFalsy();
+  expect(clusters).toBe(superCluster["clusters"]);
+});
+
+test("should not cluster if zoom beyond maxZoom", () => {
+  const mapCanvasProjection =
+    jest.fn() as unknown as google.maps.MapCanvasProjection;
+  const markers: google.maps.Marker[] = [
+    new google.maps.Marker(),
+    new google.maps.Marker(),
+  ];
+
+  const superCluster = new SuperClusterAlgorithm({});
+  superCluster["markers"] = markers;
+  superCluster["state"] = { zoom: 20 };
+  superCluster.cluster = jest.fn().mockReturnValue([]);
+  superCluster["clusters"] = [];
+
+  map.getZoom = jest.fn().mockReturnValue(superCluster["state"].zoom + 1);
+
+  const { clusters, changed } = superCluster.calculate({
+    markers,
+    map,
+    mapCanvasProjection,
+  });
+
+  expect(changed).toBeFalsy();
+  expect(clusters).toBe(superCluster["clusters"]);
 });
