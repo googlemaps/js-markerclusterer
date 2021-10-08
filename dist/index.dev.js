@@ -692,7 +692,7 @@ var markerClusterer = (function (exports) {
     return toLength(obj.length);
   };
 
-  var createMethod$3 = function (IS_INCLUDES) {
+  var createMethod$2 = function (IS_INCLUDES) {
     return function ($this, el, fromIndex) {
       var O = toIndexedObject($this);
       var length = lengthOfArrayLike(O);
@@ -714,10 +714,10 @@ var markerClusterer = (function (exports) {
   var arrayIncludes = {
     // `Array.prototype.includes` method
     // https://tc39.es/ecma262/#sec-array.prototype.includes
-    includes: createMethod$3(true),
+    includes: createMethod$2(true),
     // `Array.prototype.indexOf` method
     // https://tc39.es/ecma262/#sec-array.prototype.indexof
-    indexOf: createMethod$3(false)
+    indexOf: createMethod$2(false)
   };
 
   var indexOf = arrayIncludes.indexOf;
@@ -984,7 +984,7 @@ var markerClusterer = (function (exports) {
 
   var push = [].push; // `Array.prototype.{ forEach, map, filter, some, every, find, findIndex, filterReject }` methods implementation
 
-  var createMethod$2 = function (TYPE) {
+  var createMethod$1 = function (TYPE) {
     var IS_MAP = TYPE == 1;
     var IS_FILTER = TYPE == 2;
     var IS_SOME = TYPE == 3;
@@ -1043,28 +1043,28 @@ var markerClusterer = (function (exports) {
   var arrayIteration = {
     // `Array.prototype.forEach` method
     // https://tc39.es/ecma262/#sec-array.prototype.foreach
-    forEach: createMethod$2(0),
+    forEach: createMethod$1(0),
     // `Array.prototype.map` method
     // https://tc39.es/ecma262/#sec-array.prototype.map
-    map: createMethod$2(1),
+    map: createMethod$1(1),
     // `Array.prototype.filter` method
     // https://tc39.es/ecma262/#sec-array.prototype.filter
-    filter: createMethod$2(2),
+    filter: createMethod$1(2),
     // `Array.prototype.some` method
     // https://tc39.es/ecma262/#sec-array.prototype.some
-    some: createMethod$2(3),
+    some: createMethod$1(3),
     // `Array.prototype.every` method
     // https://tc39.es/ecma262/#sec-array.prototype.every
-    every: createMethod$2(4),
+    every: createMethod$1(4),
     // `Array.prototype.find` method
     // https://tc39.es/ecma262/#sec-array.prototype.find
-    find: createMethod$2(5),
+    find: createMethod$1(5),
     // `Array.prototype.findIndex` method
     // https://tc39.es/ecma262/#sec-array.prototype.findIndex
-    findIndex: createMethod$2(6),
+    findIndex: createMethod$1(6),
     // `Array.prototype.filterReject` method
     // https://github.com/tc39/proposal-array-filtering
-    filterReject: createMethod$2(7)
+    filterReject: createMethod$1(7)
   };
 
   var SPECIES = wellKnownSymbol('species');
@@ -1130,76 +1130,6 @@ var markerClusterer = (function (exports) {
           }
       return t;
   }
-
-  var createMethod$1 = function (IS_RIGHT) {
-    return function (that, callbackfn, argumentsLength, memo) {
-      aCallable(callbackfn);
-      var O = toObject(that);
-      var self = indexedObject(O);
-      var length = lengthOfArrayLike(O);
-      var index = IS_RIGHT ? length - 1 : 0;
-      var i = IS_RIGHT ? -1 : 1;
-      if (argumentsLength < 2) while (true) {
-        if (index in self) {
-          memo = self[index];
-          index += i;
-          break;
-        }
-
-        index += i;
-
-        if (IS_RIGHT ? index < 0 : length <= index) {
-          throw TypeError('Reduce of empty array with no initial value');
-        }
-      }
-
-      for (; IS_RIGHT ? index >= 0 : length > index; index += i) if (index in self) {
-        memo = callbackfn(memo, self[index], index, O);
-      }
-
-      return memo;
-    };
-  };
-
-  var arrayReduce = {
-    // `Array.prototype.reduce` method
-    // https://tc39.es/ecma262/#sec-array.prototype.reduce
-    left: createMethod$1(false),
-    // `Array.prototype.reduceRight` method
-    // https://tc39.es/ecma262/#sec-array.prototype.reduceright
-    right: createMethod$1(true)
-  };
-
-  var arrayMethodIsStrict = function (METHOD_NAME, argument) {
-    var method = [][METHOD_NAME];
-    return !!method && fails(function () {
-      // eslint-disable-next-line no-useless-call,no-throw-literal -- required for testing
-      method.call(null, argument || function () {
-        throw 1;
-      }, 1);
-    });
-  };
-
-  var engineIsNode = classofRaw(global_1.process) == 'process';
-
-  var $reduce = arrayReduce.left;
-  var STRICT_METHOD$2 = arrayMethodIsStrict('reduce'); // Chrome 80-82 has a critical bug
-  // https://bugs.chromium.org/p/chromium/issues/detail?id=1049982
-
-  var CHROME_BUG = !engineIsNode && engineV8Version > 79 && engineV8Version < 83; // `Array.prototype.reduce` method
-  // https://tc39.es/ecma262/#sec-array.prototype.reduce
-
-  _export({
-    target: 'Array',
-    proto: true,
-    forced: !STRICT_METHOD$2 || CHROME_BUG
-  }, {
-    reduce: function reduce(callbackfn
-    /* , initialValue */
-    ) {
-      return $reduce(this, callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : undefined);
-    }
-  });
 
   var $filter = arrayIteration.filter;
   var HAS_SPECIES_SUPPORT$1 = arrayMethodHasSpeciesSupport('filter'); // `Array.prototype.filter` method
@@ -1543,11 +1473,21 @@ var markerClusterer = (function (exports) {
   var DOMTokenListPrototype = classList && classList.constructor && classList.constructor.prototype;
   var domTokenListPrototype = DOMTokenListPrototype === Object.prototype ? undefined : DOMTokenListPrototype;
 
+  var arrayMethodIsStrict = function (METHOD_NAME, argument) {
+    var method = [][METHOD_NAME];
+    return !!method && fails(function () {
+      // eslint-disable-next-line no-useless-call,no-throw-literal -- required for testing
+      method.call(null, argument || function () {
+        throw 1;
+      }, 1);
+    });
+  };
+
   var $forEach = arrayIteration.forEach;
-  var STRICT_METHOD$1 = arrayMethodIsStrict('forEach'); // `Array.prototype.forEach` method implementation
+  var STRICT_METHOD = arrayMethodIsStrict('forEach'); // `Array.prototype.forEach` method implementation
   // https://tc39.es/ecma262/#sec-array.prototype.foreach
 
-  var arrayForEach = !STRICT_METHOD$1 ? function forEach(callbackfn
+  var arrayForEach = !STRICT_METHOD ? function forEach(callbackfn
   /* , thisArg */
   ) {
     return $forEach(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined); // eslint-disable-next-line es/no-array-prototype-foreach -- safe
@@ -5024,28 +4964,6 @@ var markerClusterer = (function (exports) {
     /* , position = 0 */
     ) {
       return !!~toString_1(requireObjectCoercible(this)).indexOf(toString_1(notARegexp(searchString)), arguments.length > 1 ? arguments[1] : undefined);
-    }
-  });
-
-  /* eslint-disable es/no-array-prototype-indexof -- required for testing */
-
-
-  var $indexOf = arrayIncludes.indexOf;
-  var nativeIndexOf = [].indexOf;
-  var NEGATIVE_ZERO = !!nativeIndexOf && 1 / [1].indexOf(1, -0) < 0;
-  var STRICT_METHOD = arrayMethodIsStrict('indexOf'); // `Array.prototype.indexOf` method
-  // https://tc39.es/ecma262/#sec-array.prototype.indexof
-
-  _export({
-    target: 'Array',
-    proto: true,
-    forced: NEGATIVE_ZERO || !STRICT_METHOD
-  }, {
-    indexOf: function indexOf(searchElement
-    /* , fromIndex = 0 */
-    ) {
-      return NEGATIVE_ZERO // convert -0 to +0
-      ? nativeIndexOf.apply(this, arguments) || 0 : $indexOf(this, searchElement, arguments.length > 1 ? arguments[1] : undefined);
     }
   });
 
