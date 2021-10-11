@@ -4441,10 +4441,10 @@ var markerClusterer = (function (exports) {
           const b = tree.points[neighborId]; // filter out neighbors that are already processed
 
           if (b.zoom > zoom) numPoints += b.numPoints || 1;
-        }
+        } // if there were neighbors to merge, and there are enough points to form a cluster
 
-        if (numPoints >= minPoints) {
-          // enough points to form a cluster
+
+        if (numPoints > numPointsOrigin && numPoints >= minPoints) {
           let wx = p.x * numPointsOrigin;
           let wy = p.y * numPointsOrigin;
           let clusterProperties = reduce && numPointsOrigin > 1 ? this._map(p, true) : null; // encode both zoom and point index on which the cluster originated -- offset by total length of features
