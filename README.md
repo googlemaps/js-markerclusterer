@@ -32,7 +32,7 @@ Alternativly you may add the umd package directly to the html document using the
 <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
 ```
 
-When adding via unpkg, the `MarkerClusterer` can be accessed at `markerclusterer.MarkerClusterer`.
+When adding via unpkg, the `MarkerClusterer` can be accessed at `markerClusterer.MarkerClusterer`.
 
 #### TypeScript
 
