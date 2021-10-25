@@ -801,7 +801,6 @@ class MarkerClusterer extends OverlayViewSafe {
     }
     reset() {
         this.markers.forEach((marker) => marker.setMap(null));
-        this.markers.forEach((marker) => marker.setMap(null));
         this.clusters.forEach((cluster) => cluster.delete());
         this.clusters = [];
     }

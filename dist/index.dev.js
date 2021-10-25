@@ -5543,9 +5543,6 @@ var markerClusterer = (function (exports) {
         this.markers.forEach(function (marker) {
           return marker.setMap(null);
         });
-        this.markers.forEach(function (marker) {
-          return marker.setMap(null);
-        });
         this.clusters.forEach(function (cluster) {
           return cluster.delete();
         });
