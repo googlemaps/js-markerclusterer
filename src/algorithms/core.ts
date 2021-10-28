@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Cluster } from "../cluster";
-import { filterMarkersToPaddedViewport } from "./utils";
+import {Cluster} from '../cluster';
+import {filterMarkersToPaddedViewport} from './utils';
 
 export interface AlgorithmInput {
   /**
@@ -52,7 +52,7 @@ export interface Algorithm {
   /**
    * Calculates an array of {@link Cluster}.
    */
-  calculate: ({ markers, map }: AlgorithmInput) => AlgorithmOutput;
+  calculate: ({markers, map}: AlgorithmInput) => AlgorithmOutput;
 }
 
 export interface AlgorithmOptions {
@@ -64,7 +64,7 @@ export interface AlgorithmOptions {
 export abstract class AbstractAlgorithm implements Algorithm {
   protected maxZoom: number;
 
-  constructor({ maxZoom = 16 }: AlgorithmOptions) {
+  constructor({maxZoom = 16}: AlgorithmOptions) {
     this.maxZoom = maxZoom;
   }
   /**
@@ -79,7 +79,7 @@ export abstract class AbstractAlgorithm implements Algorithm {
    * }
    * ```
    */
-  protected noop({ markers }: AlgorithmInput): Cluster[] {
+  protected noop({markers}: AlgorithmInput): Cluster[] {
     return noop(markers);
   }
   /**
@@ -88,12 +88,12 @@ export abstract class AbstractAlgorithm implements Algorithm {
    * based upon the viewport as in {@link AbstractViewportAlgorithm}. Caching
    * and other optimizations can also be done here.
    */
-  public abstract calculate({ markers, map }: AlgorithmInput): AlgorithmOutput;
+  public abstract calculate({markers, map}: AlgorithmInput): AlgorithmOutput;
 
   /**
    * Clusters the markers and called from {@link calculate}.
    */
-  protected abstract cluster({ markers, map }: AlgorithmInput): Cluster[];
+  protected abstract cluster({markers, map}: AlgorithmInput): Cluster[];
 }
 
 /**
@@ -116,7 +116,7 @@ export interface ViewportAlgorithmOptions extends AlgorithmOptions {
 export abstract class AbstractViewportAlgorithm extends AbstractAlgorithm {
   protected viewportPadding = 60;
 
-  constructor({ viewportPadding = 60, ...options }: ViewportAlgorithmOptions) {
+  constructor({viewportPadding = 60, ...options}: ViewportAlgorithmOptions) {
     super(options);
     this.viewportPadding = viewportPadding;
   }
@@ -149,7 +149,7 @@ export abstract class AbstractViewportAlgorithm extends AbstractAlgorithm {
       }),
     };
   }
-  protected abstract cluster({ markers, map }: AlgorithmInput): Cluster[];
+  protected abstract cluster({markers, map}: AlgorithmInput): Cluster[];
 }
 
 /**
@@ -157,7 +157,7 @@ export abstract class AbstractViewportAlgorithm extends AbstractAlgorithm {
  */
 export const noop = (markers: google.maps.Marker[]): Cluster[] => {
   const clusters = markers.map(
-    (marker) =>
+    marker =>
       new Cluster({
         position: marker.getPosition(),
         markers: [marker],

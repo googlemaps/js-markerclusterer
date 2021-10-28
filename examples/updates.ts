@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-import { LOADER_OPTIONS } from "./config";
-import { Loader } from "@googlemaps/js-api-loader";
-import { MarkerClusterer } from "../src";
-import trees from "./trees.json";
+import {LOADER_OPTIONS} from './config';
+import {Loader} from '@googlemaps/js-api-loader';
+import {MarkerClusterer} from '../src';
+import trees from './trees.json';
 
 const mapOptions = {
-  center: { lat: 40.7128, lng: -73.85 },
+  center: {lat: 40.7128, lng: -73.85},
   zoom: 12,
 };
 
 new Loader(LOADER_OPTIONS).load().then(async () => {
-  const element = document.getElementById("map");
+  const element = document.getElementById('map');
 
   const map = new google.maps.Map(element, mapOptions);
 
   const markers = trees.map(
-    ({ geometry }) =>
+    ({geometry}) =>
       new google.maps.Marker({
         position: {
           lat: geometry.coordinates[1],
@@ -45,7 +45,7 @@ new Loader(LOADER_OPTIONS).load().then(async () => {
 
   markerCluster.setMap(map);
 
-  await new Promise((resolve) => {
+  await new Promise(resolve => {
     setTimeout(() => {
       markerCluster.clearMarkers();
       resolve(null);
@@ -57,7 +57,7 @@ new Loader(LOADER_OPTIONS).load().then(async () => {
   await Promise.all(
     markers.slice(0, n).map(
       (m, i) =>
-        new Promise((resolve) => {
+        new Promise(resolve => {
           setTimeout(() => {
             markerCluster.addMarker(m);
             resolve(null);
@@ -69,7 +69,7 @@ new Loader(LOADER_OPTIONS).load().then(async () => {
   await Promise.all(
     markers.slice(0, n).map(
       (m, i) =>
-        new Promise((resolve) => {
+        new Promise(resolve => {
           setTimeout(() => {
             markerCluster.removeMarker(m);
             resolve(null);
@@ -78,14 +78,14 @@ new Loader(LOADER_OPTIONS).load().then(async () => {
     )
   );
 
-  await new Promise((resolve) => {
+  await new Promise(resolve => {
     setTimeout(() => {
       markerCluster.addMarkers(markers);
       resolve(null);
     }, 2000);
   });
 
-  await new Promise((resolve) => {
+  await new Promise(resolve => {
     setTimeout(() => {
       markerCluster.removeMarkers(markers);
       resolve(null);

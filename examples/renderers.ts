@@ -20,22 +20,22 @@ import {
   DefaultRenderer,
   MarkerClusterer,
   Renderer,
-} from "../src";
-import { LOADER_OPTIONS, sync } from "./config";
+} from '../src';
+import {LOADER_OPTIONS, sync} from './config';
 
-import { Loader } from "@googlemaps/js-api-loader";
-import { interpolateRgb } from "d3-interpolate";
-import trees from "./trees.json";
+import {Loader} from '@googlemaps/js-api-loader';
+import {interpolateRgb} from 'd3-interpolate';
+import trees from './trees.json';
 
 const mapOptions = {
-  center: { lat: 40.7128, lng: -73.85 },
+  center: {lat: 40.7128, lng: -73.85},
   zoom: 10,
 };
 
 const interpolatedRenderer = {
-  palette: interpolateRgb("red", "blue"),
+  palette: interpolateRgb('red', 'blue'),
   render: function (
-    { count, position }: Cluster,
+    {count, position}: Cluster,
     stats: ClusterStats
   ): google.maps.Marker {
     // use d3-interpolateRgb to interpolate between red and blue
@@ -56,8 +56,8 @@ const interpolatedRenderer = {
       },
       label: {
         text: String(count),
-        color: "rgba(255,255,255,0.9)",
-        fontSize: "12px",
+        color: 'rgba(255,255,255,0.9)',
+        fontSize: '12px',
       },
       // adjust zIndex to be above other markers
       zIndex: Number(google.maps.Marker.MAX_ZINDEX) + count,
@@ -70,16 +70,16 @@ new Loader(LOADER_OPTIONS).load().then(() => {
 
   const panels: [Element, Renderer, string][] = [
     [
-      document.getElementById("default"),
+      document.getElementById('default'),
       new DefaultRenderer(),
-      `new DefaultRenderer()`,
+      'new DefaultRenderer()',
     ],
     [
-      document.getElementById("simple"),
+      document.getElementById('simple'),
       {
-        render: ({ count, position }: Cluster) =>
+        render: ({count, position}: Cluster) =>
           new google.maps.Marker({
-            label: { text: String(count), color: "white", fontSize: "10px" },
+            label: {text: String(count), color: 'white', fontSize: '10px'},
             position,
             // adjust zIndex to be above other markers
             zIndex: Number(google.maps.Marker.MAX_ZINDEX) + count,
@@ -87,8 +87,8 @@ new Loader(LOADER_OPTIONS).load().then(() => {
       },
       null,
     ],
-    [document.getElementById("svg"), new DefaultRenderer(), null],
-    [document.getElementById("interpolated"), interpolatedRenderer, null],
+    [document.getElementById('svg'), new DefaultRenderer(), null],
+    [document.getElementById('interpolated'), interpolatedRenderer, null],
   ];
 
   panels.forEach(([element, renderer, text]) => {
@@ -98,17 +98,17 @@ new Loader(LOADER_OPTIONS).load().then(() => {
     const map = new google.maps.Map(element, mapOptions);
     maps.push(map);
 
-    const textElement = document.createElement("pre");
+    const textElement = document.createElement('pre');
     // @ts-ignore
     textElement.innerHTML = window.hljs.highlight(text, {
-      language: "typescript",
+      language: 'typescript',
     }).value;
-    textElement.classList.add("description");
+    textElement.classList.add('description');
 
     map.controls[google.maps.ControlPosition.LEFT_TOP].push(textElement);
 
     const markers = trees.map(
-      ({ geometry }) =>
+      ({geometry}) =>
         new google.maps.Marker({
           position: {
             lat: geometry.coordinates[1],

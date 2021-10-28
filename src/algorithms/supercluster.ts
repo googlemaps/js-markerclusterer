@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import { AbstractAlgorithm, AlgorithmInput, AlgorithmOutput } from "./core";
-import SuperCluster, { ClusterFeature } from "supercluster";
+import {AbstractAlgorithm, AlgorithmInput, AlgorithmOutput} from './core';
+import SuperCluster, {ClusterFeature} from 'supercluster';
 
-import { Cluster } from "../cluster";
-import equal from "fast-deep-equal/es6";
+import {Cluster} from '../cluster';
+import equal from 'fast-deep-equal/es6';
 
 export type SuperClusterOptions = SuperCluster.Options<
-  { [name: string]: any },
-  { [name: string]: any }
+  {[name: string]: any},
+  {[name: string]: any}
 >;
 
 /**
@@ -34,10 +34,10 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
   protected superCluster: SuperCluster;
   protected markers: google.maps.Marker[];
   protected clusters: Cluster[];
-  protected state: { zoom: number };
+  protected state: {zoom: number};
 
-  constructor({ maxZoom, radius = 60, ...options }: SuperClusterOptions) {
-    super({ maxZoom });
+  constructor({maxZoom, radius = 60, ...options}: SuperClusterOptions) {
+    super({maxZoom});
 
     this.superCluster = new SuperCluster({
       maxZoom: this.maxZoom,
@@ -45,7 +45,7 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
       ...options,
     });
 
-    this.state = { zoom: null };
+    this.state = {zoom: null};
   }
   public calculate(input: AlgorithmInput): AlgorithmOutput {
     let changed = false;
@@ -55,24 +55,24 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
       // TODO use proxy to avoid copy?
       this.markers = [...input.markers];
 
-      const points = this.markers.map((marker) => {
+      const points = this.markers.map(marker => {
         return {
-          type: "Feature" as const,
+          type: 'Feature' as const,
           geometry: {
-            type: "Point" as const,
+            type: 'Point' as const,
             coordinates: [
               marker.getPosition().lng(),
               marker.getPosition().lat(),
             ],
           },
-          properties: { marker },
+          properties: {marker},
         };
       });
 
       this.superCluster.load(points);
     }
 
-    const state = { zoom: input.map.getZoom() };
+    const state = {zoom: input.map.getZoom()};
 
     if (!changed) {
       if (this.state.zoom > this.maxZoom && state.zoom > this.maxZoom) {
@@ -88,10 +88,10 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
       this.clusters = this.cluster(input);
     }
 
-    return { clusters: this.clusters, changed };
+    return {clusters: this.clusters, changed};
   }
 
-  public cluster({ map }: AlgorithmInput): Cluster[] {
+  public cluster({map}: AlgorithmInput): Cluster[] {
     return this.superCluster
       .getClusters([-180, -90, 180, 90], map.getZoom())
       .map(this.transformCluster.bind(this));
@@ -102,13 +102,13 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
       coordinates: [lng, lat],
     },
     properties,
-  }: ClusterFeature<{ marker: google.maps.Marker }>): Cluster {
+  }: ClusterFeature<{marker: google.maps.Marker}>): Cluster {
     if (properties.cluster) {
       return new Cluster({
         markers: this.superCluster
           .getLeaves(properties.cluster_id, Infinity)
-          .map((leaf) => leaf.properties.marker),
-        position: new google.maps.LatLng({ lat, lng }),
+          .map(leaf => leaf.properties.marker),
+        position: new google.maps.LatLng({lat, lng}),
       });
     } else {
       const marker = properties.marker;

@@ -25,7 +25,7 @@ export const filterMarkersToPaddedViewport = (
     mapCanvasProjection,
     viewportPadding
   );
-  return markers.filter((marker) =>
+  return markers.filter(marker =>
     extendedMapBounds.contains(marker.getPosition())
   );
 };
@@ -38,14 +38,8 @@ export const extendBoundsToPaddedViewport = (
   projection: google.maps.MapCanvasProjection,
   pixels: number
 ): google.maps.LatLngBounds => {
-  const { northEast, southWest } = latLngBoundsToPixelBounds(
-    bounds,
-    projection
-  );
-  const extendedPixelBounds = extendPixelBounds(
-    { northEast, southWest },
-    pixels
-  );
+  const {northEast, southWest} = latLngBoundsToPixelBounds(bounds, projection);
+  const extendedPixelBounds = extendPixelBounds({northEast, southWest}, pixels);
   return pixelBoundsToLatLngBounds(extendedPixelBounds, projection);
 };
 
@@ -91,7 +85,7 @@ const latLngBoundsToPixelBounds = (
  * @hidden
  */
 export const extendPixelBounds = (
-  { northEast, southWest }: PixelBounds,
+  {northEast, southWest}: PixelBounds,
   pixels: number
 ): PixelBounds => {
   northEast.x += pixels;
@@ -100,14 +94,14 @@ export const extendPixelBounds = (
   southWest.x -= pixels;
   southWest.y += pixels;
 
-  return { northEast, southWest };
+  return {northEast, southWest};
 };
 
 /**
  * @hidden
  */
 export const pixelBoundsToLatLngBounds = (
-  { northEast, southWest }: PixelBounds,
+  {northEast, southWest}: PixelBounds,
   projection: google.maps.MapCanvasProjection
 ): google.maps.LatLngBounds => {
   const bounds = new google.maps.LatLngBounds();

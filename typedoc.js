@@ -15,9 +15,9 @@
  */
 
 module.exports = {
-  out: "docs",
-  exclude: ["**/node_modules/**", "**/*.spec.ts", "**/*.test.ts"],
-  name: "@googlemaps/js-markerclusterer",
+  out: 'docs',
+  exclude: ['**/node_modules/**', '**/*.spec.ts', '**/*.test.ts'],
+  name: '@googlemaps/js-markerclusterer',
   excludePrivate: true,
   excludeExternals: true,
 };

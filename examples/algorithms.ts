@@ -22,14 +22,14 @@ import {
   MarkerClusterer,
   NoopAlgorithm,
   SuperClusterAlgorithm,
-} from "../src";
-import { LOADER_OPTIONS, sync } from "./config";
+} from '../src';
+import {LOADER_OPTIONS, sync} from './config';
 
-import { Loader } from "@googlemaps/js-api-loader";
-import trees from "./trees.json";
+import {Loader} from '@googlemaps/js-api-loader';
+import trees from './trees.json';
 
 const mapOptions = {
-  center: { lat: 40.7128, lng: -73.85 },
+  center: {lat: 40.7128, lng: -73.85},
   zoom: 10,
 };
 
@@ -38,31 +38,31 @@ new Loader(LOADER_OPTIONS).load().then(() => {
 
   const panels: [Element, AbstractAlgorithm, string][] = [
     [
-      document.getElementById("noop"),
+      document.getElementById('noop'),
       new NoopAlgorithm({}),
-      `new NoopAlgorithm()`,
+      'new NoopAlgorithm()',
     ],
     [
-      document.getElementById("grid"),
-      new GridAlgorithm({ maxDistance: 40000 }),
-      `new GridAlgorithm({})`,
+      document.getElementById('grid'),
+      new GridAlgorithm({maxDistance: 40000}),
+      'new GridAlgorithm({})',
     ],
     [
-      document.getElementById("kmeans"),
+      document.getElementById('kmeans'),
       new KmeansAlgorithm({
         numberOfClusters: 10,
       }),
-      `new KmeansAlgorithm({})`,
+      'new KmeansAlgorithm({})',
     ],
     [
-      document.getElementById("dbscan"),
+      document.getElementById('dbscan'),
       new DBScanAlgorithm({}),
-      `new DBScanAlgorithm({})`,
+      'new DBScanAlgorithm({})',
     ],
     [
-      document.getElementById("supercluster"),
+      document.getElementById('supercluster'),
       new SuperClusterAlgorithm({}),
-      `new SuperClusterAlgorithm({})`,
+      'new SuperClusterAlgorithm({})',
     ],
   ];
 
@@ -70,14 +70,14 @@ new Loader(LOADER_OPTIONS).load().then(() => {
     const map = new google.maps.Map(element, mapOptions);
     maps.push(map);
 
-    const textElement = document.createElement("pre");
+    const textElement = document.createElement('pre');
     textElement.innerText = text;
-    textElement.classList.add("description");
+    textElement.classList.add('description');
 
     map.controls[google.maps.ControlPosition.LEFT_TOP].push(textElement);
 
     const markers = trees.map(
-      ({ geometry }) =>
+      ({geometry}) =>
         new google.maps.Marker({
           position: {
             lat: geometry.coordinates[1],

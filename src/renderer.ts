@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { Cluster } from "./cluster";
+import {Cluster} from './cluster';
 
 /**
  * Provides statistics on all clusters in the current render cycle for use in {@link Renderer.render}.
  */
 export class ClusterStats {
-  public readonly markers: { sum: number };
+  public readonly markers: {sum: number};
   public readonly clusters: {
     count: number;
     markers: {
@@ -32,9 +32,9 @@ export class ClusterStats {
   };
 
   constructor(markers: google.maps.Marker[], clusters: Cluster[]) {
-    this.markers = { sum: markers.length };
+    this.markers = {sum: markers.length};
 
-    const clusterMarkerCounts = clusters.map((a) => a.count);
+    const clusterMarkerCounts = clusters.map(a => a.count);
     const clusterMarkerSum = clusterMarkerCounts.reduce((a, b) => a + b, 0);
 
     this.clusters = {
@@ -105,12 +105,12 @@ export class DefaultRenderer implements Renderer {
    * ```
    */
   public render(
-    { count, position }: Cluster,
+    {count, position}: Cluster,
     stats: ClusterStats
   ): google.maps.Marker {
     // change color if this cluster has more markers than the mean cluster
     const color =
-      count > Math.max(10, stats.clusters.markers.mean) ? "#ff0000" : "#0000ff";
+      count > Math.max(10, stats.clusters.markers.mean) ? '#ff0000' : '#0000ff';
 
     // create svg url with fill color
     const svg = window.btoa(`
@@ -129,8 +129,8 @@ export class DefaultRenderer implements Renderer {
       },
       label: {
         text: String(count),
-        color: "rgba(255,255,255,0.9)",
-        fontSize: "12px",
+        color: 'rgba(255,255,255,0.9)',
+        fontSize: '12px',
       },
       // adjust zIndex to be above other markers
       zIndex: Number(google.maps.Marker.MAX_ZINDEX) + count,

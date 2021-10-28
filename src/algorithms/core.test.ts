@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { initialize } from "@googlemaps/jest-mocks";
-import { noop } from "./core";
+import {initialize} from '@googlemaps/jest-mocks';
+import {noop} from './core';
 
 beforeEach(() => {
   initialize();
 });
 
-test("noop should return equivalent number of clusters", () => {
+test('noop should return equivalent number of clusters', () => {
   expect(noop([]).length).toBe(0);
   expect(
     noop([new google.maps.Marker({}), new google.maps.Marker({})]).length

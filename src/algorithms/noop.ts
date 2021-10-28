@@ -19,15 +19,15 @@ import {
   AlgorithmInput,
   AlgorithmOptions,
   AlgorithmOutput,
-} from "./core";
+} from './core';
 
-import { Cluster } from "../cluster";
+import {Cluster} from '../cluster';
 
 /**
  * Noop algorithm does not generate any clusters or filter markers by the an extended viewport.
  */
 export class NoopAlgorithm extends AbstractAlgorithm {
-  constructor({ ...options }: AlgorithmOptions) {
+  constructor({...options}: AlgorithmOptions) {
     super(options);
   }
   public calculate({
@@ -36,7 +36,7 @@ export class NoopAlgorithm extends AbstractAlgorithm {
     mapCanvasProjection,
   }: AlgorithmInput): AlgorithmOutput {
     return {
-      clusters: this.cluster({ markers, map, mapCanvasProjection }),
+      clusters: this.cluster({markers, map, mapCanvasProjection}),
       changed: false,
     };
   }

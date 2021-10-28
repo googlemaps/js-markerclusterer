@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export * from "./algorithms";
-export * from "./cluster";
-export * from "./markerclusterer";
-export * from "./renderer";
+export * from './algorithms';
+export * from './cluster';
+export * from './markerclusterer';
+export * from './renderer';

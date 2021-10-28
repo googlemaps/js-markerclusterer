@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { LoaderOptions } from "@googlemaps/js-api-loader";
+import {LoaderOptions} from '@googlemaps/js-api-loader';
 
-export const MAP_ID = "7b9a897acd0a63a4";
+export const MAP_ID = '7b9a897acd0a63a4';
 
 export const LOADER_OPTIONS: LoaderOptions = {
-  apiKey: "AIzaSyDhRjl83cPVWeaEer-SnKIw7GTjBuqWxXI",
-  version: "weekly",
+  apiKey: 'AIzaSyDhRjl83cPVWeaEer-SnKIw7GTjBuqWxXI',
+  version: 'weekly',
   libraries: [],
 };
 
@@ -30,7 +30,7 @@ export const sync = (...maps: google.maps.Map[]): void => {
   let zoom: number;
 
   function update(changedMap: google.maps.Map) {
-    maps.forEach((m) => {
+    maps.forEach(m => {
       if (m === changedMap) {
         return;
       }
@@ -40,8 +40,8 @@ export const sync = (...maps: google.maps.Map[]): void => {
     });
   }
 
-  maps.forEach((m) => {
-    m.addListener("bounds_changed", () => {
+  maps.forEach(m => {
+    m.addListener('bounds_changed', () => {
       const changedCenter = m.getCenter();
       const changedZoom = m.getZoom();
 

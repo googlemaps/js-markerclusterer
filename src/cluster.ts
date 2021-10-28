@@ -24,7 +24,7 @@ export class Cluster {
   public readonly markers?: google.maps.Marker[];
   protected _position: google.maps.LatLng;
 
-  constructor({ markers, position }: ClusterOptions) {
+  constructor({markers, position}: ClusterOptions) {
     this.markers = markers;
 
     if (position) {

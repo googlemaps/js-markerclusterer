@@ -18,11 +18,11 @@ import {
   AbstractViewportAlgorithm,
   AlgorithmInput,
   ViewportAlgorithmOptions,
-} from "./core";
-import { Units, featureCollection, point } from "@turf/helpers";
+} from './core';
+import {Units, featureCollection, point} from '@turf/helpers';
 
-import { Cluster } from "../cluster";
-import clustersDbscan from "@turf/clusters-dbscan";
+import {Cluster} from '../cluster';
+import clustersDbscan from '@turf/clusters-dbscan';
 
 export interface DBScanOptions {
   units?: Units;
@@ -36,7 +36,7 @@ export interface DBScanAlgorithmOptions extends ViewportAlgorithmOptions {
 }
 
 const DEFAULT_INTERNAL_DBSCAN_OPTION: DBScanOptions = {
-  units: "kilometers",
+  units: 'kilometers',
   mutate: false,
   minPoints: 1,
 };
@@ -68,12 +68,9 @@ export class DBScanAlgorithm extends AbstractViewportAlgorithm {
     };
   }
 
-  protected cluster({
-    markers,
-    mapCanvasProjection,
-  }: AlgorithmInput): Cluster[] {
+  protected cluster({markers, mapCanvasProjection}: AlgorithmInput): Cluster[] {
     const points = featureCollection(
-      markers.map((marker) => {
+      markers.map(marker => {
         const projectedPoint = mapCanvasProjection.fromLatLngToContainerPixel(
           marker.getPosition()
         );
@@ -93,6 +90,6 @@ export class DBScanAlgorithm extends AbstractViewportAlgorithm {
       }
     );
 
-    return grouped.map((markers) => new Cluster({ markers }));
+    return grouped.map(markers => new Cluster({markers}));
   }
 }

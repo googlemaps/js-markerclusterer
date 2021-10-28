@@ -14,42 +14,42 @@
  * limitations under the License.
  */
 
-import { MapCanvasProjection, initialize } from "@googlemaps/jest-mocks";
+import {MapCanvasProjection, initialize} from '@googlemaps/jest-mocks';
 import {
   distanceBetweenPoints,
   extendPixelBounds,
   pixelBoundsToLatLngBounds,
-} from "./utils";
+} from './utils';
 
 beforeEach(() => {
   initialize();
 });
 
-describe("distanceBetweenPoints", () => {
-  test("is correct", () => {
+describe('distanceBetweenPoints', () => {
+  test('is correct', () => {
     expect(
-      distanceBetweenPoints({ lng: 0, lat: 0 }, { lng: 1, lat: 1 })
-    ).toMatchInlineSnapshot(`157.24938127194397`);
+      distanceBetweenPoints({lng: 0, lat: 0}, {lng: 1, lat: 1})
+    ).toMatchInlineSnapshot('157.24938127194397');
 
     expect(
-      distanceBetweenPoints({ lng: 0, lat: 0 }, { lng: -1, lat: 1 })
-    ).toMatchInlineSnapshot(`157.24938127194397`);
+      distanceBetweenPoints({lng: 0, lat: 0}, {lng: -1, lat: 1})
+    ).toMatchInlineSnapshot('157.24938127194397');
 
     expect(
-      distanceBetweenPoints({ lng: 0, lat: 0 }, { lng: -1, lat: -1 })
-    ).toMatchInlineSnapshot(`157.24938127194397`);
+      distanceBetweenPoints({lng: 0, lat: 0}, {lng: -1, lat: -1})
+    ).toMatchInlineSnapshot('157.24938127194397');
 
     expect(
-      distanceBetweenPoints({ lng: 0, lat: 0 }, { lng: 1, lat: -1 })
-    ).toMatchInlineSnapshot(`157.24938127194397`);
+      distanceBetweenPoints({lng: 0, lat: 0}, {lng: 1, lat: -1})
+    ).toMatchInlineSnapshot('157.24938127194397');
   });
 });
 
-describe("extendPixelBounds", () => {
-  test("is correct", () => {
-    const northEast = { x: 0, y: 0 } as google.maps.Point;
-    const southWest = { x: 0, y: 0 } as google.maps.Point;
-    expect(extendPixelBounds({ northEast, southWest }, 1)).toEqual({
+describe('extendPixelBounds', () => {
+  test('is correct', () => {
+    const northEast = {x: 0, y: 0} as google.maps.Point;
+    const southWest = {x: 0, y: 0} as google.maps.Point;
+    expect(extendPixelBounds({northEast, southWest}, 1)).toEqual({
       northEast: {
         x: 1,
         y: -1,
@@ -62,13 +62,13 @@ describe("extendPixelBounds", () => {
   });
 });
 
-describe("pixelBoundsToLatLngBounds", () => {
-  test("is correct", () => {
-    const northEast = { x: 1, y: 1 } as google.maps.Point;
-    const southWest = { x: -1, y: -1 } as google.maps.Point;
+describe('pixelBoundsToLatLngBounds', () => {
+  test('is correct', () => {
+    const northEast = {x: 1, y: 1} as google.maps.Point;
+    const southWest = {x: -1, y: -1} as google.maps.Point;
     const projection = new MapCanvasProjection();
     const bounds = pixelBoundsToLatLngBounds(
-      { northEast, southWest },
+      {northEast, southWest},
       projection
     );
     expect(projection.fromDivPixelToLatLng).toHaveBeenCalledWith(northEast);

@@ -18,10 +18,10 @@ import {
   AbstractViewportAlgorithm,
   AlgorithmInput,
   ViewportAlgorithmOptions,
-} from "./core";
-import { distanceBetweenPoints, extendBoundsToPaddedViewport } from "./utils";
+} from './core';
+import {distanceBetweenPoints, extendBoundsToPaddedViewport} from './utils';
 
-import { Cluster } from "../cluster";
+import {Cluster} from '../cluster';
 
 export interface GridOptions extends ViewportAlgorithmOptions {
   gridSize?: number;
@@ -44,7 +44,7 @@ export class GridAlgorithm extends AbstractViewportAlgorithm {
   protected maxDistance: number;
   protected clusters: Cluster[] = [];
 
-  constructor({ maxDistance = 40000, gridSize = 40, ...options }: GridOptions) {
+  constructor({maxDistance = 40000, gridSize = 40, ...options}: GridOptions) {
     super(options);
 
     this.maxDistance = maxDistance;
@@ -57,7 +57,7 @@ export class GridAlgorithm extends AbstractViewportAlgorithm {
     mapCanvasProjection,
   }: AlgorithmInput): Cluster[] {
     this.clusters = [];
-    markers.forEach((marker) => {
+    markers.forEach(marker => {
       this.addToClosestCluster(marker, map, mapCanvasProjection);
     });
 
@@ -95,7 +95,7 @@ export class GridAlgorithm extends AbstractViewportAlgorithm {
     ) {
       cluster.push(marker);
     } else {
-      const cluster = new Cluster({ markers: [marker] });
+      const cluster = new Cluster({markers: [marker]});
       this.clusters.push(cluster);
     }
   }

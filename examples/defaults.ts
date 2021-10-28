@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-import { LOADER_OPTIONS } from "./config";
-import { Loader } from "@googlemaps/js-api-loader";
-import { MarkerClusterer } from "../src";
-import trees from "./trees.json";
+import {LOADER_OPTIONS} from './config';
+import {Loader} from '@googlemaps/js-api-loader';
+import {MarkerClusterer} from '../src';
+import trees from './trees.json';
 
 const mapOptions = {
-  center: { lat: 40.7128, lng: -73.85 },
+  center: {lat: 40.7128, lng: -73.85},
   zoom: 12,
 };
 
 new Loader(LOADER_OPTIONS).load().then(() => {
-  const element = document.getElementById("map");
+  const element = document.getElementById('map');
 
   const map = new google.maps.Map(element, mapOptions);
 
   const markers = trees.map(
-    ({ geometry }) =>
+    ({geometry}) =>
       new google.maps.Marker({
         position: {
           lat: geometry.coordinates[1],
