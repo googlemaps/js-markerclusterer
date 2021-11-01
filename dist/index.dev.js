@@ -1165,6 +1165,21 @@ var markerClusterer = (function (exports) {
       return t;
   }
 
+  // https://tc39.es/ecma262/#sec-object.prototype.tostring
+
+
+  var objectToString = toStringTagSupport ? {}.toString : function toString() {
+    return '[object ' + classof(this) + ']';
+  };
+
+  // https://tc39.es/ecma262/#sec-object.prototype.tostring
+
+  if (!toStringTagSupport) {
+    redefine(Object.prototype, 'toString', objectToString, {
+      unsafe: true
+    });
+  }
+
   var $filter = arrayIteration.filter;
   var HAS_SPECIES_SUPPORT$1 = arrayMethodHasSpeciesSupport('filter'); // `Array.prototype.filter` method
   // https://tc39.es/ecma262/#sec-array.prototype.filter
