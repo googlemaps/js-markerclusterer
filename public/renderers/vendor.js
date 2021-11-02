@@ -830,6 +830,12 @@ class Loader {
         }
         return url;
     }
+    deleteScript() {
+        const script = document.getElementById(this.id);
+        if (script) {
+            script.remove();
+        }
+    }
     /**
      * Load the Google Maps JavaScript API script and return a Promise.
      */
@@ -881,12 +887,6 @@ class Loader {
             script.nonce = this.nonce;
         }
         document.head.appendChild(script);
-    }
-    deleteScript() {
-        const script = document.getElementById(this.id);
-        if (script) {
-            script.remove();
-        }
     }
     /**
      * Reset the loader state.
