@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import babel from "rollup-plugin-babel";
-import commonjs from "rollup-plugin-commonjs";
+import { babel } from '@rollup/plugin-babel';
+import commonjs from '@rollup/plugin-commonjs';
 import { terser } from "rollup-plugin-terser";
-import typescript from "rollup-plugin-typescript2";
+import typescript from "@rollup/plugin-typescript";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 
 const babelOptions = {
