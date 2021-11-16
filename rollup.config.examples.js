@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import commonjs from '@rollup/plugin-commonjs';
+import commonjs from "@rollup/plugin-commonjs";
 import fs from "fs";
 import html from "@rollup/plugin-html";
 import jsonNodeResolve from "@rollup/plugin-json";
