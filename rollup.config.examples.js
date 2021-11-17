@@ -23,7 +23,7 @@ import path from "path";
 import typescript from "@rollup/plugin-typescript";
 
 const typescriptOptions = {
-  compilerOptions: {
+  ...{
     declaration: false,
     noEmit: true,
     resolveJsonModule: true,
