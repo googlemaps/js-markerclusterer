@@ -14,23 +14,16 @@
  * limitations under the License.
  */
 
-import commonjs from "rollup-plugin-commonjs";
+import commonjs from "@rollup/plugin-commonjs";
 import fs from "fs";
 import html from "@rollup/plugin-html";
 import jsonNodeResolve from "@rollup/plugin-json";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 import path from "path";
-import typescript from "rollup-plugin-typescript2";
+import typescript from "@rollup/plugin-typescript";
 
 const typescriptOptions = {
-  tsconfigOverride: {
-    compilerOptions: {
-      declaration: false,
-      noEmit: true,
-      resolveJsonModule: true,
-    },
-    include: ["src/**/*", "examples/**/*"],
-  },
+  tsconfig: "tsconfig.examples.json",
 };
 
 const examples = fs
