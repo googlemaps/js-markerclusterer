@@ -23,14 +23,12 @@ import path from "path";
 import typescript from "@rollup/plugin-typescript";
 
 const typescriptOptions = {
-  tsconfigOverride: {
-    compilerOptions: {
-      declaration: false,
-      noEmit: true,
-      resolveJsonModule: true,
-    },
-    include: ["src/**/*", "examples/**/*"],
+  compilerOptions: {
+    declaration: false,
+    noEmit: true,
+    resolveJsonModule: true,
   },
+  include: ["src/**/*", "examples/**/*"],
 };
 
 const examples = fs
