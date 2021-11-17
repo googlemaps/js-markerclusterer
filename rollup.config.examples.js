@@ -23,12 +23,7 @@ import path from "path";
 import typescript from "@rollup/plugin-typescript";
 
 const typescriptOptions = {
-  ...{
-    declaration: false,
-    noEmit: true,
-    resolveJsonModule: true,
-  },
-  include: ["src/**/*", "examples/**/*"],
+  tsconfig: "tsconfig.examples.json",
 };
 
 const examples = fs
