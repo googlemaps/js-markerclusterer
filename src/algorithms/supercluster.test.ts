@@ -143,3 +143,26 @@ test("should not cluster if zoom beyond maxZoom", () => {
   expect(changed).toBeFalsy();
   expect(clusters).toBe(superCluster["clusters"]);
 });
+
+test("should round fractional zoom", () => {
+  const mapCanvasProjection =
+    jest.fn() as unknown as google.maps.MapCanvasProjection;
+  const markers: google.maps.Marker[] = [];
+
+  const superCluster = new SuperClusterAlgorithm({});
+  superCluster["superCluster"].getClusters = jest.fn().mockReturnValue([]);
+
+  map.getZoom = jest.fn().mockReturnValue(1.534);
+  superCluster.cluster({ map, mapCanvasProjection, markers });
+  expect(superCluster["superCluster"].getClusters).toHaveBeenCalledWith(
+    [-180, -90, 180, 90],
+    2
+  );
+
+  map.getZoom = jest.fn().mockReturnValue(3.234);
+  superCluster.cluster({ map, mapCanvasProjection, markers });
+  expect(superCluster["superCluster"].getClusters).toHaveBeenCalledWith(
+    [-180, -90, 180, 90],
+    3
+  );
+});
