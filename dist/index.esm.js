@@ -517,7 +517,7 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
     }
     cluster({ map }) {
         return this.superCluster
-            .getClusters([-180, -90, 180, 90], map.getZoom())
+            .getClusters([-180, -90, 180, 90], Math.round(map.getZoom()))
             .map(this.transformCluster.bind(this));
     }
     transformCluster({ geometry: { coordinates: [lng, lat], }, properties, }) {

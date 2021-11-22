@@ -5048,7 +5048,7 @@ var markerClusterer = (function (exports) {
       key: "cluster",
       value: function cluster(_ref) {
         var map = _ref.map;
-        return this.superCluster.getClusters([-180, -90, 180, 90], map.getZoom()).map(this.transformCluster.bind(this));
+        return this.superCluster.getClusters([-180, -90, 180, 90], Math.round(map.getZoom())).map(this.transformCluster.bind(this));
       }
     }, {
       key: "transformCluster",
