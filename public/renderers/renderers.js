@@ -370,7 +370,6 @@ const defaultOnClusterClickHandler = (_, cluster, map) => {
  * MarkerClusterer creates and manages per-zoom-level clusters for large amounts
  * of markers. See {@link MarkerClustererOptions} for more details.
  *
- * <iframe src="https://googlemaps.github.io/js-three/public/anchor/index.html"></iframe>
  */
 class MarkerClusterer extends OverlayViewSafe {
     constructor({ map, markers = [], algorithm = new SuperClusterAlgorithm({}), renderer = new DefaultRenderer(), onClusterClick = defaultOnClusterClickHandler, }) {

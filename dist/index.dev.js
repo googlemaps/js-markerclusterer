@@ -5766,7 +5766,6 @@ var markerClusterer = (function (exports) {
    * MarkerClusterer creates and manages per-zoom-level clusters for large amounts
    * of markers. See {@link MarkerClustererOptions} for more details.
    *
-   * <iframe src="https://googlemaps.github.io/js-three/public/anchor/index.html"></iframe>
    */
 
   var MarkerClusterer = /*#__PURE__*/function (_OverlayViewSafe) {
