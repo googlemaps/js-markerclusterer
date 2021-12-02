@@ -59,7 +59,6 @@ export const defaultOnClusterClickHandler: onClusterClickHandler = (
  * MarkerClusterer creates and manages per-zoom-level clusters for large amounts
  * of markers. See {@link MarkerClustererOptions} for more details.
  *
- * <iframe src="https://googlemaps.github.io/js-three/public/anchor/index.html"></iframe>
  */
 export class MarkerClusterer extends OverlayViewSafe {
   /** @see {@link MarkerClustererOptions.onClusterClick} */
