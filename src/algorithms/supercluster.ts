@@ -92,8 +92,10 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
   }
 
   public cluster({ map }: AlgorithmInput): Cluster[] {
+    const { west, south, east, north } = map.getBounds().toJSON();
+
     return this.superCluster
-      .getClusters([-180, -90, 180, 90], Math.round(map.getZoom()))
+      .getClusters([west, south, east, north], Math.round(map.getZoom()))
       .map(this.transformCluster.bind(this));
   }
 
