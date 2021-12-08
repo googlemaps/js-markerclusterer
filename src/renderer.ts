@@ -132,6 +132,7 @@ export class DefaultRenderer implements Renderer {
         color: "rgba(255,255,255,0.9)",
         fontSize: "12px",
       },
+      title: `Cluster of ${count} markers,
       // adjust zIndex to be above other markers
       zIndex: Number(google.maps.Marker.MAX_ZINDEX) + count,
     });
