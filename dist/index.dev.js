@@ -450,7 +450,7 @@ var markerClusterer = (function (exports) {
   (shared$3.exports = function (key, value) {
     return store$2[key] || (store$2[key] = value !== undefined ? value : {});
   })('versions', []).push({
-    version: '3.19.3',
+    version: '3.20.0',
     mode: 'global',
     copyright: '© 2021 Denis Pushkarev (zloirock.ru)'
   });
@@ -939,14 +939,17 @@ var markerClusterer = (function (exports) {
   var getOwnPropertyDescriptorModule = objectGetOwnPropertyDescriptor;
   var definePropertyModule$3 = objectDefineProperty;
 
-  var copyConstructorProperties$1 = function (target, source) {
+  var copyConstructorProperties$1 = function (target, source, exceptions) {
     var keys = ownKeys(source);
     var defineProperty = definePropertyModule$3.f;
     var getOwnPropertyDescriptor = getOwnPropertyDescriptorModule.f;
 
     for (var i = 0; i < keys.length; i++) {
       var key = keys[i];
-      if (!hasOwn$1(target, key)) defineProperty(target, key, getOwnPropertyDescriptor(source, key));
+
+      if (!hasOwn$1(target, key) && !(exceptions && hasOwn$1(exceptions, key))) {
+        defineProperty(target, key, getOwnPropertyDescriptor(source, key));
+      }
     }
   };
 
@@ -1103,7 +1106,7 @@ var markerClusterer = (function (exports) {
   var exec = uncurryThis$7(constructorRegExp.exec);
   var INCORRECT_TO_STRING = !constructorRegExp.exec(noop);
 
-  var isConstructorModern = function (argument) {
+  var isConstructorModern = function isConstructor(argument) {
     if (!isCallable$2(argument)) return false;
 
     try {
@@ -1114,7 +1117,7 @@ var markerClusterer = (function (exports) {
     }
   };
 
-  var isConstructorLegacy = function (argument) {
+  var isConstructorLegacy = function isConstructor(argument) {
     if (!isCallable$2(argument)) return false;
 
     switch (classof$3(argument)) {
@@ -1122,13 +1125,20 @@ var markerClusterer = (function (exports) {
       case 'GeneratorFunction':
       case 'AsyncGeneratorFunction':
         return false;
-      // we can't check .prototype since constructors produced by .bind haven't it
     }
 
-    return INCORRECT_TO_STRING || !!exec(constructorRegExp, inspectSource(argument));
-  }; // `IsConstructor` abstract operation
-  // https://tc39.es/ecma262/#sec-isconstructor
+    try {
+      // we can't check .prototype since constructors produced by .bind haven't it
+      // `Function#toString` throws on some built-it function in some legacy engines
+      // (for example, `DOMQuad` and similar in FF41-)
+      return INCORRECT_TO_STRING || !!exec(constructorRegExp, inspectSource(argument));
+    } catch (error) {
+      return true;
+    }
+  };
 
+  isConstructorLegacy.sham = true; // `IsConstructor` abstract operation
+  // https://tc39.es/ecma262/#sec-isconstructor
 
   var isConstructor$1 = !construct || fails$4(function () {
     var called;
