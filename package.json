@@ -65,7 +65,7 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-jest": "^25.0.3",
     "eslint-plugin-prettier": "^4.0.0",
-    "geckodriver": "^2.0.0",
+    "geckodriver": "^3.0.0",
     "jest": "^26.4.2",
     "prettier": "^2.1.1",
     "rollup": "^2.26.11",
