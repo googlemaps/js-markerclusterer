@@ -181,7 +181,7 @@ var markerClusterer = (function (exports) {
   }; // https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
 
 
-  var global$t = // eslint-disable-next-line es/no-global-this -- safe
+  var global$v = // eslint-disable-next-line es/no-global-this -- safe
   check(typeof globalThis == 'object' && globalThis) || check(typeof window == 'object' && window) || // eslint-disable-next-line no-restricted-globals -- safe
   check(typeof self == 'object' && self) || check(typeof commonjsGlobal == 'object' && commonjsGlobal) || // eslint-disable-next-line no-new-func -- fallback
   function () {
@@ -251,43 +251,43 @@ var markerClusterer = (function (exports) {
     };
   };
 
-  var uncurryThis$h = functionUncurryThis;
-  var toString$5 = uncurryThis$h({}.toString);
-  var stringSlice = uncurryThis$h(''.slice);
+  var uncurryThis$i = functionUncurryThis;
+  var toString$5 = uncurryThis$i({}.toString);
+  var stringSlice = uncurryThis$i(''.slice);
 
   var classofRaw$1 = function (it) {
     return stringSlice(toString$5(it), 8, -1);
   };
 
-  var global$s = global$t;
-  var uncurryThis$g = functionUncurryThis;
+  var global$u = global$v;
+  var uncurryThis$h = functionUncurryThis;
   var fails$8 = fails$a;
-  var classof$6 = classofRaw$1;
-  var Object$4 = global$s.Object;
-  var split = uncurryThis$g(''.split); // fallback for non-array-like ES3 and non-enumerable old V8 strings
+  var classof$7 = classofRaw$1;
+  var Object$4 = global$u.Object;
+  var split = uncurryThis$h(''.split); // fallback for non-array-like ES3 and non-enumerable old V8 strings
 
   var indexedObject = fails$8(function () {
     // throws an error in rhino, see https://github.com/mozilla/rhino/issues/346
     // eslint-disable-next-line no-prototype-builtins -- safe
     return !Object$4('z').propertyIsEnumerable(0);
   }) ? function (it) {
-    return classof$6(it) == 'String' ? split(it, '') : Object$4(it);
+    return classof$7(it) == 'String' ? split(it, '') : Object$4(it);
   } : Object$4;
 
-  var global$r = global$t;
-  var TypeError$b = global$r.TypeError; // `RequireObjectCoercible` abstract operation
+  var global$t = global$v;
+  var TypeError$c = global$t.TypeError; // `RequireObjectCoercible` abstract operation
   // https://tc39.es/ecma262/#sec-requireobjectcoercible
 
   var requireObjectCoercible$4 = function (it) {
-    if (it == undefined) throw TypeError$b("Can't call method on " + it);
+    if (it == undefined) throw TypeError$c("Can't call method on " + it);
     return it;
   };
 
-  var IndexedObject$2 = indexedObject;
+  var IndexedObject$3 = indexedObject;
   var requireObjectCoercible$3 = requireObjectCoercible$4;
 
   var toIndexedObject$4 = function (it) {
-    return IndexedObject$2(requireObjectCoercible$3(it));
+    return IndexedObject$3(requireObjectCoercible$3(it));
   };
 
   // https://tc39.es/ecma262/#sec-iscallable
@@ -302,7 +302,7 @@ var markerClusterer = (function (exports) {
     return typeof it == 'object' ? it !== null : isCallable$c(it);
   };
 
-  var global$q = global$t;
+  var global$s = global$v;
   var isCallable$b = isCallable$d;
 
   var aFunction = function (argument) {
@@ -310,19 +310,19 @@ var markerClusterer = (function (exports) {
   };
 
   var getBuiltIn$5 = function (namespace, method) {
-    return arguments.length < 2 ? aFunction(global$q[namespace]) : global$q[namespace] && global$q[namespace][method];
+    return arguments.length < 2 ? aFunction(global$s[namespace]) : global$s[namespace] && global$s[namespace][method];
   };
 
-  var uncurryThis$f = functionUncurryThis;
-  var objectIsPrototypeOf = uncurryThis$f({}.isPrototypeOf);
+  var uncurryThis$g = functionUncurryThis;
+  var objectIsPrototypeOf = uncurryThis$g({}.isPrototypeOf);
 
   var getBuiltIn$4 = getBuiltIn$5;
   var engineUserAgent = getBuiltIn$4('navigator', 'userAgent') || '';
 
-  var global$p = global$t;
+  var global$r = global$v;
   var userAgent = engineUserAgent;
-  var process = global$p.process;
-  var Deno = global$p.Deno;
+  var process = global$r.process;
+  var Deno = global$r.Deno;
   var versions = process && process.versions || Deno && Deno.version;
   var v8 = versions && versions.v8;
   var match, version;
@@ -363,12 +363,12 @@ var markerClusterer = (function (exports) {
   var NATIVE_SYMBOL$1 = nativeSymbol;
   var useSymbolAsUid = NATIVE_SYMBOL$1 && !Symbol.sham && typeof Symbol.iterator == 'symbol';
 
-  var global$o = global$t;
+  var global$q = global$v;
   var getBuiltIn$3 = getBuiltIn$5;
   var isCallable$a = isCallable$d;
   var isPrototypeOf$1 = objectIsPrototypeOf;
   var USE_SYMBOL_AS_UID$1 = useSymbolAsUid;
-  var Object$3 = global$o.Object;
+  var Object$3 = global$q.Object;
   var isSymbol$3 = USE_SYMBOL_AS_UID$1 ? function (it) {
     return typeof it == 'symbol';
   } : function (it) {
@@ -376,8 +376,8 @@ var markerClusterer = (function (exports) {
     return isCallable$a($Symbol) && isPrototypeOf$1($Symbol.prototype, Object$3(it));
   };
 
-  var global$n = global$t;
-  var String$4 = global$n.String;
+  var global$p = global$v;
+  var String$4 = global$p.String;
 
   var tryToString$1 = function (argument) {
     try {
@@ -387,29 +387,29 @@ var markerClusterer = (function (exports) {
     }
   };
 
-  var global$m = global$t;
+  var global$o = global$v;
   var isCallable$9 = isCallable$d;
   var tryToString = tryToString$1;
-  var TypeError$a = global$m.TypeError; // `Assert: IsCallable(argument) is true`
+  var TypeError$b = global$o.TypeError; // `Assert: IsCallable(argument) is true`
 
-  var aCallable$2 = function (argument) {
+  var aCallable$3 = function (argument) {
     if (isCallable$9(argument)) return argument;
-    throw TypeError$a(tryToString(argument) + ' is not a function');
+    throw TypeError$b(tryToString(argument) + ' is not a function');
   };
 
-  var aCallable$1 = aCallable$2; // `GetMethod` abstract operation
+  var aCallable$2 = aCallable$3; // `GetMethod` abstract operation
   // https://tc39.es/ecma262/#sec-getmethod
 
   var getMethod$1 = function (V, P) {
     var func = V[P];
-    return func == null ? undefined : aCallable$1(func);
+    return func == null ? undefined : aCallable$2(func);
   };
 
-  var global$l = global$t;
+  var global$n = global$v;
   var call$4 = functionCall;
   var isCallable$8 = isCallable$d;
   var isObject$7 = isObject$8;
-  var TypeError$9 = global$l.TypeError; // `OrdinaryToPrimitive` abstract operation
+  var TypeError$a = global$n.TypeError; // `OrdinaryToPrimitive` abstract operation
   // https://tc39.es/ecma262/#sec-ordinarytoprimitive
 
   var ordinaryToPrimitive$1 = function (input, pref) {
@@ -417,33 +417,33 @@ var markerClusterer = (function (exports) {
     if (pref === 'string' && isCallable$8(fn = input.toString) && !isObject$7(val = call$4(fn, input))) return val;
     if (isCallable$8(fn = input.valueOf) && !isObject$7(val = call$4(fn, input))) return val;
     if (pref !== 'string' && isCallable$8(fn = input.toString) && !isObject$7(val = call$4(fn, input))) return val;
-    throw TypeError$9("Can't convert object to primitive value");
+    throw TypeError$a("Can't convert object to primitive value");
   };
 
   var shared$3 = {exports: {}};
 
-  var global$k = global$t; // eslint-disable-next-line es/no-object-defineproperty -- safe
+  var global$m = global$v; // eslint-disable-next-line es/no-object-defineproperty -- safe
 
   var defineProperty$2 = Object.defineProperty;
 
   var setGlobal$3 = function (key, value) {
     try {
-      defineProperty$2(global$k, key, {
+      defineProperty$2(global$m, key, {
         value: value,
         configurable: true,
         writable: true
       });
     } catch (error) {
-      global$k[key] = value;
+      global$m[key] = value;
     }
 
     return value;
   };
 
-  var global$j = global$t;
+  var global$l = global$v;
   var setGlobal$2 = setGlobal$3;
   var SHARED = '__core-js_shared__';
-  var store$3 = global$j[SHARED] || setGlobal$2(SHARED, {});
+  var store$3 = global$l[SHARED] || setGlobal$2(SHARED, {});
   var sharedStore = store$3;
 
   var store$2 = sharedStore;
@@ -455,41 +455,41 @@ var markerClusterer = (function (exports) {
     copyright: '© 2021 Denis Pushkarev (zloirock.ru)'
   });
 
-  var global$i = global$t;
+  var global$k = global$v;
   var requireObjectCoercible$2 = requireObjectCoercible$4;
-  var Object$2 = global$i.Object; // `ToObject` abstract operation
+  var Object$2 = global$k.Object; // `ToObject` abstract operation
   // https://tc39.es/ecma262/#sec-toobject
 
-  var toObject$4 = function (argument) {
+  var toObject$5 = function (argument) {
     return Object$2(requireObjectCoercible$2(argument));
   };
 
-  var uncurryThis$e = functionUncurryThis;
-  var toObject$3 = toObject$4;
-  var hasOwnProperty = uncurryThis$e({}.hasOwnProperty); // `HasOwnProperty` abstract operation
+  var uncurryThis$f = functionUncurryThis;
+  var toObject$4 = toObject$5;
+  var hasOwnProperty = uncurryThis$f({}.hasOwnProperty); // `HasOwnProperty` abstract operation
   // https://tc39.es/ecma262/#sec-hasownproperty
 
   var hasOwnProperty_1 = Object.hasOwn || function hasOwn(it, key) {
-    return hasOwnProperty(toObject$3(it), key);
+    return hasOwnProperty(toObject$4(it), key);
   };
 
-  var uncurryThis$d = functionUncurryThis;
+  var uncurryThis$e = functionUncurryThis;
   var id = 0;
   var postfix = Math.random();
-  var toString$4 = uncurryThis$d(1.0.toString);
+  var toString$4 = uncurryThis$e(1.0.toString);
 
   var uid$2 = function (key) {
     return 'Symbol(' + (key === undefined ? '' : key) + ')_' + toString$4(++id + postfix, 36);
   };
 
-  var global$h = global$t;
+  var global$j = global$v;
   var shared$2 = shared$3.exports;
   var hasOwn$7 = hasOwnProperty_1;
   var uid$1 = uid$2;
   var NATIVE_SYMBOL = nativeSymbol;
   var USE_SYMBOL_AS_UID = useSymbolAsUid;
   var WellKnownSymbolsStore = shared$2('wks');
-  var Symbol$1 = global$h.Symbol;
+  var Symbol$1 = global$j.Symbol;
   var symbolFor = Symbol$1 && Symbol$1['for'];
   var createWellKnownSymbol = USE_SYMBOL_AS_UID ? Symbol$1 : Symbol$1 && Symbol$1.withoutSetter || uid$1;
 
@@ -509,14 +509,14 @@ var markerClusterer = (function (exports) {
     return WellKnownSymbolsStore[name];
   };
 
-  var global$g = global$t;
+  var global$i = global$v;
   var call$3 = functionCall;
   var isObject$6 = isObject$8;
   var isSymbol$2 = isSymbol$3;
   var getMethod = getMethod$1;
   var ordinaryToPrimitive = ordinaryToPrimitive$1;
   var wellKnownSymbol$7 = wellKnownSymbol$8;
-  var TypeError$8 = global$g.TypeError;
+  var TypeError$9 = global$i.TypeError;
   var TO_PRIMITIVE = wellKnownSymbol$7('toPrimitive'); // `ToPrimitive` abstract operation
   // https://tc39.es/ecma262/#sec-toprimitive
 
@@ -529,7 +529,7 @@ var markerClusterer = (function (exports) {
       if (pref === undefined) pref = 'default';
       result = call$3(exoticToPrim, input, pref);
       if (!isObject$6(result) || isSymbol$2(result)) return result;
-      throw TypeError$8("Can't convert object to primitive value");
+      throw TypeError$9("Can't convert object to primitive value");
     }
 
     if (pref === undefined) pref = 'number';
@@ -545,9 +545,9 @@ var markerClusterer = (function (exports) {
     return isSymbol$1(key) ? key : key + '';
   };
 
-  var global$f = global$t;
+  var global$h = global$v;
   var isObject$5 = isObject$8;
-  var document$1 = global$f.document; // typeof document.createElement is 'object' in old IE
+  var document$1 = global$h.document; // typeof document.createElement is 'object' in old IE
 
   var EXISTS$1 = isObject$5(document$1) && isObject$5(document$1.createElement);
 
@@ -593,22 +593,22 @@ var markerClusterer = (function (exports) {
 
   var objectDefineProperty = {};
 
-  var global$e = global$t;
+  var global$g = global$v;
   var isObject$4 = isObject$8;
-  var String$3 = global$e.String;
-  var TypeError$7 = global$e.TypeError; // `Assert: Type(argument) is Object`
+  var String$3 = global$g.String;
+  var TypeError$8 = global$g.TypeError; // `Assert: Type(argument) is Object`
 
   var anObject$5 = function (argument) {
     if (isObject$4(argument)) return argument;
-    throw TypeError$7(String$3(argument) + ' is not an object');
+    throw TypeError$8(String$3(argument) + ' is not an object');
   };
 
-  var global$d = global$t;
+  var global$f = global$v;
   var DESCRIPTORS$5 = descriptors;
   var IE8_DOM_DEFINE = ie8DomDefine;
   var anObject$4 = anObject$5;
   var toPropertyKey$1 = toPropertyKey$3;
-  var TypeError$6 = global$d.TypeError; // eslint-disable-next-line es/no-object-defineproperty -- safe
+  var TypeError$7 = global$f.TypeError; // eslint-disable-next-line es/no-object-defineproperty -- safe
 
   var $defineProperty = Object.defineProperty; // `Object.defineProperty` method
   // https://tc39.es/ecma262/#sec-object.defineproperty
@@ -622,7 +622,7 @@ var markerClusterer = (function (exports) {
     } catch (error) {
       /* empty */
     }
-    if ('get' in Attributes || 'set' in Attributes) throw TypeError$6('Accessors not supported');
+    if ('get' in Attributes || 'set' in Attributes) throw TypeError$7('Accessors not supported');
     if ('value' in Attributes) O[P] = Attributes.value;
     return O;
   };
@@ -639,10 +639,10 @@ var markerClusterer = (function (exports) {
 
   var redefine$3 = {exports: {}};
 
-  var uncurryThis$c = functionUncurryThis;
+  var uncurryThis$d = functionUncurryThis;
   var isCallable$7 = isCallable$d;
   var store$1 = sharedStore;
-  var functionToString = uncurryThis$c(Function.toString); // this helper broken in `core-js@3.4.1-3.4.4`, so we can't use `shared` helper
+  var functionToString = uncurryThis$d(Function.toString); // this helper broken in `core-js@3.4.1-3.4.4`, so we can't use `shared` helper
 
   if (!isCallable$7(store$1.inspectSource)) {
     store$1.inspectSource = function (it) {
@@ -652,10 +652,10 @@ var markerClusterer = (function (exports) {
 
   var inspectSource$3 = store$1.inspectSource;
 
-  var global$c = global$t;
+  var global$e = global$v;
   var isCallable$6 = isCallable$d;
   var inspectSource$2 = inspectSource$3;
-  var WeakMap$1 = global$c.WeakMap;
+  var WeakMap$1 = global$e.WeakMap;
   var nativeWeakMap = isCallable$6(WeakMap$1) && /native code/.test(inspectSource$2(WeakMap$1));
 
   var shared$1 = shared$3.exports;
@@ -669,8 +669,8 @@ var markerClusterer = (function (exports) {
   var hiddenKeys$4 = {};
 
   var NATIVE_WEAK_MAP = nativeWeakMap;
-  var global$b = global$t;
-  var uncurryThis$b = functionUncurryThis;
+  var global$d = global$v;
+  var uncurryThis$c = functionUncurryThis;
   var isObject$3 = isObject$8;
   var createNonEnumerableProperty$3 = createNonEnumerableProperty$4;
   var hasOwn$5 = hasOwnProperty_1;
@@ -678,8 +678,8 @@ var markerClusterer = (function (exports) {
   var sharedKey$1 = sharedKey$2;
   var hiddenKeys$3 = hiddenKeys$4;
   var OBJECT_ALREADY_INITIALIZED = 'Object already initialized';
-  var TypeError$5 = global$b.TypeError;
-  var WeakMap = global$b.WeakMap;
+  var TypeError$6 = global$d.TypeError;
+  var WeakMap = global$d.WeakMap;
   var set, get, has;
 
   var enforce = function (it) {
@@ -691,7 +691,7 @@ var markerClusterer = (function (exports) {
       var state;
 
       if (!isObject$3(it) || (state = get(it)).type !== TYPE) {
-        throw TypeError$5('Incompatible receiver, ' + TYPE + ' required');
+        throw TypeError$6('Incompatible receiver, ' + TYPE + ' required');
       }
 
       return state;
@@ -700,12 +700,12 @@ var markerClusterer = (function (exports) {
 
   if (NATIVE_WEAK_MAP || shared.state) {
     var store = shared.state || (shared.state = new WeakMap());
-    var wmget = uncurryThis$b(store.get);
-    var wmhas = uncurryThis$b(store.has);
-    var wmset = uncurryThis$b(store.set);
+    var wmget = uncurryThis$c(store.get);
+    var wmhas = uncurryThis$c(store.has);
+    var wmset = uncurryThis$c(store.set);
 
     set = function (it, metadata) {
-      if (wmhas(store, it)) throw new TypeError$5(OBJECT_ALREADY_INITIALIZED);
+      if (wmhas(store, it)) throw new TypeError$6(OBJECT_ALREADY_INITIALIZED);
       metadata.facade = it;
       wmset(store, it, metadata);
       return metadata;
@@ -723,7 +723,7 @@ var markerClusterer = (function (exports) {
     hiddenKeys$3[STATE] = true;
 
     set = function (it, metadata) {
-      if (hasOwn$5(it, STATE)) throw new TypeError$5(OBJECT_ALREADY_INITIALIZED);
+      if (hasOwn$5(it, STATE)) throw new TypeError$6(OBJECT_ALREADY_INITIALIZED);
       metadata.facade = it;
       createNonEnumerableProperty$3(it, STATE, metadata);
       return metadata;
@@ -764,7 +764,7 @@ var markerClusterer = (function (exports) {
     CONFIGURABLE: CONFIGURABLE
   };
 
-  var global$a = global$t;
+  var global$c = global$v;
   var isCallable$5 = isCallable$d;
   var hasOwn$3 = hasOwnProperty_1;
   var createNonEnumerableProperty$2 = createNonEnumerableProperty$4;
@@ -798,7 +798,7 @@ var markerClusterer = (function (exports) {
       }
     }
 
-    if (O === global$a) {
+    if (O === global$c) {
       if (simple) O[key] = value;else setGlobal$1(key, value);
       return;
     } else if (!unsafe) {
@@ -846,18 +846,18 @@ var markerClusterer = (function (exports) {
   var toLength = toLength$1; // `LengthOfArrayLike` abstract operation
   // https://tc39.es/ecma262/#sec-lengthofarraylike
 
-  var lengthOfArrayLike$3 = function (obj) {
+  var lengthOfArrayLike$4 = function (obj) {
     return toLength(obj.length);
   };
 
   var toIndexedObject$2 = toIndexedObject$4;
   var toAbsoluteIndex$1 = toAbsoluteIndex$2;
-  var lengthOfArrayLike$2 = lengthOfArrayLike$3; // `Array.prototype.{ indexOf, includes }` methods implementation
+  var lengthOfArrayLike$3 = lengthOfArrayLike$4; // `Array.prototype.{ indexOf, includes }` methods implementation
 
-  var createMethod$2 = function (IS_INCLUDES) {
+  var createMethod$3 = function (IS_INCLUDES) {
     return function ($this, el, fromIndex) {
       var O = toIndexedObject$2($this);
-      var length = lengthOfArrayLike$2(O);
+      var length = lengthOfArrayLike$3(O);
       var index = toAbsoluteIndex$1(fromIndex, length);
       var value; // Array#includes uses SameValueZero equality algorithm
       // eslint-disable-next-line no-self-compare -- NaN check
@@ -876,18 +876,18 @@ var markerClusterer = (function (exports) {
   var arrayIncludes = {
     // `Array.prototype.includes` method
     // https://tc39.es/ecma262/#sec-array.prototype.includes
-    includes: createMethod$2(true),
+    includes: createMethod$3(true),
     // `Array.prototype.indexOf` method
     // https://tc39.es/ecma262/#sec-array.prototype.indexof
-    indexOf: createMethod$2(false)
+    indexOf: createMethod$3(false)
   };
 
-  var uncurryThis$a = functionUncurryThis;
+  var uncurryThis$b = functionUncurryThis;
   var hasOwn$2 = hasOwnProperty_1;
   var toIndexedObject$1 = toIndexedObject$4;
   var indexOf = arrayIncludes.indexOf;
   var hiddenKeys$2 = hiddenKeys$4;
-  var push$1 = uncurryThis$a([].push);
+  var push$1 = uncurryThis$b([].push);
 
   var objectKeysInternal = function (object, names) {
     var O = toIndexedObject$1(object);
@@ -922,11 +922,11 @@ var markerClusterer = (function (exports) {
   objectGetOwnPropertySymbols.f = Object.getOwnPropertySymbols;
 
   var getBuiltIn$2 = getBuiltIn$5;
-  var uncurryThis$9 = functionUncurryThis;
+  var uncurryThis$a = functionUncurryThis;
   var getOwnPropertyNamesModule = objectGetOwnPropertyNames;
   var getOwnPropertySymbolsModule$1 = objectGetOwnPropertySymbols;
   var anObject$3 = anObject$5;
-  var concat$1 = uncurryThis$9([].concat); // all object keys, includes non-enumerable and symbols
+  var concat$1 = uncurryThis$a([].concat); // all object keys, includes non-enumerable and symbols
 
   var ownKeys$1 = getBuiltIn$2('Reflect', 'ownKeys') || function ownKeys(it) {
     var keys = getOwnPropertyNamesModule.f(anObject$3(it));
@@ -971,7 +971,7 @@ var markerClusterer = (function (exports) {
   var POLYFILL = isForced$2.POLYFILL = 'P';
   var isForced_1 = isForced$2;
 
-  var global$9 = global$t;
+  var global$b = global$v;
   var getOwnPropertyDescriptor$1 = objectGetOwnPropertyDescriptor.f;
   var createNonEnumerableProperty$1 = createNonEnumerableProperty$4;
   var redefine$2 = redefine$3.exports;
@@ -1001,11 +1001,11 @@ var markerClusterer = (function (exports) {
     var FORCED, target, key, targetProperty, sourceProperty, descriptor;
 
     if (GLOBAL) {
-      target = global$9;
+      target = global$b;
     } else if (STATIC) {
-      target = global$9[TARGET] || setGlobal(TARGET, {});
+      target = global$b[TARGET] || setGlobal(TARGET, {});
     } else {
-      target = (global$9[TARGET] || {}).prototype;
+      target = (global$b[TARGET] || {}).prototype;
     }
 
     if (target) for (key in source) {
@@ -1033,12 +1033,12 @@ var markerClusterer = (function (exports) {
     }
   };
 
-  var uncurryThis$8 = functionUncurryThis;
-  var aCallable = aCallable$2;
-  var bind$1 = uncurryThis$8(uncurryThis$8.bind); // optional / simple context binding
+  var uncurryThis$9 = functionUncurryThis;
+  var aCallable$1 = aCallable$3;
+  var bind$1 = uncurryThis$9(uncurryThis$9.bind); // optional / simple context binding
 
   var functionBindContext = function (fn, that) {
-    aCallable(fn);
+    aCallable$1(fn);
     return that === undefined ? fn : bind$1 ? bind$1(fn, that) : function ()
     /* ...args */
     {
@@ -1046,12 +1046,12 @@ var markerClusterer = (function (exports) {
     };
   };
 
-  var classof$5 = classofRaw$1; // `IsArray` abstract operation
+  var classof$6 = classofRaw$1; // `IsArray` abstract operation
   // https://tc39.es/ecma262/#sec-isarray
   // eslint-disable-next-line es/no-array-isarray -- safe
 
   var isArray$1 = Array.isArray || function isArray(argument) {
-    return classof$5(argument) == 'Array';
+    return classof$6(argument) == 'Array';
   };
 
   var wellKnownSymbol$6 = wellKnownSymbol$8;
@@ -1060,13 +1060,13 @@ var markerClusterer = (function (exports) {
   test[TO_STRING_TAG$1] = 'z';
   var toStringTagSupport = String(test) === '[object z]';
 
-  var global$8 = global$t;
+  var global$a = global$v;
   var TO_STRING_TAG_SUPPORT$2 = toStringTagSupport;
   var isCallable$3 = isCallable$d;
   var classofRaw = classofRaw$1;
   var wellKnownSymbol$5 = wellKnownSymbol$8;
   var TO_STRING_TAG = wellKnownSymbol$5('toStringTag');
-  var Object$1 = global$8.Object; // ES3 wrong here
+  var Object$1 = global$a.Object; // ES3 wrong here
 
   var CORRECT_ARGUMENTS = classofRaw(function () {
     return arguments;
@@ -1081,7 +1081,7 @@ var markerClusterer = (function (exports) {
   }; // getting tag from ES6+ `Object.prototype.toString`
 
 
-  var classof$4 = TO_STRING_TAG_SUPPORT$2 ? classofRaw : function (it) {
+  var classof$5 = TO_STRING_TAG_SUPPORT$2 ? classofRaw : function (it) {
     var O, tag, result;
     return it === undefined ? 'Undefined' : it === null ? 'Null' // @@toStringTag case
     : typeof (tag = tryGet(O = Object$1(it), TO_STRING_TAG)) == 'string' ? tag // builtinTag case
@@ -1089,10 +1089,10 @@ var markerClusterer = (function (exports) {
     : (result = classofRaw(O)) == 'Object' && isCallable$3(O.callee) ? 'Arguments' : result;
   };
 
-  var uncurryThis$7 = functionUncurryThis;
+  var uncurryThis$8 = functionUncurryThis;
   var fails$4 = fails$a;
   var isCallable$2 = isCallable$d;
-  var classof$3 = classof$4;
+  var classof$4 = classof$5;
   var getBuiltIn$1 = getBuiltIn$5;
   var inspectSource = inspectSource$3;
 
@@ -1103,7 +1103,7 @@ var markerClusterer = (function (exports) {
   var empty = [];
   var construct = getBuiltIn$1('Reflect', 'construct');
   var constructorRegExp = /^\s*(?:class|function)\b/;
-  var exec = uncurryThis$7(constructorRegExp.exec);
+  var exec = uncurryThis$8(constructorRegExp.exec);
   var INCORRECT_TO_STRING = !constructorRegExp.exec(noop);
 
   var isConstructorModern = function isConstructor(argument) {
@@ -1120,7 +1120,7 @@ var markerClusterer = (function (exports) {
   var isConstructorLegacy = function isConstructor(argument) {
     if (!isCallable$2(argument)) return false;
 
-    switch (classof$3(argument)) {
+    switch (classof$4(argument)) {
       case 'AsyncFunction':
       case 'GeneratorFunction':
       case 'AsyncGeneratorFunction':
@@ -1147,13 +1147,13 @@ var markerClusterer = (function (exports) {
     }) || called;
   }) ? isConstructorLegacy : isConstructorModern;
 
-  var global$7 = global$t;
+  var global$9 = global$v;
   var isArray = isArray$1;
   var isConstructor = isConstructor$1;
   var isObject$2 = isObject$8;
   var wellKnownSymbol$4 = wellKnownSymbol$8;
   var SPECIES$1 = wellKnownSymbol$4('species');
-  var Array$1 = global$7.Array; // a part of `ArraySpeciesCreate` abstract operation
+  var Array$1 = global$9.Array; // a part of `ArraySpeciesCreate` abstract operation
   // https://tc39.es/ecma262/#sec-arrayspeciescreate
 
   var arraySpeciesConstructor$1 = function (originalArray) {
@@ -1179,14 +1179,14 @@ var markerClusterer = (function (exports) {
   };
 
   var bind = functionBindContext;
-  var uncurryThis$6 = functionUncurryThis;
-  var IndexedObject$1 = indexedObject;
-  var toObject$2 = toObject$4;
-  var lengthOfArrayLike$1 = lengthOfArrayLike$3;
+  var uncurryThis$7 = functionUncurryThis;
+  var IndexedObject$2 = indexedObject;
+  var toObject$3 = toObject$5;
+  var lengthOfArrayLike$2 = lengthOfArrayLike$4;
   var arraySpeciesCreate$1 = arraySpeciesCreate$2;
-  var push = uncurryThis$6([].push); // `Array.prototype.{ forEach, map, filter, some, every, find, findIndex, filterReject }` methods implementation
+  var push = uncurryThis$7([].push); // `Array.prototype.{ forEach, map, filter, some, every, find, findIndex, filterReject }` methods implementation
 
-  var createMethod$1 = function (TYPE) {
+  var createMethod$2 = function (TYPE) {
     var IS_MAP = TYPE == 1;
     var IS_FILTER = TYPE == 2;
     var IS_SOME = TYPE == 3;
@@ -1195,10 +1195,10 @@ var markerClusterer = (function (exports) {
     var IS_FILTER_REJECT = TYPE == 7;
     var NO_HOLES = TYPE == 5 || IS_FIND_INDEX;
     return function ($this, callbackfn, that, specificCreate) {
-      var O = toObject$2($this);
-      var self = IndexedObject$1(O);
+      var O = toObject$3($this);
+      var self = IndexedObject$2(O);
       var boundFunction = bind(callbackfn, that);
-      var length = lengthOfArrayLike$1(self);
+      var length = lengthOfArrayLike$2(self);
       var index = 0;
       var create = specificCreate || arraySpeciesCreate$1;
       var target = IS_MAP ? create($this, length) : IS_FILTER || IS_FILTER_REJECT ? create($this, 0) : undefined;
@@ -1245,28 +1245,28 @@ var markerClusterer = (function (exports) {
   var arrayIteration = {
     // `Array.prototype.forEach` method
     // https://tc39.es/ecma262/#sec-array.prototype.foreach
-    forEach: createMethod$1(0),
+    forEach: createMethod$2(0),
     // `Array.prototype.map` method
     // https://tc39.es/ecma262/#sec-array.prototype.map
-    map: createMethod$1(1),
+    map: createMethod$2(1),
     // `Array.prototype.filter` method
     // https://tc39.es/ecma262/#sec-array.prototype.filter
-    filter: createMethod$1(2),
+    filter: createMethod$2(2),
     // `Array.prototype.some` method
     // https://tc39.es/ecma262/#sec-array.prototype.some
-    some: createMethod$1(3),
+    some: createMethod$2(3),
     // `Array.prototype.every` method
     // https://tc39.es/ecma262/#sec-array.prototype.every
-    every: createMethod$1(4),
+    every: createMethod$2(4),
     // `Array.prototype.find` method
     // https://tc39.es/ecma262/#sec-array.prototype.find
-    find: createMethod$1(5),
+    find: createMethod$2(5),
     // `Array.prototype.findIndex` method
     // https://tc39.es/ecma262/#sec-array.prototype.findIndex
-    findIndex: createMethod$1(6),
+    findIndex: createMethod$2(6),
     // `Array.prototype.filterReject` method
     // https://github.com/tc39/proposal-array-filtering
-    filterReject: createMethod$1(7)
+    filterReject: createMethod$2(7)
   };
 
   var fails$3 = fails$a;
@@ -1292,14 +1292,14 @@ var markerClusterer = (function (exports) {
     });
   };
 
-  var $$6 = _export;
+  var $$8 = _export;
   var $map = arrayIteration.map;
   var arrayMethodHasSpeciesSupport$2 = arrayMethodHasSpeciesSupport$3;
   var HAS_SPECIES_SUPPORT$2 = arrayMethodHasSpeciesSupport$2('map'); // `Array.prototype.map` method
   // https://tc39.es/ecma262/#sec-array.prototype.map
   // with adding support of @@species
 
-  $$6({
+  $$8({
     target: 'Array',
     proto: true,
     forced: !HAS_SPECIES_SUPPORT$2
@@ -1336,8 +1336,94 @@ var markerClusterer = (function (exports) {
     return t;
   }
 
+  var global$8 = global$v;
+  var aCallable = aCallable$3;
+  var toObject$2 = toObject$5;
+  var IndexedObject$1 = indexedObject;
+  var lengthOfArrayLike$1 = lengthOfArrayLike$4;
+  var TypeError$5 = global$8.TypeError; // `Array.prototype.{ reduce, reduceRight }` methods implementation
+
+  var createMethod$1 = function (IS_RIGHT) {
+    return function (that, callbackfn, argumentsLength, memo) {
+      aCallable(callbackfn);
+      var O = toObject$2(that);
+      var self = IndexedObject$1(O);
+      var length = lengthOfArrayLike$1(O);
+      var index = IS_RIGHT ? length - 1 : 0;
+      var i = IS_RIGHT ? -1 : 1;
+      if (argumentsLength < 2) while (true) {
+        if (index in self) {
+          memo = self[index];
+          index += i;
+          break;
+        }
+
+        index += i;
+
+        if (IS_RIGHT ? index < 0 : length <= index) {
+          throw TypeError$5('Reduce of empty array with no initial value');
+        }
+      }
+
+      for (; IS_RIGHT ? index >= 0 : length > index; index += i) if (index in self) {
+        memo = callbackfn(memo, self[index], index, O);
+      }
+
+      return memo;
+    };
+  };
+
+  var arrayReduce = {
+    // `Array.prototype.reduce` method
+    // https://tc39.es/ecma262/#sec-array.prototype.reduce
+    left: createMethod$1(false),
+    // `Array.prototype.reduceRight` method
+    // https://tc39.es/ecma262/#sec-array.prototype.reduceright
+    right: createMethod$1(true)
+  };
+
+  var fails$2 = fails$a;
+
+  var arrayMethodIsStrict$3 = function (METHOD_NAME, argument) {
+    var method = [][METHOD_NAME];
+    return !!method && fails$2(function () {
+      // eslint-disable-next-line no-useless-call,no-throw-literal -- required for testing
+      method.call(null, argument || function () {
+        throw 1;
+      }, 1);
+    });
+  };
+
+  var classof$3 = classofRaw$1;
+  var global$7 = global$v;
+  var engineIsNode = classof$3(global$7.process) == 'process';
+
+  var $$7 = _export;
+  var $reduce = arrayReduce.left;
+  var arrayMethodIsStrict$2 = arrayMethodIsStrict$3;
+  var CHROME_VERSION = engineV8Version;
+  var IS_NODE = engineIsNode;
+  var STRICT_METHOD$2 = arrayMethodIsStrict$2('reduce'); // Chrome 80-82 has a critical bug
+  // https://bugs.chromium.org/p/chromium/issues/detail?id=1049982
+
+  var CHROME_BUG = !IS_NODE && CHROME_VERSION > 79 && CHROME_VERSION < 83; // `Array.prototype.reduce` method
+  // https://tc39.es/ecma262/#sec-array.prototype.reduce
+
+  $$7({
+    target: 'Array',
+    proto: true,
+    forced: !STRICT_METHOD$2 || CHROME_BUG
+  }, {
+    reduce: function reduce(callbackfn
+    /* , initialValue */
+    ) {
+      var length = arguments.length;
+      return $reduce(this, callbackfn, length, length > 1 ? arguments[1] : undefined);
+    }
+  });
+
   var TO_STRING_TAG_SUPPORT$1 = toStringTagSupport;
-  var classof$2 = classof$4; // `Object.prototype.toString` method implementation
+  var classof$2 = classof$5; // `Object.prototype.toString` method implementation
   // https://tc39.es/ecma262/#sec-object.prototype.tostring
 
   var objectToString = TO_STRING_TAG_SUPPORT$1 ? {}.toString : function toString() {
@@ -1355,14 +1441,14 @@ var markerClusterer = (function (exports) {
     });
   }
 
-  var $$5 = _export;
+  var $$6 = _export;
   var $filter = arrayIteration.filter;
   var arrayMethodHasSpeciesSupport$1 = arrayMethodHasSpeciesSupport$3;
   var HAS_SPECIES_SUPPORT$1 = arrayMethodHasSpeciesSupport$1('filter'); // `Array.prototype.filter` method
   // https://tc39.es/ecma262/#sec-array.prototype.filter
   // with adding support of @@species
 
-  $$5({
+  $$6({
     target: 'Array',
     proto: true,
     forced: !HAS_SPECIES_SUPPORT$1
@@ -1700,30 +1786,18 @@ var markerClusterer = (function (exports) {
   var DOMTokenListPrototype$1 = classList && classList.constructor && classList.constructor.prototype;
   var domTokenListPrototype = DOMTokenListPrototype$1 === Object.prototype ? undefined : DOMTokenListPrototype$1;
 
-  var fails$2 = fails$a;
-
-  var arrayMethodIsStrict$1 = function (METHOD_NAME, argument) {
-    var method = [][METHOD_NAME];
-    return !!method && fails$2(function () {
-      // eslint-disable-next-line no-useless-call,no-throw-literal -- required for testing
-      method.call(null, argument || function () {
-        throw 1;
-      }, 1);
-    });
-  };
-
   var $forEach = arrayIteration.forEach;
-  var arrayMethodIsStrict = arrayMethodIsStrict$1;
-  var STRICT_METHOD = arrayMethodIsStrict('forEach'); // `Array.prototype.forEach` method implementation
+  var arrayMethodIsStrict$1 = arrayMethodIsStrict$3;
+  var STRICT_METHOD$1 = arrayMethodIsStrict$1('forEach'); // `Array.prototype.forEach` method implementation
   // https://tc39.es/ecma262/#sec-array.prototype.foreach
 
-  var arrayForEach = !STRICT_METHOD ? function forEach(callbackfn
+  var arrayForEach = !STRICT_METHOD$1 ? function forEach(callbackfn
   /* , thisArg */
   ) {
     return $forEach(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined); // eslint-disable-next-line es/no-array-prototype-foreach -- safe
   } : [].forEach;
 
-  var global$6 = global$t;
+  var global$6 = global$v;
   var DOMIterables = domIterables;
   var DOMTokenListPrototype = domTokenListPrototype;
   var forEach = arrayForEach;
@@ -1746,11 +1820,11 @@ var markerClusterer = (function (exports) {
 
   handlePrototype(DOMTokenListPrototype);
 
-  var $$4 = _export;
+  var $$5 = _export;
   var call$1 = functionCall; // `URL.prototype.toJSON` method
   // https://url.spec.whatwg.org/#dom-url-tojson
 
-  $$4({
+  $$5({
     target: 'URL',
     proto: true,
     enumerable: true
@@ -2991,19 +3065,19 @@ var markerClusterer = (function (exports) {
   };
 
   var DESCRIPTORS$2 = descriptors;
-  var uncurryThis$5 = functionUncurryThis;
+  var uncurryThis$6 = functionUncurryThis;
   var call = functionCall;
   var fails$1 = fails$a;
   var objectKeys$1 = objectKeys$2;
   var getOwnPropertySymbolsModule = objectGetOwnPropertySymbols;
   var propertyIsEnumerableModule = objectPropertyIsEnumerable;
-  var toObject$1 = toObject$4;
+  var toObject$1 = toObject$5;
   var IndexedObject = indexedObject; // eslint-disable-next-line es/no-object-assign -- safe
 
   var $assign = Object.assign; // eslint-disable-next-line es/no-object-defineproperty -- required for testing
 
   var defineProperty$1 = Object.defineProperty;
-  var concat = uncurryThis$5([].concat); // `Object.assign` method
+  var concat = uncurryThis$6([].concat); // `Object.assign` method
   // https://tc39.es/ecma262/#sec-object.assign
 
   var objectAssign = !$assign || fails$1(function () {
@@ -3056,12 +3130,12 @@ var markerClusterer = (function (exports) {
     return T;
   } : $assign;
 
-  var $$3 = _export;
+  var $$4 = _export;
   var assign = objectAssign; // `Object.assign` method
   // https://tc39.es/ecma262/#sec-object.assign
   // eslint-disable-next-line es/no-object-assign -- required for testing
 
-  $$3({
+  $$4({
     target: 'Object',
     stat: true,
     forced: Object.assign !== assign
@@ -5224,12 +5298,12 @@ var markerClusterer = (function (exports) {
     ArrayPrototype[UNSCOPABLES][key] = true;
   };
 
-  var $$2 = _export;
+  var $$3 = _export;
   var $includes = arrayIncludes.includes;
   var addToUnscopables = addToUnscopables$1; // `Array.prototype.includes` method
   // https://tc39.es/ecma262/#sec-array.prototype.includes
 
-  $$2({
+  $$3({
     target: 'Array',
     proto: true
   }, {
@@ -5253,7 +5327,7 @@ var markerClusterer = (function (exports) {
     return isObject$1(it) && ((isRegExp = it[MATCH$1]) !== undefined ? !!isRegExp : classof$1(it) == 'RegExp');
   };
 
-  var global$5 = global$t;
+  var global$5 = global$v;
   var isRegExp = isRegexp;
   var TypeError$4 = global$5.TypeError;
 
@@ -5265,8 +5339,8 @@ var markerClusterer = (function (exports) {
     return it;
   };
 
-  var global$4 = global$t;
-  var classof = classof$4;
+  var global$4 = global$v;
+  var classof = classof$5;
   var String$2 = global$4.String;
 
   var toString$2 = function (argument) {
@@ -5294,16 +5368,16 @@ var markerClusterer = (function (exports) {
     return false;
   };
 
-  var $$1 = _export;
-  var uncurryThis$4 = functionUncurryThis;
+  var $$2 = _export;
+  var uncurryThis$5 = functionUncurryThis;
   var notARegExp = notARegexp;
   var requireObjectCoercible$1 = requireObjectCoercible$4;
   var toString$1 = toString$2;
   var correctIsRegExpLogic = correctIsRegexpLogic;
-  var stringIndexOf = uncurryThis$4(''.indexOf); // `String.prototype.includes` method
+  var stringIndexOf = uncurryThis$5(''.indexOf); // `String.prototype.includes` method
   // https://tc39.es/ecma262/#sec-string.prototype.includes
 
-  $$1({
+  $$2({
     target: 'String',
     proto: true,
     forced: !correctIsRegExpLogic('includes')
@@ -5312,6 +5386,32 @@ var markerClusterer = (function (exports) {
     /* , position = 0 */
     ) {
       return !!~stringIndexOf(toString$1(requireObjectCoercible$1(this)), toString$1(notARegExp(searchString)), arguments.length > 1 ? arguments[1] : undefined);
+    }
+  });
+
+  /* eslint-disable es/no-array-prototype-indexof -- required for testing */
+
+
+  var $$1 = _export;
+  var uncurryThis$4 = functionUncurryThis;
+  var $IndexOf = arrayIncludes.indexOf;
+  var arrayMethodIsStrict = arrayMethodIsStrict$3;
+  var un$IndexOf = uncurryThis$4([].indexOf);
+  var NEGATIVE_ZERO = !!un$IndexOf && 1 / un$IndexOf([1], 1, -0) < 0;
+  var STRICT_METHOD = arrayMethodIsStrict('indexOf'); // `Array.prototype.indexOf` method
+  // https://tc39.es/ecma262/#sec-array.prototype.indexof
+
+  $$1({
+    target: 'Array',
+    proto: true,
+    forced: NEGATIVE_ZERO || !STRICT_METHOD
+  }, {
+    indexOf: function indexOf(searchElement
+    /* , fromIndex = 0 */
+    ) {
+      var fromIndex = arguments.length > 1 ? arguments[1] : undefined;
+      return NEGATIVE_ZERO // convert -0 to +0
+      ? un$IndexOf(this, searchElement, fromIndex) || 0 : $IndexOf(this, searchElement, fromIndex);
     }
   });
 
@@ -5325,11 +5425,11 @@ var markerClusterer = (function (exports) {
   };
 
   var $ = _export;
-  var global$3 = global$t;
+  var global$3 = global$v;
   var toAbsoluteIndex = toAbsoluteIndex$2;
   var toIntegerOrInfinity = toIntegerOrInfinity$3;
-  var lengthOfArrayLike = lengthOfArrayLike$3;
-  var toObject = toObject$4;
+  var lengthOfArrayLike = lengthOfArrayLike$4;
+  var toObject = toObject$5;
   var arraySpeciesCreate = arraySpeciesCreate$2;
   var createProperty = createProperty$1;
   var arrayMethodHasSpeciesSupport = arrayMethodHasSpeciesSupport$3;
@@ -5404,7 +5504,7 @@ var markerClusterer = (function (exports) {
     }
   });
 
-  var global$2 = global$t;
+  var global$2 = global$v;
   var isCallable$1 = isCallable$d;
   var String$1 = global$2.String;
   var TypeError$2 = global$2.TypeError;
@@ -5494,7 +5594,7 @@ var markerClusterer = (function (exports) {
   };
 
   var DESCRIPTORS = descriptors;
-  var global$1 = global$t;
+  var global$1 = global$v;
   var uncurryThis = functionUncurryThis;
   var isForced = isForced_1;
   var redefine = redefine$3.exports;
@@ -5618,7 +5718,7 @@ var markerClusterer = (function (exports) {
   /**
    * Provides statistics on all clusters in the current render cycle for use in {@link Renderer.render}.
    */
-  var ClusterStats = function ClusterStats(markers, clusters) {
+  var ClusterStats = /*#__PURE__*/_createClass(function ClusterStats(markers, clusters) {
     _classCallCheck(this, ClusterStats);
 
     this.markers = {
@@ -5639,7 +5739,7 @@ var markerClusterer = (function (exports) {
         max: Math.max.apply(Math, _toConsumableArray(clusterMarkerCounts))
       }
     };
-  };
+  });
   var DefaultRenderer = /*#__PURE__*/function () {
     function DefaultRenderer() {
       _classCallCheck(this, DefaultRenderer);
@@ -5751,7 +5851,7 @@ var markerClusterer = (function (exports) {
    */
 
 
-  var OverlayViewSafe = function OverlayViewSafe() {
+  var OverlayViewSafe = /*#__PURE__*/_createClass(function OverlayViewSafe() {
     _classCallCheck(this, OverlayViewSafe);
 
     // MarkerClusterer implements google.maps.OverlayView interface. We use the
@@ -5760,7 +5860,7 @@ var markerClusterer = (function (exports) {
     // look for it at the last possible moment. If it doesn't exist now then
     // there is no point going ahead :)
     extend(OverlayViewSafe, google.maps.OverlayView);
-  };
+  });
 
   exports.MarkerClustererEvents = void 0;
 
