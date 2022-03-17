@@ -17,7 +17,5 @@
 export * from "./core";
 export * from "./grid";
 export * from "./noop";
-export * from "./kmeans";
-export * from "./dbscan";
 export * from "./supercluster";
 export * from "./utils";

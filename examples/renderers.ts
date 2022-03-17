@@ -68,7 +68,7 @@ const interpolatedRenderer = {
 new Loader(LOADER_OPTIONS).load().then(() => {
   const maps: google.maps.Map[] = [];
 
-  const panels: [Element, Renderer, string][] = [
+  const panels: [HTMLElement, Renderer, string][] = [
     [
       document.getElementById("default"),
       new DefaultRenderer(),

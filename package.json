@@ -35,8 +35,6 @@
     "test:e2e": "jest --passWithNoTests e2e/*"
   },
   "dependencies": {
-    "@turf/clusters-dbscan": "^6.4.0",
-    "@turf/clusters-kmeans": "^6.4.0",
     "fast-deep-equal": "^3.1.3",
     "supercluster": "^7.1.3"
   },
