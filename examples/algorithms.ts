@@ -16,9 +16,7 @@
 
 import {
   AbstractAlgorithm,
-  DBScanAlgorithm,
   GridAlgorithm,
-  KmeansAlgorithm,
   MarkerClusterer,
   NoopAlgorithm,
   SuperClusterAlgorithm,
@@ -36,7 +34,7 @@ const mapOptions = {
 new Loader(LOADER_OPTIONS).load().then(() => {
   const maps: google.maps.Map[] = [];
 
-  const panels: [Element, AbstractAlgorithm, string][] = [
+  const panels: [HTMLElement, AbstractAlgorithm, string][] = [
     [
       document.getElementById("noop"),
       new NoopAlgorithm({}),
@@ -46,18 +44,6 @@ new Loader(LOADER_OPTIONS).load().then(() => {
       document.getElementById("grid"),
       new GridAlgorithm({ maxDistance: 40000 }),
       `new GridAlgorithm({})`,
-    ],
-    [
-      document.getElementById("kmeans"),
-      new KmeansAlgorithm({
-        numberOfClusters: 10,
-      }),
-      `new KmeansAlgorithm({})`,
-    ],
-    [
-      document.getElementById("dbscan"),
-      new DBScanAlgorithm({}),
-      `new DBScanAlgorithm({})`,
     ],
     [
       document.getElementById("supercluster"),
