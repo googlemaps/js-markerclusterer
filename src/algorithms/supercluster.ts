@@ -18,7 +18,8 @@ import { AbstractAlgorithm, AlgorithmInput, AlgorithmOutput } from "./core";
 import SuperCluster, { ClusterFeature } from "supercluster";
 
 import { Cluster } from "../cluster";
-import equal from "fast-deep-equal/es6";
+import { deepEqual } from 'fast-equals';
+
 
 export type SuperClusterOptions = SuperCluster.Options<
   { [name: string]: any },
@@ -50,7 +51,7 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
   public calculate(input: AlgorithmInput): AlgorithmOutput {
     let changed = false;
 
-    if (!equal(input.markers, this.markers)) {
+    if (!deepEqual(input.markers, this.markers)) {
       changed = true;
       // TODO use proxy to avoid copy?
       this.markers = [...input.markers];
@@ -78,7 +79,7 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
       if (this.state.zoom > this.maxZoom && state.zoom > this.maxZoom) {
         // still beyond maxZoom, no change
       } else {
-        changed = changed || !equal(this.state, state);
+        changed = changed || !deepEqual(this.state, state);
       }
     }
 
