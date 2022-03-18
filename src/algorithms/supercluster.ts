@@ -18,8 +18,7 @@ import { AbstractAlgorithm, AlgorithmInput, AlgorithmOutput } from "./core";
 import SuperCluster, { ClusterFeature } from "supercluster";
 
 import { Cluster } from "../cluster";
-import { deepEqual } from 'fast-equals';
-
+import { deepEqual } from "fast-equals";
 
 export type SuperClusterOptions = SuperCluster.Options<
   { [name: string]: any },
