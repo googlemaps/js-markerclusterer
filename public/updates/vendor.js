@@ -788,7 +788,7 @@ class Supercluster {
     }
 
     _limitZoom(z) {
-        return Math.max(this.options.minZoom, Math.min(+z, this.options.maxZoom + 1));
+        return Math.max(this.options.minZoom, Math.min(Math.floor(+z), this.options.maxZoom + 1));
     }
 
     _cluster(points, zoom) {
