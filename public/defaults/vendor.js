@@ -1095,7 +1095,8 @@ function areMapsEqual(a, b, isEqual, meta) {
                 b.forEach(function (bValue, bKey) {
                     if (!hasMatch_1 && !matchedIndices_1[matchIndexB_1]) {
                         hasMatch_1 =
-                            isEqual(aKey, bKey, indexA_1, matchIndexB_1, a, b, meta) && isEqual(aValue, bValue, aKey, bKey, a, b, meta);
+                            isEqual(aKey, bKey, indexA_1, matchIndexB_1, a, b, meta) &&
+                                isEqual(aValue, bValue, aKey, bKey, a, b, meta);
                         if (hasMatch_1) {
                             matchedIndices_1[matchIndexB_1] = true;
                         }
@@ -1138,7 +1139,8 @@ function areObjectsEqual(a, b, isEqual, meta) {
                     return false;
                 }
             }
-            if (!hasOwnProperty(b, key) || !isEqual(a[key], b[key], key, key, a, b, meta)) {
+            if (!hasOwnProperty(b, key) ||
+                !isEqual(a[key], b[key], key, key, a, b, meta)) {
                 return false;
             }
         }
