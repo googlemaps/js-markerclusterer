@@ -181,7 +181,7 @@ var markerClusterer = (function (exports) {
   }; // https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
 
 
-  var global$v = // eslint-disable-next-line es/no-global-this -- safe
+  var global$v = // eslint-disable-next-line es-x/no-global-this -- safe
   check(typeof globalThis == 'object' && globalThis) || check(typeof window == 'object' && window) || // eslint-disable-next-line no-restricted-globals -- safe
   check(typeof self == 'object' && self) || check(typeof commonjsGlobal == 'object' && commonjsGlobal) || // eslint-disable-next-line no-new-func -- fallback
   function () {
@@ -201,7 +201,7 @@ var markerClusterer = (function (exports) {
   var fails$b = fails$c; // Detect IE8's incomplete defineProperty implementation
 
   var descriptors = !fails$b(function () {
-    // eslint-disable-next-line es/no-object-defineproperty -- required for testing
+    // eslint-disable-next-line es-x/no-object-defineproperty -- required for testing
     return Object.defineProperty({}, 1, {
       get: function () {
         return 7;
@@ -211,6 +211,7 @@ var markerClusterer = (function (exports) {
 
   var fails$a = fails$c;
   var functionBindNative = !fails$a(function () {
+    // eslint-disable-next-line es-x/no-function-prototype-bind -- safe
     var test = function () {
       /* empty */
     }.bind(); // eslint-disable-next-line no-prototype-builtins -- safe
@@ -227,7 +228,7 @@ var markerClusterer = (function (exports) {
 
   var objectPropertyIsEnumerable = {};
 
-  var $propertyIsEnumerable = {}.propertyIsEnumerable; // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
+  var $propertyIsEnumerable = {}.propertyIsEnumerable; // eslint-disable-next-line es-x/no-object-getownpropertydescriptor -- safe
 
   var getOwnPropertyDescriptor$2 = Object.getOwnPropertyDescriptor; // Nashorn ~ JDK8 bug
 
@@ -359,9 +360,9 @@ var markerClusterer = (function (exports) {
 
   var engineV8Version = version;
 
-  /* eslint-disable es/no-symbol -- required for testing */
+  /* eslint-disable es-x/no-symbol -- required for testing */
   var V8_VERSION$1 = engineV8Version;
-  var fails$8 = fails$c; // eslint-disable-next-line es/no-object-getownpropertysymbols -- required for testing
+  var fails$8 = fails$c; // eslint-disable-next-line es-x/no-object-getownpropertysymbols -- required for testing
 
   var nativeSymbol = !!Object.getOwnPropertySymbols && !fails$8(function () {
     var symbol = Symbol(); // Chrome 38 Symbol has incorrect toString conversion
@@ -371,7 +372,7 @@ var markerClusterer = (function (exports) {
     !Symbol.sham && V8_VERSION$1 && V8_VERSION$1 < 41;
   });
 
-  /* eslint-disable es/no-symbol -- required for testing */
+  /* eslint-disable es-x/no-symbol -- required for testing */
   var NATIVE_SYMBOL$1 = nativeSymbol;
   var useSymbolAsUid = NATIVE_SYMBOL$1 && !Symbol.sham && typeof Symbol.iterator == 'symbol';
 
@@ -434,7 +435,7 @@ var markerClusterer = (function (exports) {
 
   var shared$3 = {exports: {}};
 
-  var global$m = global$v; // eslint-disable-next-line es/no-object-defineproperty -- safe
+  var global$m = global$v; // eslint-disable-next-line es-x/no-object-defineproperty -- safe
 
   var defineProperty$2 = Object.defineProperty;
 
@@ -462,10 +463,10 @@ var markerClusterer = (function (exports) {
   (shared$3.exports = function (key, value) {
     return store$2[key] || (store$2[key] = value !== undefined ? value : {});
   })('versions', []).push({
-    version: '3.21.1',
+    version: '3.22.0',
     mode: 'global',
     copyright: '© 2014-2022 Denis Pushkarev (zloirock.ru)',
-    license: 'https://github.com/zloirock/core-js/blob/v3.21.1/LICENSE',
+    license: 'https://github.com/zloirock/core-js/blob/v3.22.0/LICENSE',
     source: 'https://github.com/zloirock/core-js'
   });
 
@@ -482,6 +483,7 @@ var markerClusterer = (function (exports) {
   var toObject$4 = toObject$5;
   var hasOwnProperty$1 = uncurryThis$f({}.hasOwnProperty); // `HasOwnProperty` abstract operation
   // https://tc39.es/ecma262/#sec-hasownproperty
+  // eslint-disable-next-line es-x/no-object-hasown -- safe
 
   var hasOwnProperty_1 = Object.hasOwn || function hasOwn(it, key) {
     return hasOwnProperty$1(toObject$4(it), key);
@@ -574,7 +576,7 @@ var markerClusterer = (function (exports) {
   var createElement = documentCreateElement$2; // Thanks to IE8 for its funny defineProperty
 
   var ie8DomDefine = !DESCRIPTORS$8 && !fails$7(function () {
-    // eslint-disable-next-line es/no-object-defineproperty -- required for testing
+    // eslint-disable-next-line es-x/no-object-defineproperty -- required for testing
     return Object.defineProperty(createElement('div'), 'a', {
       get: function () {
         return 7;
@@ -589,7 +591,7 @@ var markerClusterer = (function (exports) {
   var toIndexedObject$3 = toIndexedObject$4;
   var toPropertyKey$2 = toPropertyKey$3;
   var hasOwn$6 = hasOwnProperty_1;
-  var IE8_DOM_DEFINE$1 = ie8DomDefine; // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
+  var IE8_DOM_DEFINE$1 = ie8DomDefine; // eslint-disable-next-line es-x/no-object-getownpropertydescriptor -- safe
 
   var $getOwnPropertyDescriptor$1 = Object.getOwnPropertyDescriptor; // `Object.getOwnPropertyDescriptor` method
   // https://tc39.es/ecma262/#sec-object.getownpropertydescriptor
@@ -612,7 +614,7 @@ var markerClusterer = (function (exports) {
   // https://bugs.chromium.org/p/v8/issues/detail?id=3334
 
   var v8PrototypeDefineBug = DESCRIPTORS$6 && fails$6(function () {
-    // eslint-disable-next-line es/no-object-defineproperty -- required for testing
+    // eslint-disable-next-line es-x/no-object-defineproperty -- required for testing
     return Object.defineProperty(function () {
       /* empty */
     }, 'prototype', {
@@ -637,9 +639,9 @@ var markerClusterer = (function (exports) {
   var V8_PROTOTYPE_DEFINE_BUG$1 = v8PrototypeDefineBug;
   var anObject$4 = anObject$5;
   var toPropertyKey$1 = toPropertyKey$3;
-  var TypeError$7 = global$f.TypeError; // eslint-disable-next-line es/no-object-defineproperty -- safe
+  var TypeError$7 = global$f.TypeError; // eslint-disable-next-line es-x/no-object-defineproperty -- safe
 
-  var $defineProperty = Object.defineProperty; // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
+  var $defineProperty = Object.defineProperty; // eslint-disable-next-line es-x/no-object-getownpropertydescriptor -- safe
 
   var $getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
   var ENUMERABLE = 'enumerable';
@@ -801,7 +803,7 @@ var markerClusterer = (function (exports) {
 
   var DESCRIPTORS$3 = descriptors;
   var hasOwn$4 = hasOwnProperty_1;
-  var FunctionPrototype = Function.prototype; // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
+  var FunctionPrototype = Function.prototype; // eslint-disable-next-line es-x/no-object-getownpropertydescriptor -- safe
 
   var getDescriptor = DESCRIPTORS$3 && Object.getOwnPropertyDescriptor;
   var EXISTS = hasOwn$4(FunctionPrototype, 'name'); // additional protection from minified / mangled / dropped function names
@@ -964,7 +966,7 @@ var markerClusterer = (function (exports) {
   var enumBugKeys$2 = enumBugKeys$3;
   var hiddenKeys$1 = enumBugKeys$2.concat('length', 'prototype'); // `Object.getOwnPropertyNames` method
   // https://tc39.es/ecma262/#sec-object.getownpropertynames
-  // eslint-disable-next-line es/no-object-getownpropertynames -- safe
+  // eslint-disable-next-line es-x/no-object-getownpropertynames -- safe
 
   objectGetOwnPropertyNames.f = Object.getOwnPropertyNames || function getOwnPropertyNames(O) {
     return internalObjectKeys$1(O, hiddenKeys$1);
@@ -1102,7 +1104,7 @@ var markerClusterer = (function (exports) {
 
   var classof$6 = classofRaw$1; // `IsArray` abstract operation
   // https://tc39.es/ecma262/#sec-isarray
-  // eslint-disable-next-line es/no-array-isarray -- safe
+  // eslint-disable-next-line es-x/no-array-isarray -- safe
 
   var isArray$1 = Array.isArray || function isArray(argument) {
     return classof$6(argument) == 'Array';
@@ -1848,7 +1850,7 @@ var markerClusterer = (function (exports) {
   var arrayForEach = !STRICT_METHOD$1 ? function forEach(callbackfn
   /* , thisArg */
   ) {
-    return $forEach(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined); // eslint-disable-next-line es/no-array-prototype-foreach -- safe
+    return $forEach(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined); // eslint-disable-next-line es-x/no-array-prototype-foreach -- safe
   } : [].forEach;
 
   var global$6 = global$v;
@@ -2010,7 +2012,7 @@ var markerClusterer = (function (exports) {
   var internalObjectKeys = objectKeysInternal;
   var enumBugKeys$1 = enumBugKeys$3; // `Object.keys` method
   // https://tc39.es/ecma262/#sec-object.keys
-  // eslint-disable-next-line es/no-object-keys -- safe
+  // eslint-disable-next-line es-x/no-object-keys -- safe
 
   var objectKeys$2 = Object.keys || function keys(O) {
     return internalObjectKeys(O, enumBugKeys$1);
@@ -2024,9 +2026,9 @@ var markerClusterer = (function (exports) {
   var getOwnPropertySymbolsModule = objectGetOwnPropertySymbols;
   var propertyIsEnumerableModule = objectPropertyIsEnumerable;
   var toObject$1 = toObject$5;
-  var IndexedObject = indexedObject; // eslint-disable-next-line es/no-object-assign -- safe
+  var IndexedObject = indexedObject; // eslint-disable-next-line es-x/no-object-assign -- safe
 
-  var $assign = Object.assign; // eslint-disable-next-line es/no-object-defineproperty -- required for testing
+  var $assign = Object.assign; // eslint-disable-next-line es-x/no-object-defineproperty -- required for testing
 
   var defineProperty$1 = Object.defineProperty;
   var concat = uncurryThis$6([].concat); // `Object.assign` method
@@ -2049,7 +2051,7 @@ var markerClusterer = (function (exports) {
     })).b !== 1) return true; // should work with symbols and should have deterministic property order (V8 bug)
 
     var A = {};
-    var B = {}; // eslint-disable-next-line es/no-symbol -- safe
+    var B = {}; // eslint-disable-next-line es-x/no-symbol -- safe
 
     var symbol = Symbol();
     var alphabet = 'abcdefghijklmnopqrst';
@@ -2085,7 +2087,7 @@ var markerClusterer = (function (exports) {
   var $$4 = _export;
   var assign = objectAssign; // `Object.assign` method
   // https://tc39.es/ecma262/#sec-object.assign
-  // eslint-disable-next-line es/no-object-assign -- required for testing
+  // eslint-disable-next-line es-x/no-object-assign -- required for testing
 
   $$4({
     target: 'Object',
@@ -3249,7 +3251,7 @@ var markerClusterer = (function (exports) {
   var toIndexedObject = toIndexedObject$4;
   var objectKeys = objectKeys$2; // `Object.defineProperties` method
   // https://tc39.es/ecma262/#sec-object.defineproperties
-  // eslint-disable-next-line es/no-object-defineproperties -- safe
+  // eslint-disable-next-line es-x/no-object-defineproperties -- safe
 
   objectDefineProperties.f = DESCRIPTORS$1 && !V8_PROTOTYPE_DEFINE_BUG ? Object.defineProperties : function defineProperties(O, Properties) {
     anObject$2(O);
@@ -3342,6 +3344,7 @@ var markerClusterer = (function (exports) {
 
   hiddenKeys[IE_PROTO] = true; // `Object.create` method
   // https://tc39.es/ecma262/#sec-object.create
+  // eslint-disable-next-line es-x/no-object-create -- safe
 
   var objectCreate = Object.create || function create(O, Properties) {
     var result;
@@ -3467,7 +3470,7 @@ var markerClusterer = (function (exports) {
     }
   });
 
-  /* eslint-disable es/no-array-prototype-indexof -- required for testing */
+  /* eslint-disable es-x/no-array-prototype-indexof -- required for testing */
 
 
   var $$1 = _export;
@@ -3598,7 +3601,7 @@ var markerClusterer = (function (exports) {
   var aPossiblePrototype = aPossiblePrototype$1; // `Object.setPrototypeOf` method
   // https://tc39.es/ecma262/#sec-object.setprototypeof
   // Works with __proto__ only. Old v8 can't work with null proto objects.
-  // eslint-disable-next-line es/no-object-setprototypeof -- safe
+  // eslint-disable-next-line es-x/no-object-setprototypeof -- safe
 
   var objectSetPrototypeOf = Object.setPrototypeOf || ('__proto__' in {} ? function () {
     var CORRECT_SETTER = false;
@@ -3606,7 +3609,7 @@ var markerClusterer = (function (exports) {
     var setter;
 
     try {
-      // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
+      // eslint-disable-next-line es-x/no-object-getownpropertydescriptor -- safe
       setter = uncurryThis$3(Object.getOwnPropertyDescriptor(Object.prototype, '__proto__').set);
       setter(test, []);
       CORRECT_SETTER = test instanceof Array;
