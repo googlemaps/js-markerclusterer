@@ -30,200 +30,200 @@ var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof win
 var kdbush = {exports: {}};
 
 (function (module, exports) {
-(function (global, factory) {
-module.exports = factory() ;
-}(commonjsGlobal, (function () {
-function sortKD(ids, coords, nodeSize, left, right, depth) {
-    if (right - left <= nodeSize) { return; }
+	(function (global, factory) {
+	module.exports = factory() ;
+	}(commonjsGlobal, (function () {
+	function sortKD(ids, coords, nodeSize, left, right, depth) {
+	    if (right - left <= nodeSize) { return; }
 
-    var m = (left + right) >> 1;
+	    var m = (left + right) >> 1;
 
-    select(ids, coords, m, left, right, depth % 2);
+	    select(ids, coords, m, left, right, depth % 2);
 
-    sortKD(ids, coords, nodeSize, left, m - 1, depth + 1);
-    sortKD(ids, coords, nodeSize, m + 1, right, depth + 1);
-}
+	    sortKD(ids, coords, nodeSize, left, m - 1, depth + 1);
+	    sortKD(ids, coords, nodeSize, m + 1, right, depth + 1);
+	}
 
-function select(ids, coords, k, left, right, inc) {
+	function select(ids, coords, k, left, right, inc) {
 
-    while (right > left) {
-        if (right - left > 600) {
-            var n = right - left + 1;
-            var m = k - left + 1;
-            var z = Math.log(n);
-            var s = 0.5 * Math.exp(2 * z / 3);
-            var sd = 0.5 * Math.sqrt(z * s * (n - s) / n) * (m - n / 2 < 0 ? -1 : 1);
-            var newLeft = Math.max(left, Math.floor(k - m * s / n + sd));
-            var newRight = Math.min(right, Math.floor(k + (n - m) * s / n + sd));
-            select(ids, coords, k, newLeft, newRight, inc);
-        }
+	    while (right > left) {
+	        if (right - left > 600) {
+	            var n = right - left + 1;
+	            var m = k - left + 1;
+	            var z = Math.log(n);
+	            var s = 0.5 * Math.exp(2 * z / 3);
+	            var sd = 0.5 * Math.sqrt(z * s * (n - s) / n) * (m - n / 2 < 0 ? -1 : 1);
+	            var newLeft = Math.max(left, Math.floor(k - m * s / n + sd));
+	            var newRight = Math.min(right, Math.floor(k + (n - m) * s / n + sd));
+	            select(ids, coords, k, newLeft, newRight, inc);
+	        }
 
-        var t = coords[2 * k + inc];
-        var i = left;
-        var j = right;
+	        var t = coords[2 * k + inc];
+	        var i = left;
+	        var j = right;
 
-        swapItem(ids, coords, left, k);
-        if (coords[2 * right + inc] > t) { swapItem(ids, coords, left, right); }
+	        swapItem(ids, coords, left, k);
+	        if (coords[2 * right + inc] > t) { swapItem(ids, coords, left, right); }
 
-        while (i < j) {
-            swapItem(ids, coords, i, j);
-            i++;
-            j--;
-            while (coords[2 * i + inc] < t) { i++; }
-            while (coords[2 * j + inc] > t) { j--; }
-        }
+	        while (i < j) {
+	            swapItem(ids, coords, i, j);
+	            i++;
+	            j--;
+	            while (coords[2 * i + inc] < t) { i++; }
+	            while (coords[2 * j + inc] > t) { j--; }
+	        }
 
-        if (coords[2 * left + inc] === t) { swapItem(ids, coords, left, j); }
-        else {
-            j++;
-            swapItem(ids, coords, j, right);
-        }
+	        if (coords[2 * left + inc] === t) { swapItem(ids, coords, left, j); }
+	        else {
+	            j++;
+	            swapItem(ids, coords, j, right);
+	        }
 
-        if (j <= k) { left = j + 1; }
-        if (k <= j) { right = j - 1; }
-    }
-}
+	        if (j <= k) { left = j + 1; }
+	        if (k <= j) { right = j - 1; }
+	    }
+	}
 
-function swapItem(ids, coords, i, j) {
-    swap(ids, i, j);
-    swap(coords, 2 * i, 2 * j);
-    swap(coords, 2 * i + 1, 2 * j + 1);
-}
+	function swapItem(ids, coords, i, j) {
+	    swap(ids, i, j);
+	    swap(coords, 2 * i, 2 * j);
+	    swap(coords, 2 * i + 1, 2 * j + 1);
+	}
 
-function swap(arr, i, j) {
-    var tmp = arr[i];
-    arr[i] = arr[j];
-    arr[j] = tmp;
-}
+	function swap(arr, i, j) {
+	    var tmp = arr[i];
+	    arr[i] = arr[j];
+	    arr[j] = tmp;
+	}
 
-function range(ids, coords, minX, minY, maxX, maxY, nodeSize) {
-    var stack = [0, ids.length - 1, 0];
-    var result = [];
-    var x, y;
+	function range(ids, coords, minX, minY, maxX, maxY, nodeSize) {
+	    var stack = [0, ids.length - 1, 0];
+	    var result = [];
+	    var x, y;
 
-    while (stack.length) {
-        var axis = stack.pop();
-        var right = stack.pop();
-        var left = stack.pop();
+	    while (stack.length) {
+	        var axis = stack.pop();
+	        var right = stack.pop();
+	        var left = stack.pop();
 
-        if (right - left <= nodeSize) {
-            for (var i = left; i <= right; i++) {
-                x = coords[2 * i];
-                y = coords[2 * i + 1];
-                if (x >= minX && x <= maxX && y >= minY && y <= maxY) { result.push(ids[i]); }
-            }
-            continue;
-        }
+	        if (right - left <= nodeSize) {
+	            for (var i = left; i <= right; i++) {
+	                x = coords[2 * i];
+	                y = coords[2 * i + 1];
+	                if (x >= minX && x <= maxX && y >= minY && y <= maxY) { result.push(ids[i]); }
+	            }
+	            continue;
+	        }
 
-        var m = Math.floor((left + right) / 2);
+	        var m = Math.floor((left + right) / 2);
 
-        x = coords[2 * m];
-        y = coords[2 * m + 1];
+	        x = coords[2 * m];
+	        y = coords[2 * m + 1];
 
-        if (x >= minX && x <= maxX && y >= minY && y <= maxY) { result.push(ids[m]); }
+	        if (x >= minX && x <= maxX && y >= minY && y <= maxY) { result.push(ids[m]); }
 
-        var nextAxis = (axis + 1) % 2;
+	        var nextAxis = (axis + 1) % 2;
 
-        if (axis === 0 ? minX <= x : minY <= y) {
-            stack.push(left);
-            stack.push(m - 1);
-            stack.push(nextAxis);
-        }
-        if (axis === 0 ? maxX >= x : maxY >= y) {
-            stack.push(m + 1);
-            stack.push(right);
-            stack.push(nextAxis);
-        }
-    }
+	        if (axis === 0 ? minX <= x : minY <= y) {
+	            stack.push(left);
+	            stack.push(m - 1);
+	            stack.push(nextAxis);
+	        }
+	        if (axis === 0 ? maxX >= x : maxY >= y) {
+	            stack.push(m + 1);
+	            stack.push(right);
+	            stack.push(nextAxis);
+	        }
+	    }
 
-    return result;
-}
+	    return result;
+	}
 
-function within(ids, coords, qx, qy, r, nodeSize) {
-    var stack = [0, ids.length - 1, 0];
-    var result = [];
-    var r2 = r * r;
+	function within(ids, coords, qx, qy, r, nodeSize) {
+	    var stack = [0, ids.length - 1, 0];
+	    var result = [];
+	    var r2 = r * r;
 
-    while (stack.length) {
-        var axis = stack.pop();
-        var right = stack.pop();
-        var left = stack.pop();
+	    while (stack.length) {
+	        var axis = stack.pop();
+	        var right = stack.pop();
+	        var left = stack.pop();
 
-        if (right - left <= nodeSize) {
-            for (var i = left; i <= right; i++) {
-                if (sqDist(coords[2 * i], coords[2 * i + 1], qx, qy) <= r2) { result.push(ids[i]); }
-            }
-            continue;
-        }
+	        if (right - left <= nodeSize) {
+	            for (var i = left; i <= right; i++) {
+	                if (sqDist(coords[2 * i], coords[2 * i + 1], qx, qy) <= r2) { result.push(ids[i]); }
+	            }
+	            continue;
+	        }
 
-        var m = Math.floor((left + right) / 2);
+	        var m = Math.floor((left + right) / 2);
 
-        var x = coords[2 * m];
-        var y = coords[2 * m + 1];
+	        var x = coords[2 * m];
+	        var y = coords[2 * m + 1];
 
-        if (sqDist(x, y, qx, qy) <= r2) { result.push(ids[m]); }
+	        if (sqDist(x, y, qx, qy) <= r2) { result.push(ids[m]); }
 
-        var nextAxis = (axis + 1) % 2;
+	        var nextAxis = (axis + 1) % 2;
 
-        if (axis === 0 ? qx - r <= x : qy - r <= y) {
-            stack.push(left);
-            stack.push(m - 1);
-            stack.push(nextAxis);
-        }
-        if (axis === 0 ? qx + r >= x : qy + r >= y) {
-            stack.push(m + 1);
-            stack.push(right);
-            stack.push(nextAxis);
-        }
-    }
+	        if (axis === 0 ? qx - r <= x : qy - r <= y) {
+	            stack.push(left);
+	            stack.push(m - 1);
+	            stack.push(nextAxis);
+	        }
+	        if (axis === 0 ? qx + r >= x : qy + r >= y) {
+	            stack.push(m + 1);
+	            stack.push(right);
+	            stack.push(nextAxis);
+	        }
+	    }
 
-    return result;
-}
+	    return result;
+	}
 
-function sqDist(ax, ay, bx, by) {
-    var dx = ax - bx;
-    var dy = ay - by;
-    return dx * dx + dy * dy;
-}
+	function sqDist(ax, ay, bx, by) {
+	    var dx = ax - bx;
+	    var dy = ay - by;
+	    return dx * dx + dy * dy;
+	}
 
-var defaultGetX = function (p) { return p[0]; };
-var defaultGetY = function (p) { return p[1]; };
+	var defaultGetX = function (p) { return p[0]; };
+	var defaultGetY = function (p) { return p[1]; };
 
-var KDBush = function KDBush(points, getX, getY, nodeSize, ArrayType) {
-    if ( getX === void 0 ) getX = defaultGetX;
-    if ( getY === void 0 ) getY = defaultGetY;
-    if ( nodeSize === void 0 ) nodeSize = 64;
-    if ( ArrayType === void 0 ) ArrayType = Float64Array;
+	var KDBush = function KDBush(points, getX, getY, nodeSize, ArrayType) {
+	    if ( getX === void 0 ) getX = defaultGetX;
+	    if ( getY === void 0 ) getY = defaultGetY;
+	    if ( nodeSize === void 0 ) nodeSize = 64;
+	    if ( ArrayType === void 0 ) ArrayType = Float64Array;
 
-    this.nodeSize = nodeSize;
-    this.points = points;
+	    this.nodeSize = nodeSize;
+	    this.points = points;
 
-    var IndexArrayType = points.length < 65536 ? Uint16Array : Uint32Array;
+	    var IndexArrayType = points.length < 65536 ? Uint16Array : Uint32Array;
 
-    var ids = this.ids = new IndexArrayType(points.length);
-    var coords = this.coords = new ArrayType(points.length * 2);
+	    var ids = this.ids = new IndexArrayType(points.length);
+	    var coords = this.coords = new ArrayType(points.length * 2);
 
-    for (var i = 0; i < points.length; i++) {
-        ids[i] = i;
-        coords[2 * i] = getX(points[i]);
-        coords[2 * i + 1] = getY(points[i]);
-    }
+	    for (var i = 0; i < points.length; i++) {
+	        ids[i] = i;
+	        coords[2 * i] = getX(points[i]);
+	        coords[2 * i + 1] = getY(points[i]);
+	    }
 
-    sortKD(ids, coords, nodeSize, 0, ids.length - 1, 0);
-};
+	    sortKD(ids, coords, nodeSize, 0, ids.length - 1, 0);
+	};
 
-KDBush.prototype.range = function range$1 (minX, minY, maxX, maxY) {
-    return range(this.ids, this.coords, minX, minY, maxX, maxY, this.nodeSize);
-};
+	KDBush.prototype.range = function range$1 (minX, minY, maxX, maxY) {
+	    return range(this.ids, this.coords, minX, minY, maxX, maxY, this.nodeSize);
+	};
 
-KDBush.prototype.within = function within$1 (x, y, r) {
-    return within(this.ids, this.coords, x, y, r, this.nodeSize);
-};
+	KDBush.prototype.within = function within$1 (x, y, r) {
+	    return within(this.ids, this.coords, x, y, r, this.nodeSize);
+	};
 
-return KDBush;
+	return KDBush;
 
-})));
-}(kdbush));
+	})));
+} (kdbush));
 
 var KDBush = kdbush.exports;
 
@@ -1650,6 +1650,179 @@ function hsl2rgb(h, m1, m2) {
       : h < 240 ? m1 + (m2 - m1) * (240 - h) / 60
       : m1) * 255;
 }
+
+const radians = Math.PI / 180;
+const degrees = 180 / Math.PI;
+
+// https://observablehq.com/@mbostock/lab-and-rgb
+const K = 18,
+    Xn = 0.96422,
+    Yn = 1,
+    Zn = 0.82521,
+    t0 = 4 / 29,
+    t1 = 6 / 29,
+    t2 = 3 * t1 * t1,
+    t3 = t1 * t1 * t1;
+
+function labConvert(o) {
+  if (o instanceof Lab) return new Lab(o.l, o.a, o.b, o.opacity);
+  if (o instanceof Hcl) return hcl2lab(o);
+  if (!(o instanceof Rgb)) o = rgbConvert(o);
+  var r = rgb2lrgb(o.r),
+      g = rgb2lrgb(o.g),
+      b = rgb2lrgb(o.b),
+      y = xyz2lab((0.2225045 * r + 0.7168786 * g + 0.0606169 * b) / Yn), x, z;
+  if (r === g && g === b) x = z = y; else {
+    x = xyz2lab((0.4360747 * r + 0.3850649 * g + 0.1430804 * b) / Xn);
+    z = xyz2lab((0.0139322 * r + 0.0971045 * g + 0.7141733 * b) / Zn);
+  }
+  return new Lab(116 * y - 16, 500 * (x - y), 200 * (y - z), o.opacity);
+}
+
+function lab(l, a, b, opacity) {
+  return arguments.length === 1 ? labConvert(l) : new Lab(l, a, b, opacity == null ? 1 : opacity);
+}
+
+function Lab(l, a, b, opacity) {
+  this.l = +l;
+  this.a = +a;
+  this.b = +b;
+  this.opacity = +opacity;
+}
+
+define(Lab, lab, extend(Color, {
+  brighter: function(k) {
+    return new Lab(this.l + K * (k == null ? 1 : k), this.a, this.b, this.opacity);
+  },
+  darker: function(k) {
+    return new Lab(this.l - K * (k == null ? 1 : k), this.a, this.b, this.opacity);
+  },
+  rgb: function() {
+    var y = (this.l + 16) / 116,
+        x = isNaN(this.a) ? y : y + this.a / 500,
+        z = isNaN(this.b) ? y : y - this.b / 200;
+    x = Xn * lab2xyz(x);
+    y = Yn * lab2xyz(y);
+    z = Zn * lab2xyz(z);
+    return new Rgb(
+      lrgb2rgb( 3.1338561 * x - 1.6168667 * y - 0.4906146 * z),
+      lrgb2rgb(-0.9787684 * x + 1.9161415 * y + 0.0334540 * z),
+      lrgb2rgb( 0.0719453 * x - 0.2289914 * y + 1.4052427 * z),
+      this.opacity
+    );
+  }
+}));
+
+function xyz2lab(t) {
+  return t > t3 ? Math.pow(t, 1 / 3) : t / t2 + t0;
+}
+
+function lab2xyz(t) {
+  return t > t1 ? t * t * t : t2 * (t - t0);
+}
+
+function lrgb2rgb(x) {
+  return 255 * (x <= 0.0031308 ? 12.92 * x : 1.055 * Math.pow(x, 1 / 2.4) - 0.055);
+}
+
+function rgb2lrgb(x) {
+  return (x /= 255) <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+}
+
+function hclConvert(o) {
+  if (o instanceof Hcl) return new Hcl(o.h, o.c, o.l, o.opacity);
+  if (!(o instanceof Lab)) o = labConvert(o);
+  if (o.a === 0 && o.b === 0) return new Hcl(NaN, 0 < o.l && o.l < 100 ? 0 : NaN, o.l, o.opacity);
+  var h = Math.atan2(o.b, o.a) * degrees;
+  return new Hcl(h < 0 ? h + 360 : h, Math.sqrt(o.a * o.a + o.b * o.b), o.l, o.opacity);
+}
+
+function hcl(h, c, l, opacity) {
+  return arguments.length === 1 ? hclConvert(h) : new Hcl(h, c, l, opacity == null ? 1 : opacity);
+}
+
+function Hcl(h, c, l, opacity) {
+  this.h = +h;
+  this.c = +c;
+  this.l = +l;
+  this.opacity = +opacity;
+}
+
+function hcl2lab(o) {
+  if (isNaN(o.h)) return new Lab(o.l, 0, 0, o.opacity);
+  var h = o.h * radians;
+  return new Lab(o.l, Math.cos(h) * o.c, Math.sin(h) * o.c, o.opacity);
+}
+
+define(Hcl, hcl, extend(Color, {
+  brighter: function(k) {
+    return new Hcl(this.h, this.c, this.l + K * (k == null ? 1 : k), this.opacity);
+  },
+  darker: function(k) {
+    return new Hcl(this.h, this.c, this.l - K * (k == null ? 1 : k), this.opacity);
+  },
+  rgb: function() {
+    return hcl2lab(this).rgb();
+  }
+}));
+
+var A = -0.14861,
+    B = +1.78277,
+    C = -0.29227,
+    D = -0.90649,
+    E = +1.97294,
+    ED = E * D,
+    EB = E * B,
+    BC_DA = B * C - D * A;
+
+function cubehelixConvert(o) {
+  if (o instanceof Cubehelix) return new Cubehelix(o.h, o.s, o.l, o.opacity);
+  if (!(o instanceof Rgb)) o = rgbConvert(o);
+  var r = o.r / 255,
+      g = o.g / 255,
+      b = o.b / 255,
+      l = (BC_DA * b + ED * r - EB * g) / (BC_DA + ED - EB),
+      bl = b - l,
+      k = (E * (g - l) - C * bl) / D,
+      s = Math.sqrt(k * k + bl * bl) / (E * l * (1 - l)), // NaN if l=0 or l=1
+      h = s ? Math.atan2(k, bl) * degrees - 120 : NaN;
+  return new Cubehelix(h < 0 ? h + 360 : h, s, l, o.opacity);
+}
+
+function cubehelix(h, s, l, opacity) {
+  return arguments.length === 1 ? cubehelixConvert(h) : new Cubehelix(h, s, l, opacity == null ? 1 : opacity);
+}
+
+function Cubehelix(h, s, l, opacity) {
+  this.h = +h;
+  this.s = +s;
+  this.l = +l;
+  this.opacity = +opacity;
+}
+
+define(Cubehelix, cubehelix, extend(Color, {
+  brighter: function(k) {
+    k = k == null ? brighter : Math.pow(brighter, k);
+    return new Cubehelix(this.h, this.s, this.l * k, this.opacity);
+  },
+  darker: function(k) {
+    k = k == null ? darker : Math.pow(darker, k);
+    return new Cubehelix(this.h, this.s, this.l * k, this.opacity);
+  },
+  rgb: function() {
+    var h = isNaN(this.h) ? 0 : (this.h + 120) * radians,
+        l = +this.l,
+        a = isNaN(this.s) ? 0 : this.s * l * (1 - l),
+        cosh = Math.cos(h),
+        sinh = Math.sin(h);
+    return new Rgb(
+      255 * (l + a * (A * cosh + B * sinh)),
+      255 * (l + a * (C * cosh + D * sinh)),
+      255 * (l + a * (E * cosh)),
+      this.opacity
+    );
+  }
+}));
 
 var constant = x => () => x;
 
