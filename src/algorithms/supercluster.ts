@@ -75,10 +75,12 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
     const state = { zoom: input.map.getZoom() };
 
     if (!changed) {
+      const zoomChanged = this.state.zoom != state.zoom;
       if (this.state.zoom > this.maxZoom && state.zoom > this.maxZoom) {
         // still beyond maxZoom, no change
+        changed = zoomChanged;
       } else {
-        changed = changed || !deepEqual(this.state, state);
+        changed = changed || zoomChanged || !deepEqual(this.state, state);
       }
     }
 
@@ -92,8 +94,9 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
   }
 
   public cluster({ map }: AlgorithmInput): Cluster[] {
+    const { west, south, east, north } = map.getBounds().toJSON();
     return this.superCluster
-      .getClusters([-180, -90, 180, 90], Math.round(map.getZoom()))
+      .getClusters([west, south, east, north], Math.round(map.getZoom()))
       .map(this.transformCluster.bind(this));
   }
 

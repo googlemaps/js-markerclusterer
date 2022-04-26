@@ -105,20 +105,28 @@ export class DefaultRenderer implements Renderer {
    * ```
    */
   public render(
-    { count, position }: Cluster,
+    { count, position, markers }: Cluster,
     stats: ClusterStats
   ): google.maps.Marker {
-    // change color if this cluster has more markers than the mean cluster
-    const color =
-      count > Math.max(10, stats.clusters.markers.mean) ? "#ff0000" : "#0000ff";
-
+    let color = "#00c853"; //OK
+    if (markers){
+      // @ts-ignore
+      const anyError = markers.some(marker => marker["hasError"] !== undefined && marker["hasError"] === true);
+      if (anyError) color = "#ff0000"; //ERROR
+      else{
+        // @ts-ignore
+        const anyWarning = markers.some(marker => marker["hasWarning"] !== undefined && marker["hasWarning"] === true);
+        if (anyWarning) color = "#ffa500"; //WARNING
+      }
+    }
     // create svg url with fill color
     const svg = window.btoa(`
-  <svg fill="${color}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
-    <circle cx="120" cy="120" opacity=".6" r="70" />
-    <circle cx="120" cy="120" opacity=".3" r="90" />
-    <circle cx="120" cy="120" opacity=".2" r="110" />
-  </svg>`);
+      <svg fill="${color}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+        <circle cx="120" cy="120" opacity=".6" r="70" />
+        <circle cx="120" cy="120" opacity=".3" r="90" />
+        <circle cx="120" cy="120" opacity=".2" r="110" />
+      </svg>`
+    );
 
     // create marker using svg icon
     return new google.maps.Marker({
@@ -129,8 +137,9 @@ export class DefaultRenderer implements Renderer {
       },
       label: {
         text: String(count),
-        color: "rgba(255,255,255,0.9)",
+        color: "#000",
         fontSize: "12px",
+        fontWeight: "bold",
       },
       title: `Cluster of ${count} markers`,
       // adjust zIndex to be above other markers
