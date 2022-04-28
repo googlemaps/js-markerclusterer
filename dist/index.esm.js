@@ -1,5 +1,5 @@
 import SuperCluster from 'supercluster';
-import { deepEqual } from 'fast-equals';
+import equal from 'fast-deep-equal';
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -366,7 +366,7 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
     }
     calculate(input) {
         let changed = false;
-        if (!deepEqual(input.markers, this.markers)) {
+        if (!equal(input.markers, this.markers)) {
             changed = true;
             // TODO use proxy to avoid copy?
             this.markers = [...input.markers];
@@ -389,7 +389,7 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
         if (!changed) {
             if (this.state.zoom > this.maxZoom && state.zoom > this.maxZoom) ;
             else {
-                changed = changed || !deepEqual(this.state, state);
+                changed = changed || !equal(this.state, state);
             }
         }
         this.state = state;
