@@ -190,7 +190,7 @@ var markerClusterer = (function (exports) {
 
   var objectGetOwnPropertyDescriptor = {};
 
-  var fails$c = function (exec) {
+  var fails$e = function (exec) {
     try {
       return !!exec();
     } catch (error) {
@@ -198,9 +198,9 @@ var markerClusterer = (function (exports) {
     }
   };
 
-  var fails$b = fails$c; // Detect IE8's incomplete defineProperty implementation
+  var fails$d = fails$e; // Detect IE8's incomplete defineProperty implementation
 
-  var descriptors = !fails$b(function () {
+  var descriptors = !fails$d(function () {
     // eslint-disable-next-line es-x/no-object-defineproperty -- required for testing
     return Object.defineProperty({}, 1, {
       get: function () {
@@ -209,8 +209,8 @@ var markerClusterer = (function (exports) {
     })[1] != 7;
   });
 
-  var fails$a = fails$c;
-  var functionBindNative = !fails$a(function () {
+  var fails$c = fails$e;
+  var functionBindNative = !fails$c(function () {
     // eslint-disable-next-line es-x/no-function-prototype-bind -- safe
     var test = function () {
       /* empty */
@@ -274,12 +274,12 @@ var markerClusterer = (function (exports) {
 
   var global$u = global$v;
   var uncurryThis$h = functionUncurryThis;
-  var fails$9 = fails$c;
+  var fails$b = fails$e;
   var classof$7 = classofRaw$1;
   var Object$4 = global$u.Object;
   var split = uncurryThis$h(''.split); // fallback for non-array-like ES3 and non-enumerable old V8 strings
 
-  var indexedObject = fails$9(function () {
+  var indexedObject = fails$b(function () {
     // throws an error in rhino, see https://github.com/mozilla/rhino/issues/346
     // eslint-disable-next-line no-prototype-builtins -- safe
     return !Object$4('z').propertyIsEnumerable(0);
@@ -305,21 +305,21 @@ var markerClusterer = (function (exports) {
 
   // https://tc39.es/ecma262/#sec-iscallable
 
-  var isCallable$d = function (argument) {
+  var isCallable$e = function (argument) {
     return typeof argument == 'function';
   };
 
-  var isCallable$c = isCallable$d;
+  var isCallable$d = isCallable$e;
 
   var isObject$8 = function (it) {
-    return typeof it == 'object' ? it !== null : isCallable$c(it);
+    return typeof it == 'object' ? it !== null : isCallable$d(it);
   };
 
   var global$s = global$v;
-  var isCallable$b = isCallable$d;
+  var isCallable$c = isCallable$e;
 
   var aFunction = function (argument) {
-    return isCallable$b(argument) ? argument : undefined;
+    return isCallable$c(argument) ? argument : undefined;
   };
 
   var getBuiltIn$5 = function (namespace, method) {
@@ -362,9 +362,9 @@ var markerClusterer = (function (exports) {
 
   /* eslint-disable es-x/no-symbol -- required for testing */
   var V8_VERSION$1 = engineV8Version;
-  var fails$8 = fails$c; // eslint-disable-next-line es-x/no-object-getownpropertysymbols -- required for testing
+  var fails$a = fails$e; // eslint-disable-next-line es-x/no-object-getownpropertysymbols -- required for testing
 
-  var nativeSymbol = !!Object.getOwnPropertySymbols && !fails$8(function () {
+  var nativeSymbol = !!Object.getOwnPropertySymbols && !fails$a(function () {
     var symbol = Symbol(); // Chrome 38 Symbol has incorrect toString conversion
     // `get-own-property-symbols` polyfill symbols converted to object are not Symbol instances
 
@@ -378,7 +378,7 @@ var markerClusterer = (function (exports) {
 
   var global$q = global$v;
   var getBuiltIn$3 = getBuiltIn$5;
-  var isCallable$a = isCallable$d;
+  var isCallable$b = isCallable$e;
   var isPrototypeOf$1 = objectIsPrototypeOf;
   var USE_SYMBOL_AS_UID$1 = useSymbolAsUid;
   var Object$3 = global$q.Object;
@@ -386,7 +386,7 @@ var markerClusterer = (function (exports) {
     return typeof it == 'symbol';
   } : function (it) {
     var $Symbol = getBuiltIn$3('Symbol');
-    return isCallable$a($Symbol) && isPrototypeOf$1($Symbol.prototype, Object$3(it));
+    return isCallable$b($Symbol) && isPrototypeOf$1($Symbol.prototype, Object$3(it));
   };
 
   var global$p = global$v;
@@ -401,12 +401,12 @@ var markerClusterer = (function (exports) {
   };
 
   var global$o = global$v;
-  var isCallable$9 = isCallable$d;
+  var isCallable$a = isCallable$e;
   var tryToString = tryToString$1;
   var TypeError$b = global$o.TypeError; // `Assert: IsCallable(argument) is true`
 
   var aCallable$3 = function (argument) {
-    if (isCallable$9(argument)) return argument;
+    if (isCallable$a(argument)) return argument;
     throw TypeError$b(tryToString(argument) + ' is not a function');
   };
 
@@ -420,16 +420,16 @@ var markerClusterer = (function (exports) {
 
   var global$n = global$v;
   var call$4 = functionCall;
-  var isCallable$8 = isCallable$d;
+  var isCallable$9 = isCallable$e;
   var isObject$7 = isObject$8;
   var TypeError$a = global$n.TypeError; // `OrdinaryToPrimitive` abstract operation
   // https://tc39.es/ecma262/#sec-ordinarytoprimitive
 
   var ordinaryToPrimitive$1 = function (input, pref) {
     var fn, val;
-    if (pref === 'string' && isCallable$8(fn = input.toString) && !isObject$7(val = call$4(fn, input))) return val;
-    if (isCallable$8(fn = input.valueOf) && !isObject$7(val = call$4(fn, input))) return val;
-    if (pref !== 'string' && isCallable$8(fn = input.toString) && !isObject$7(val = call$4(fn, input))) return val;
+    if (pref === 'string' && isCallable$9(fn = input.toString) && !isObject$7(val = call$4(fn, input))) return val;
+    if (isCallable$9(fn = input.valueOf) && !isObject$7(val = call$4(fn, input))) return val;
+    if (pref !== 'string' && isCallable$9(fn = input.toString) && !isObject$7(val = call$4(fn, input))) return val;
     throw TypeError$a("Can't convert object to primitive value");
   };
 
@@ -437,11 +437,11 @@ var markerClusterer = (function (exports) {
 
   var global$m = global$v; // eslint-disable-next-line es-x/no-object-defineproperty -- safe
 
-  var defineProperty$2 = Object.defineProperty;
+  var defineProperty$3 = Object.defineProperty;
 
   var setGlobal$3 = function (key, value) {
     try {
-      defineProperty$2(global$m, key, {
+      defineProperty$3(global$m, key, {
         value: value,
         configurable: true,
         writable: true
@@ -463,10 +463,10 @@ var markerClusterer = (function (exports) {
   (shared$3.exports = function (key, value) {
     return store$2[key] || (store$2[key] = value !== undefined ? value : {});
   })('versions', []).push({
-    version: '3.22.2',
+    version: '3.22.5',
     mode: 'global',
     copyright: '© 2014-2022 Denis Pushkarev (zloirock.ru)',
-    license: 'https://github.com/zloirock/core-js/blob/v3.22.2/LICENSE',
+    license: 'https://github.com/zloirock/core-js/blob/v3.22.5/LICENSE',
     source: 'https://github.com/zloirock/core-js'
   });
 
@@ -571,11 +571,11 @@ var markerClusterer = (function (exports) {
     return EXISTS$1 ? document$1.createElement(it) : {};
   };
 
-  var DESCRIPTORS$8 = descriptors;
-  var fails$7 = fails$c;
+  var DESCRIPTORS$9 = descriptors;
+  var fails$9 = fails$e;
   var createElement = documentCreateElement$2; // Thanks to IE8 for its funny defineProperty
 
-  var ie8DomDefine = !DESCRIPTORS$8 && !fails$7(function () {
+  var ie8DomDefine = !DESCRIPTORS$9 && !fails$9(function () {
     // eslint-disable-next-line es-x/no-object-defineproperty -- required for testing
     return Object.defineProperty(createElement('div'), 'a', {
       get: function () {
@@ -584,7 +584,7 @@ var markerClusterer = (function (exports) {
     }).a != 7;
   });
 
-  var DESCRIPTORS$7 = descriptors;
+  var DESCRIPTORS$8 = descriptors;
   var call$2 = functionCall;
   var propertyIsEnumerableModule$1 = objectPropertyIsEnumerable;
   var createPropertyDescriptor$2 = createPropertyDescriptor$3;
@@ -596,7 +596,7 @@ var markerClusterer = (function (exports) {
   var $getOwnPropertyDescriptor$1 = Object.getOwnPropertyDescriptor; // `Object.getOwnPropertyDescriptor` method
   // https://tc39.es/ecma262/#sec-object.getownpropertydescriptor
 
-  objectGetOwnPropertyDescriptor.f = DESCRIPTORS$7 ? $getOwnPropertyDescriptor$1 : function getOwnPropertyDescriptor(O, P) {
+  objectGetOwnPropertyDescriptor.f = DESCRIPTORS$8 ? $getOwnPropertyDescriptor$1 : function getOwnPropertyDescriptor(O, P) {
     O = toIndexedObject$3(O);
     P = toPropertyKey$2(P);
     if (IE8_DOM_DEFINE$1) try {
@@ -609,11 +609,11 @@ var markerClusterer = (function (exports) {
 
   var objectDefineProperty = {};
 
-  var DESCRIPTORS$6 = descriptors;
-  var fails$6 = fails$c; // V8 ~ Chrome 36-
+  var DESCRIPTORS$7 = descriptors;
+  var fails$8 = fails$e; // V8 ~ Chrome 36-
   // https://bugs.chromium.org/p/v8/issues/detail?id=3334
 
-  var v8PrototypeDefineBug = DESCRIPTORS$6 && fails$6(function () {
+  var v8PrototypeDefineBug = DESCRIPTORS$7 && fails$8(function () {
     // eslint-disable-next-line es-x/no-object-defineproperty -- required for testing
     return Object.defineProperty(function () {
       /* empty */
@@ -634,7 +634,7 @@ var markerClusterer = (function (exports) {
   };
 
   var global$f = global$v;
-  var DESCRIPTORS$5 = descriptors;
+  var DESCRIPTORS$6 = descriptors;
   var IE8_DOM_DEFINE = ie8DomDefine;
   var V8_PROTOTYPE_DEFINE_BUG$1 = v8PrototypeDefineBug;
   var anObject$4 = anObject$5;
@@ -649,7 +649,7 @@ var markerClusterer = (function (exports) {
   var WRITABLE = 'writable'; // `Object.defineProperty` method
   // https://tc39.es/ecma262/#sec-object.defineproperty
 
-  objectDefineProperty.f = DESCRIPTORS$5 ? V8_PROTOTYPE_DEFINE_BUG$1 ? function defineProperty(O, P, Attributes) {
+  objectDefineProperty.f = DESCRIPTORS$6 ? V8_PROTOTYPE_DEFINE_BUG$1 ? function defineProperty(O, P, Attributes) {
     anObject$4(O);
     P = toPropertyKey$1(P);
     anObject$4(Attributes);
@@ -682,24 +682,42 @@ var markerClusterer = (function (exports) {
     return O;
   };
 
-  var DESCRIPTORS$4 = descriptors;
+  var DESCRIPTORS$5 = descriptors;
   var definePropertyModule$4 = objectDefineProperty;
   var createPropertyDescriptor$1 = createPropertyDescriptor$3;
-  var createNonEnumerableProperty$4 = DESCRIPTORS$4 ? function (object, key, value) {
+  var createNonEnumerableProperty$4 = DESCRIPTORS$5 ? function (object, key, value) {
     return definePropertyModule$4.f(object, key, createPropertyDescriptor$1(1, value));
   } : function (object, key, value) {
     object[key] = value;
     return object;
   };
 
-  var redefine$3 = {exports: {}};
+  var makeBuiltIn$2 = {exports: {}};
+
+  var DESCRIPTORS$4 = descriptors;
+  var hasOwn$5 = hasOwnProperty_1;
+  var FunctionPrototype = Function.prototype; // eslint-disable-next-line es-x/no-object-getownpropertydescriptor -- safe
+
+  var getDescriptor = DESCRIPTORS$4 && Object.getOwnPropertyDescriptor;
+  var EXISTS = hasOwn$5(FunctionPrototype, 'name'); // additional protection from minified / mangled / dropped function names
+
+  var PROPER = EXISTS && function something() {
+    /* empty */
+  }.name === 'something';
+
+  var CONFIGURABLE = EXISTS && (!DESCRIPTORS$4 || DESCRIPTORS$4 && getDescriptor(FunctionPrototype, 'name').configurable);
+  var functionName = {
+    EXISTS: EXISTS,
+    PROPER: PROPER,
+    CONFIGURABLE: CONFIGURABLE
+  };
 
   var uncurryThis$d = functionUncurryThis;
-  var isCallable$7 = isCallable$d;
+  var isCallable$8 = isCallable$e;
   var store$1 = sharedStore;
   var functionToString = uncurryThis$d(Function.toString); // this helper broken in `core-js@3.4.1-3.4.4`, so we can't use `shared` helper
 
-  if (!isCallable$7(store$1.inspectSource)) {
+  if (!isCallable$8(store$1.inspectSource)) {
     store$1.inspectSource = function (it) {
       return functionToString(it);
     };
@@ -708,10 +726,10 @@ var markerClusterer = (function (exports) {
   var inspectSource$3 = store$1.inspectSource;
 
   var global$e = global$v;
-  var isCallable$6 = isCallable$d;
+  var isCallable$7 = isCallable$e;
   var inspectSource$2 = inspectSource$3;
   var WeakMap$1 = global$e.WeakMap;
-  var nativeWeakMap = isCallable$6(WeakMap$1) && /native code/.test(inspectSource$2(WeakMap$1));
+  var nativeWeakMap = isCallable$7(WeakMap$1) && /native code/.test(inspectSource$2(WeakMap$1));
 
   var shared$1 = shared$3.exports;
   var uid = uid$2;
@@ -728,7 +746,7 @@ var markerClusterer = (function (exports) {
   var uncurryThis$c = functionUncurryThis;
   var isObject$3 = isObject$8;
   var createNonEnumerableProperty$3 = createNonEnumerableProperty$4;
-  var hasOwn$5 = hasOwnProperty_1;
+  var hasOwn$4 = hasOwnProperty_1;
   var shared = sharedStore;
   var sharedKey$1 = sharedKey$2;
   var hiddenKeys$3 = hiddenKeys$4;
@@ -778,18 +796,18 @@ var markerClusterer = (function (exports) {
     hiddenKeys$3[STATE] = true;
 
     set = function (it, metadata) {
-      if (hasOwn$5(it, STATE)) throw new TypeError$6(OBJECT_ALREADY_INITIALIZED);
+      if (hasOwn$4(it, STATE)) throw new TypeError$6(OBJECT_ALREADY_INITIALIZED);
       metadata.facade = it;
       createNonEnumerableProperty$3(it, STATE, metadata);
       return metadata;
     };
 
     get = function (it) {
-      return hasOwn$5(it, STATE) ? it[STATE] : {};
+      return hasOwn$4(it, STATE) ? it[STATE] : {};
     };
 
     has = function (it) {
-      return hasOwn$5(it, STATE);
+      return hasOwn$4(it, STATE);
     };
   }
 
@@ -801,71 +819,97 @@ var markerClusterer = (function (exports) {
     getterFor: getterFor
   };
 
-  var DESCRIPTORS$3 = descriptors;
-  var hasOwn$4 = hasOwnProperty_1;
-  var FunctionPrototype = Function.prototype; // eslint-disable-next-line es-x/no-object-getownpropertydescriptor -- safe
-
-  var getDescriptor = DESCRIPTORS$3 && Object.getOwnPropertyDescriptor;
-  var EXISTS = hasOwn$4(FunctionPrototype, 'name'); // additional protection from minified / mangled / dropped function names
-
-  var PROPER = EXISTS && function something() {
-    /* empty */
-  }.name === 'something';
-
-  var CONFIGURABLE = EXISTS && (!DESCRIPTORS$3 || DESCRIPTORS$3 && getDescriptor(FunctionPrototype, 'name').configurable);
-  var functionName = {
-    EXISTS: EXISTS,
-    PROPER: PROPER,
-    CONFIGURABLE: CONFIGURABLE
-  };
-
-  var global$c = global$v;
-  var isCallable$5 = isCallable$d;
+  var fails$7 = fails$e;
+  var isCallable$6 = isCallable$e;
   var hasOwn$3 = hasOwnProperty_1;
-  var createNonEnumerableProperty$2 = createNonEnumerableProperty$4;
-  var setGlobal$1 = setGlobal$3;
+  var DESCRIPTORS$3 = descriptors;
+  var CONFIGURABLE_FUNCTION_NAME = functionName.CONFIGURABLE;
   var inspectSource$1 = inspectSource$3;
   var InternalStateModule = internalState;
-  var CONFIGURABLE_FUNCTION_NAME = functionName.CONFIGURABLE;
-  var getInternalState = InternalStateModule.get;
   var enforceInternalState = InternalStateModule.enforce;
+  var getInternalState = InternalStateModule.get; // eslint-disable-next-line es-x/no-object-defineproperty -- safe
+
+  var defineProperty$2 = Object.defineProperty;
+  var CONFIGURABLE_LENGTH = DESCRIPTORS$3 && !fails$7(function () {
+    return defineProperty$2(function () {
+      /* empty */
+    }, 'length', {
+      value: 8
+    }).length !== 8;
+  });
   var TEMPLATE = String(String).split('String');
-  (redefine$3.exports = function (O, key, value, options) {
+
+  var makeBuiltIn$1 = makeBuiltIn$2.exports = function (value, name, options) {
+    if (String(name).slice(0, 7) === 'Symbol(') {
+      name = '[' + String(name).replace(/^Symbol\(([^)]*)\)/, '$1') + ']';
+    }
+
+    if (options && options.getter) name = 'get ' + name;
+    if (options && options.setter) name = 'set ' + name;
+
+    if (!hasOwn$3(value, 'name') || CONFIGURABLE_FUNCTION_NAME && value.name !== name) {
+      defineProperty$2(value, 'name', {
+        value: name,
+        configurable: true
+      });
+    }
+
+    if (CONFIGURABLE_LENGTH && options && hasOwn$3(options, 'arity') && value.length !== options.arity) {
+      defineProperty$2(value, 'length', {
+        value: options.arity
+      });
+    }
+
+    if (options && hasOwn$3(options, 'constructor') && options.constructor) {
+      if (DESCRIPTORS$3) try {
+        defineProperty$2(value, 'prototype', {
+          writable: false
+        });
+      } catch (error) {
+        /* empty */
+      }
+    } else value.prototype = undefined;
+
+    var state = enforceInternalState(value);
+
+    if (!hasOwn$3(state, 'source')) {
+      state.source = TEMPLATE.join(typeof name == 'string' ? name : '');
+    }
+
+    return value;
+  }; // add fake Function#toString for correct work wrapped methods / constructors with methods like LoDash isNative
+  // eslint-disable-next-line no-extend-native -- required
+
+
+  Function.prototype.toString = makeBuiltIn$1(function toString() {
+    return isCallable$6(this) && getInternalState(this).source || inspectSource$1(this);
+  }, 'toString');
+
+  var global$c = global$v;
+  var isCallable$5 = isCallable$e;
+  var createNonEnumerableProperty$2 = createNonEnumerableProperty$4;
+  var makeBuiltIn = makeBuiltIn$2.exports;
+  var setGlobal$1 = setGlobal$3;
+
+  var defineBuiltIn$3 = function (O, key, value, options) {
     var unsafe = options ? !!options.unsafe : false;
     var simple = options ? !!options.enumerable : false;
     var noTargetGet = options ? !!options.noTargetGet : false;
     var name = options && options.name !== undefined ? options.name : key;
-    var state;
-
-    if (isCallable$5(value)) {
-      if (String(name).slice(0, 7) === 'Symbol(') {
-        name = '[' + String(name).replace(/^Symbol\(([^)]*)\)/, '$1') + ']';
-      }
-
-      if (!hasOwn$3(value, 'name') || CONFIGURABLE_FUNCTION_NAME && value.name !== name) {
-        createNonEnumerableProperty$2(value, 'name', name);
-      }
-
-      state = enforceInternalState(value);
-
-      if (!state.source) {
-        state.source = TEMPLATE.join(typeof name == 'string' ? name : '');
-      }
-    }
+    if (isCallable$5(value)) makeBuiltIn(value, name, options);
 
     if (O === global$c) {
       if (simple) O[key] = value;else setGlobal$1(key, value);
-      return;
+      return O;
     } else if (!unsafe) {
       delete O[key];
     } else if (!noTargetGet && O[key]) {
       simple = true;
     }
 
-    if (simple) O[key] = value;else createNonEnumerableProperty$2(O, key, value); // add fake Function#toString for correct work wrapped methods / constructors with methods like LoDash isNative
-  })(Function.prototype, 'toString', function toString() {
-    return isCallable$5(this) && getInternalState(this).source || inspectSource$1(this);
-  });
+    if (simple) O[key] = value;else createNonEnumerableProperty$2(O, key, value);
+    return O;
+  };
 
   var objectGetOwnPropertyNames = {};
 
@@ -1008,13 +1052,13 @@ var markerClusterer = (function (exports) {
     }
   };
 
-  var fails$5 = fails$c;
-  var isCallable$4 = isCallable$d;
+  var fails$6 = fails$e;
+  var isCallable$4 = isCallable$e;
   var replacement = /#|\.prototype\./;
 
   var isForced$2 = function (feature, detection) {
     var value = data[normalize(feature)];
-    return value == POLYFILL ? true : value == NATIVE ? false : isCallable$4(detection) ? fails$5(detection) : !!detection;
+    return value == POLYFILL ? true : value == NATIVE ? false : isCallable$4(detection) ? fails$6(detection) : !!detection;
   };
 
   var normalize = isForced$2.normalize = function (string) {
@@ -1029,7 +1073,7 @@ var markerClusterer = (function (exports) {
   var global$b = global$v;
   var getOwnPropertyDescriptor$1 = objectGetOwnPropertyDescriptor.f;
   var createNonEnumerableProperty$1 = createNonEnumerableProperty$4;
-  var redefine$2 = redefine$3.exports;
+  var defineBuiltIn$2 = defineBuiltIn$3;
   var setGlobal = setGlobal$3;
   var copyConstructorProperties = copyConstructorProperties$1;
   var isForced$1 = isForced_1;
@@ -1081,10 +1125,9 @@ var markerClusterer = (function (exports) {
 
       if (options.sham || targetProperty && targetProperty.sham) {
         createNonEnumerableProperty$1(sourceProperty, 'sham', true);
-      } // extend global
+      }
 
-
-      redefine$2(target, key, sourceProperty, options);
+      defineBuiltIn$2(target, key, sourceProperty, options);
     }
   };
 
@@ -1118,7 +1161,7 @@ var markerClusterer = (function (exports) {
 
   var global$a = global$v;
   var TO_STRING_TAG_SUPPORT$2 = toStringTagSupport;
-  var isCallable$3 = isCallable$d;
+  var isCallable$3 = isCallable$e;
   var classofRaw = classofRaw$1;
   var wellKnownSymbol$5 = wellKnownSymbol$8;
   var TO_STRING_TAG = wellKnownSymbol$5('toStringTag');
@@ -1146,8 +1189,8 @@ var markerClusterer = (function (exports) {
   };
 
   var uncurryThis$8 = functionUncurryThis;
-  var fails$4 = fails$c;
-  var isCallable$2 = isCallable$d;
+  var fails$5 = fails$e;
+  var isCallable$2 = isCallable$e;
   var classof$4 = classof$5;
   var getBuiltIn$1 = getBuiltIn$5;
   var inspectSource = inspectSource$3;
@@ -1196,7 +1239,7 @@ var markerClusterer = (function (exports) {
   isConstructorLegacy.sham = true; // `IsConstructor` abstract operation
   // https://tc39.es/ecma262/#sec-isconstructor
 
-  var isConstructor$1 = !construct || fails$4(function () {
+  var isConstructor$1 = !construct || fails$5(function () {
     var called;
     return isConstructorModern(isConstructorModern.call) || !isConstructorModern(Object) || !isConstructorModern(function () {
       called = true;
@@ -1325,7 +1368,7 @@ var markerClusterer = (function (exports) {
     filterReject: createMethod$2(7)
   };
 
-  var fails$3 = fails$c;
+  var fails$4 = fails$e;
   var wellKnownSymbol$3 = wellKnownSymbol$8;
   var V8_VERSION = engineV8Version;
   var SPECIES = wellKnownSymbol$3('species');
@@ -1334,7 +1377,7 @@ var markerClusterer = (function (exports) {
     // We can't use this feature detection in V8 since it causes
     // deoptimization and serious performance degradation
     // https://github.com/zloirock/core-js/issues/677
-    return V8_VERSION >= 51 || !fails$3(function () {
+    return V8_VERSION >= 51 || !fails$4(function () {
       var array = [];
       var constructor = array.constructor = {};
 
@@ -1438,11 +1481,11 @@ var markerClusterer = (function (exports) {
     right: createMethod$1(true)
   };
 
-  var fails$2 = fails$c;
+  var fails$3 = fails$e;
 
   var arrayMethodIsStrict$3 = function (METHOD_NAME, argument) {
     var method = [][METHOD_NAME];
-    return !!method && fails$2(function () {
+    return !!method && fails$3(function () {
       // eslint-disable-next-line no-useless-call -- required for testing
       method.call(null, argument || function () {
         return 1;
@@ -1487,12 +1530,12 @@ var markerClusterer = (function (exports) {
   };
 
   var TO_STRING_TAG_SUPPORT = toStringTagSupport;
-  var redefine$1 = redefine$3.exports;
+  var defineBuiltIn$1 = defineBuiltIn$3;
   var toString$3 = objectToString; // `Object.prototype.toString` method
   // https://tc39.es/ecma262/#sec-object.prototype.tostring
 
   if (!TO_STRING_TAG_SUPPORT) {
-    redefine$1(Object.prototype, 'toString', toString$3, {
+    defineBuiltIn$1(Object.prototype, 'toString', toString$3, {
       unsafe: true
     });
   }
@@ -2021,7 +2064,7 @@ var markerClusterer = (function (exports) {
   var DESCRIPTORS$2 = descriptors;
   var uncurryThis$6 = functionUncurryThis;
   var call = functionCall;
-  var fails$1 = fails$c;
+  var fails$2 = fails$e;
   var objectKeys$1 = objectKeys$2;
   var getOwnPropertySymbolsModule = objectGetOwnPropertySymbols;
   var propertyIsEnumerableModule = objectPropertyIsEnumerable;
@@ -2034,7 +2077,7 @@ var markerClusterer = (function (exports) {
   var concat = uncurryThis$6([].concat); // `Object.assign` method
   // https://tc39.es/ecma262/#sec-object.assign
 
-  var objectAssign = !$assign || fails$1(function () {
+  var objectAssign = !$assign || fails$2(function () {
     // should have correct order of operations (Edge bug)
     if (DESCRIPTORS$2 && $assign({
       b: 1
@@ -2092,6 +2135,7 @@ var markerClusterer = (function (exports) {
   $$4({
     target: 'Object',
     stat: true,
+    arity: 2,
     forced: Object.assign !== assign
   }, {
     assign: assign
@@ -3046,12 +3090,18 @@ var markerClusterer = (function (exports) {
 
   var $$3 = _export;
   var $includes = arrayIncludes.includes;
-  var addToUnscopables = addToUnscopables$1; // `Array.prototype.includes` method
+  var fails$1 = fails$e;
+  var addToUnscopables = addToUnscopables$1; // FF99+ bug
+
+  var BROKEN_ON_SPARSE = fails$1(function () {
+    return !Array(1).includes();
+  }); // `Array.prototype.includes` method
   // https://tc39.es/ecma262/#sec-array.prototype.includes
 
   $$3({
     target: 'Array',
-    proto: true
+    proto: true,
+    forced: BROKEN_ON_SPARSE
   }, {
     includes: function includes(el
     /* , fromIndex = 0 */
@@ -3251,7 +3301,7 @@ var markerClusterer = (function (exports) {
   });
 
   var global$2 = global$v;
-  var isCallable$1 = isCallable$d;
+  var isCallable$1 = isCallable$e;
   var String$1 = global$2.String;
   var TypeError$2 = global$2.TypeError;
 
@@ -3290,7 +3340,7 @@ var markerClusterer = (function (exports) {
     };
   }() : undefined);
 
-  var isCallable = isCallable$d;
+  var isCallable = isCallable$e;
   var isObject = isObject$8;
   var setPrototypeOf = objectSetPrototypeOf; // makes subclassing work correct for wrapped built-ins
 
@@ -3343,13 +3393,13 @@ var markerClusterer = (function (exports) {
   var global$1 = global$v;
   var uncurryThis = functionUncurryThis;
   var isForced = isForced_1;
-  var redefine = redefine$3.exports;
+  var defineBuiltIn = defineBuiltIn$3;
   var hasOwn = hasOwnProperty_1;
   var inheritIfRequired = inheritIfRequired$1;
   var isPrototypeOf = objectIsPrototypeOf;
   var isSymbol = isSymbol$3;
   var toPrimitive = toPrimitive$2;
-  var fails = fails$c;
+  var fails = fails$e;
   var getOwnPropertyNames = objectGetOwnPropertyNames.f;
   var getOwnPropertyDescriptor = objectGetOwnPropertyDescriptor.f;
   var defineProperty = objectDefineProperty.f;
@@ -3442,7 +3492,9 @@ var markerClusterer = (function (exports) {
 
     NumberWrapper.prototype = NumberPrototype;
     NumberPrototype.constructor = NumberWrapper;
-    redefine(global$1, NUMBER, NumberWrapper);
+    defineBuiltIn(global$1, NUMBER, NumberWrapper, {
+      constructor: true
+    });
   }
 
   /**
