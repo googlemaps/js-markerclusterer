@@ -181,7 +181,7 @@ var markerClusterer = (function (exports) {
   }; // https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
 
 
-  var global$v = // eslint-disable-next-line es-x/no-global-this -- safe
+  var global$u = // eslint-disable-next-line es-x/no-global-this -- safe
   check(typeof globalThis == 'object' && globalThis) || check(typeof window == 'object' && window) || // eslint-disable-next-line no-restricted-globals -- safe
   check(typeof self == 'object' && self) || check(typeof commonjsGlobal == 'object' && commonjsGlobal) || // eslint-disable-next-line no-new-func -- fallback
   function () {
@@ -272,11 +272,11 @@ var markerClusterer = (function (exports) {
     return stringSlice(toString$5(it), 8, -1);
   };
 
-  var global$u = global$v;
+  var global$t = global$u;
   var uncurryThis$h = functionUncurryThis;
   var fails$b = fails$e;
   var classof$7 = classofRaw$1;
-  var Object$4 = global$u.Object;
+  var Object$4 = global$t.Object;
   var split = uncurryThis$h(''.split); // fallback for non-array-like ES3 and non-enumerable old V8 strings
 
   var indexedObject = fails$b(function () {
@@ -287,8 +287,8 @@ var markerClusterer = (function (exports) {
     return classof$7(it) == 'String' ? split(it, '') : Object$4(it);
   } : Object$4;
 
-  var global$t = global$v;
-  var TypeError$c = global$t.TypeError; // `RequireObjectCoercible` abstract operation
+  var global$s = global$u;
+  var TypeError$c = global$s.TypeError; // `RequireObjectCoercible` abstract operation
   // https://tc39.es/ecma262/#sec-requireobjectcoercible
 
   var requireObjectCoercible$4 = function (it) {
@@ -315,7 +315,7 @@ var markerClusterer = (function (exports) {
     return typeof it == 'object' ? it !== null : isCallable$d(it);
   };
 
-  var global$s = global$v;
+  var global$r = global$u;
   var isCallable$c = isCallable$e;
 
   var aFunction = function (argument) {
@@ -323,7 +323,7 @@ var markerClusterer = (function (exports) {
   };
 
   var getBuiltIn$5 = function (namespace, method) {
-    return arguments.length < 2 ? aFunction(global$s[namespace]) : global$s[namespace] && global$s[namespace][method];
+    return arguments.length < 2 ? aFunction(global$r[namespace]) : global$r[namespace] && global$r[namespace][method];
   };
 
   var uncurryThis$g = functionUncurryThis;
@@ -332,10 +332,10 @@ var markerClusterer = (function (exports) {
   var getBuiltIn$4 = getBuiltIn$5;
   var engineUserAgent = getBuiltIn$4('navigator', 'userAgent') || '';
 
-  var global$r = global$v;
+  var global$q = global$u;
   var userAgent = engineUserAgent;
-  var process = global$r.process;
-  var Deno = global$r.Deno;
+  var process = global$q.process;
+  var Deno = global$q.Deno;
   var versions = process && process.versions || Deno && Deno.version;
   var v8 = versions && versions.v8;
   var match, version;
@@ -376,12 +376,12 @@ var markerClusterer = (function (exports) {
   var NATIVE_SYMBOL$1 = nativeSymbol;
   var useSymbolAsUid = NATIVE_SYMBOL$1 && !Symbol.sham && typeof Symbol.iterator == 'symbol';
 
-  var global$q = global$v;
+  var global$p = global$u;
   var getBuiltIn$3 = getBuiltIn$5;
   var isCallable$b = isCallable$e;
   var isPrototypeOf$1 = objectIsPrototypeOf;
   var USE_SYMBOL_AS_UID$1 = useSymbolAsUid;
-  var Object$3 = global$q.Object;
+  var Object$3 = global$p.Object;
   var isSymbol$3 = USE_SYMBOL_AS_UID$1 ? function (it) {
     return typeof it == 'symbol';
   } : function (it) {
@@ -389,8 +389,8 @@ var markerClusterer = (function (exports) {
     return isCallable$b($Symbol) && isPrototypeOf$1($Symbol.prototype, Object$3(it));
   };
 
-  var global$p = global$v;
-  var String$4 = global$p.String;
+  var global$o = global$u;
+  var String$4 = global$o.String;
 
   var tryToString$1 = function (argument) {
     try {
@@ -400,10 +400,10 @@ var markerClusterer = (function (exports) {
     }
   };
 
-  var global$o = global$v;
+  var global$n = global$u;
   var isCallable$a = isCallable$e;
   var tryToString = tryToString$1;
-  var TypeError$b = global$o.TypeError; // `Assert: IsCallable(argument) is true`
+  var TypeError$b = global$n.TypeError; // `Assert: IsCallable(argument) is true`
 
   var aCallable$3 = function (argument) {
     if (isCallable$a(argument)) return argument;
@@ -418,11 +418,11 @@ var markerClusterer = (function (exports) {
     return func == null ? undefined : aCallable$2(func);
   };
 
-  var global$n = global$v;
+  var global$m = global$u;
   var call$4 = functionCall;
   var isCallable$9 = isCallable$e;
   var isObject$7 = isObject$8;
-  var TypeError$a = global$n.TypeError; // `OrdinaryToPrimitive` abstract operation
+  var TypeError$a = global$m.TypeError; // `OrdinaryToPrimitive` abstract operation
   // https://tc39.es/ecma262/#sec-ordinarytoprimitive
 
   var ordinaryToPrimitive$1 = function (input, pref) {
@@ -435,44 +435,44 @@ var markerClusterer = (function (exports) {
 
   var shared$3 = {exports: {}};
 
-  var global$m = global$v; // eslint-disable-next-line es-x/no-object-defineproperty -- safe
+  var global$l = global$u; // eslint-disable-next-line es-x/no-object-defineproperty -- safe
 
-  var defineProperty$3 = Object.defineProperty;
+  var defineProperty$4 = Object.defineProperty;
 
-  var setGlobal$3 = function (key, value) {
+  var defineGlobalProperty$3 = function (key, value) {
     try {
-      defineProperty$3(global$m, key, {
+      defineProperty$4(global$l, key, {
         value: value,
         configurable: true,
         writable: true
       });
     } catch (error) {
-      global$m[key] = value;
+      global$l[key] = value;
     }
 
     return value;
   };
 
-  var global$l = global$v;
-  var setGlobal$2 = setGlobal$3;
+  var global$k = global$u;
+  var defineGlobalProperty$2 = defineGlobalProperty$3;
   var SHARED = '__core-js_shared__';
-  var store$3 = global$l[SHARED] || setGlobal$2(SHARED, {});
+  var store$3 = global$k[SHARED] || defineGlobalProperty$2(SHARED, {});
   var sharedStore = store$3;
 
   var store$2 = sharedStore;
   (shared$3.exports = function (key, value) {
     return store$2[key] || (store$2[key] = value !== undefined ? value : {});
   })('versions', []).push({
-    version: '3.22.5',
+    version: '3.22.6',
     mode: 'global',
     copyright: '© 2014-2022 Denis Pushkarev (zloirock.ru)',
-    license: 'https://github.com/zloirock/core-js/blob/v3.22.5/LICENSE',
+    license: 'https://github.com/zloirock/core-js/blob/v3.22.6/LICENSE',
     source: 'https://github.com/zloirock/core-js'
   });
 
-  var global$k = global$v;
+  var global$j = global$u;
   var requireObjectCoercible$2 = requireObjectCoercible$4;
-  var Object$2 = global$k.Object; // `ToObject` abstract operation
+  var Object$2 = global$j.Object; // `ToObject` abstract operation
   // https://tc39.es/ecma262/#sec-toobject
 
   var toObject$5 = function (argument) {
@@ -498,14 +498,14 @@ var markerClusterer = (function (exports) {
     return 'Symbol(' + (key === undefined ? '' : key) + ')_' + toString$4(++id + postfix, 36);
   };
 
-  var global$j = global$v;
+  var global$i = global$u;
   var shared$2 = shared$3.exports;
   var hasOwn$7 = hasOwnProperty_1;
   var uid$1 = uid$2;
   var NATIVE_SYMBOL = nativeSymbol;
   var USE_SYMBOL_AS_UID = useSymbolAsUid;
   var WellKnownSymbolsStore = shared$2('wks');
-  var Symbol$1 = global$j.Symbol;
+  var Symbol$1 = global$i.Symbol;
   var symbolFor = Symbol$1 && Symbol$1['for'];
   var createWellKnownSymbol = USE_SYMBOL_AS_UID ? Symbol$1 : Symbol$1 && Symbol$1.withoutSetter || uid$1;
 
@@ -525,14 +525,14 @@ var markerClusterer = (function (exports) {
     return WellKnownSymbolsStore[name];
   };
 
-  var global$i = global$v;
+  var global$h = global$u;
   var call$3 = functionCall;
   var isObject$6 = isObject$8;
   var isSymbol$2 = isSymbol$3;
   var getMethod = getMethod$1;
   var ordinaryToPrimitive = ordinaryToPrimitive$1;
   var wellKnownSymbol$7 = wellKnownSymbol$8;
-  var TypeError$9 = global$i.TypeError;
+  var TypeError$9 = global$h.TypeError;
   var TO_PRIMITIVE = wellKnownSymbol$7('toPrimitive'); // `ToPrimitive` abstract operation
   // https://tc39.es/ecma262/#sec-toprimitive
 
@@ -561,9 +561,9 @@ var markerClusterer = (function (exports) {
     return isSymbol$1(key) ? key : key + '';
   };
 
-  var global$h = global$v;
+  var global$g = global$u;
   var isObject$5 = isObject$8;
-  var document$1 = global$h.document; // typeof document.createElement is 'object' in old IE
+  var document$1 = global$g.document; // typeof document.createElement is 'object' in old IE
 
   var EXISTS$1 = isObject$5(document$1) && isObject$5(document$1.createElement);
 
@@ -623,23 +623,23 @@ var markerClusterer = (function (exports) {
     }).prototype != 42;
   });
 
-  var global$g = global$v;
+  var global$f = global$u;
   var isObject$4 = isObject$8;
-  var String$3 = global$g.String;
-  var TypeError$8 = global$g.TypeError; // `Assert: Type(argument) is Object`
+  var String$3 = global$f.String;
+  var TypeError$8 = global$f.TypeError; // `Assert: Type(argument) is Object`
 
   var anObject$5 = function (argument) {
     if (isObject$4(argument)) return argument;
     throw TypeError$8(String$3(argument) + ' is not an object');
   };
 
-  var global$f = global$v;
+  var global$e = global$u;
   var DESCRIPTORS$6 = descriptors;
   var IE8_DOM_DEFINE = ie8DomDefine;
   var V8_PROTOTYPE_DEFINE_BUG$1 = v8PrototypeDefineBug;
   var anObject$4 = anObject$5;
   var toPropertyKey$1 = toPropertyKey$3;
-  var TypeError$7 = global$f.TypeError; // eslint-disable-next-line es-x/no-object-defineproperty -- safe
+  var TypeError$7 = global$e.TypeError; // eslint-disable-next-line es-x/no-object-defineproperty -- safe
 
   var $defineProperty = Object.defineProperty; // eslint-disable-next-line es-x/no-object-getownpropertydescriptor -- safe
 
@@ -683,10 +683,10 @@ var markerClusterer = (function (exports) {
   };
 
   var DESCRIPTORS$5 = descriptors;
-  var definePropertyModule$4 = objectDefineProperty;
+  var definePropertyModule$3 = objectDefineProperty;
   var createPropertyDescriptor$1 = createPropertyDescriptor$3;
   var createNonEnumerableProperty$4 = DESCRIPTORS$5 ? function (object, key, value) {
-    return definePropertyModule$4.f(object, key, createPropertyDescriptor$1(1, value));
+    return definePropertyModule$3.f(object, key, createPropertyDescriptor$1(1, value));
   } : function (object, key, value) {
     object[key] = value;
     return object;
@@ -725,10 +725,10 @@ var markerClusterer = (function (exports) {
 
   var inspectSource$3 = store$1.inspectSource;
 
-  var global$e = global$v;
+  var global$d = global$u;
   var isCallable$7 = isCallable$e;
   var inspectSource$2 = inspectSource$3;
-  var WeakMap$1 = global$e.WeakMap;
+  var WeakMap$1 = global$d.WeakMap;
   var nativeWeakMap = isCallable$7(WeakMap$1) && /native code/.test(inspectSource$2(WeakMap$1));
 
   var shared$1 = shared$3.exports;
@@ -742,7 +742,7 @@ var markerClusterer = (function (exports) {
   var hiddenKeys$4 = {};
 
   var NATIVE_WEAK_MAP = nativeWeakMap;
-  var global$d = global$v;
+  var global$c = global$u;
   var uncurryThis$c = functionUncurryThis;
   var isObject$3 = isObject$8;
   var createNonEnumerableProperty$3 = createNonEnumerableProperty$4;
@@ -751,8 +751,8 @@ var markerClusterer = (function (exports) {
   var sharedKey$1 = sharedKey$2;
   var hiddenKeys$3 = hiddenKeys$4;
   var OBJECT_ALREADY_INITIALIZED = 'Object already initialized';
-  var TypeError$6 = global$d.TypeError;
-  var WeakMap = global$d.WeakMap;
+  var TypeError$6 = global$c.TypeError;
+  var WeakMap = global$c.WeakMap;
   var set, get, has;
 
   var enforce = function (it) {
@@ -829,9 +829,9 @@ var markerClusterer = (function (exports) {
   var enforceInternalState = InternalStateModule.enforce;
   var getInternalState = InternalStateModule.get; // eslint-disable-next-line es-x/no-object-defineproperty -- safe
 
-  var defineProperty$2 = Object.defineProperty;
+  var defineProperty$3 = Object.defineProperty;
   var CONFIGURABLE_LENGTH = DESCRIPTORS$3 && !fails$7(function () {
-    return defineProperty$2(function () {
+    return defineProperty$3(function () {
       /* empty */
     }, 'length', {
       value: 8
@@ -848,21 +848,21 @@ var markerClusterer = (function (exports) {
     if (options && options.setter) name = 'set ' + name;
 
     if (!hasOwn$3(value, 'name') || CONFIGURABLE_FUNCTION_NAME && value.name !== name) {
-      defineProperty$2(value, 'name', {
+      defineProperty$3(value, 'name', {
         value: name,
         configurable: true
       });
     }
 
     if (CONFIGURABLE_LENGTH && options && hasOwn$3(options, 'arity') && value.length !== options.arity) {
-      defineProperty$2(value, 'length', {
+      defineProperty$3(value, 'length', {
         value: options.arity
       });
     }
 
     if (options && hasOwn$3(options, 'constructor') && options.constructor) {
       if (DESCRIPTORS$3) try {
-        defineProperty$2(value, 'prototype', {
+        defineProperty$3(value, 'prototype', {
           writable: false
         });
       } catch (error) {
@@ -885,42 +885,46 @@ var markerClusterer = (function (exports) {
     return isCallable$6(this) && getInternalState(this).source || inspectSource$1(this);
   }, 'toString');
 
-  var global$c = global$v;
   var isCallable$5 = isCallable$e;
   var createNonEnumerableProperty$2 = createNonEnumerableProperty$4;
   var makeBuiltIn = makeBuiltIn$2.exports;
-  var setGlobal$1 = setGlobal$3;
+  var defineGlobalProperty$1 = defineGlobalProperty$3;
 
   var defineBuiltIn$3 = function (O, key, value, options) {
-    var unsafe = options ? !!options.unsafe : false;
-    var simple = options ? !!options.enumerable : false;
-    var noTargetGet = options ? !!options.noTargetGet : false;
-    var name = options && options.name !== undefined ? options.name : key;
+    if (!options) options = {};
+    var simple = options.enumerable;
+    var name = options.name !== undefined ? options.name : key;
     if (isCallable$5(value)) makeBuiltIn(value, name, options);
 
-    if (O === global$c) {
-      if (simple) O[key] = value;else setGlobal$1(key, value);
-      return O;
-    } else if (!unsafe) {
-      delete O[key];
-    } else if (!noTargetGet && O[key]) {
-      simple = true;
+    if (options.global) {
+      if (simple) O[key] = value;else defineGlobalProperty$1(key, value);
+    } else {
+      if (!options.unsafe) delete O[key];else if (O[key]) simple = true;
+      if (simple) O[key] = value;else createNonEnumerableProperty$2(O, key, value);
     }
 
-    if (simple) O[key] = value;else createNonEnumerableProperty$2(O, key, value);
     return O;
   };
 
   var objectGetOwnPropertyNames = {};
 
   var ceil = Math.ceil;
-  var floor = Math.floor; // `ToIntegerOrInfinity` abstract operation
+  var floor = Math.floor; // `Math.trunc` method
+  // https://tc39.es/ecma262/#sec-math.trunc
+  // eslint-disable-next-line es-x/no-math-trunc -- safe
+
+  var mathTrunc = Math.trunc || function trunc(x) {
+    var n = +x;
+    return (n > 0 ? floor : ceil)(n);
+  };
+
+  var trunc = mathTrunc; // `ToIntegerOrInfinity` abstract operation
   // https://tc39.es/ecma262/#sec-tointegerorinfinity
 
   var toIntegerOrInfinity$3 = function (argument) {
-    var number = +argument; // eslint-disable-next-line no-self-compare -- safe
+    var number = +argument; // eslint-disable-next-line no-self-compare -- NaN check
 
-    return number !== number || number === 0 ? 0 : (number > 0 ? floor : ceil)(number);
+    return number !== number || number === 0 ? 0 : trunc(number);
   };
 
   var toIntegerOrInfinity$2 = toIntegerOrInfinity$3;
@@ -1036,11 +1040,11 @@ var markerClusterer = (function (exports) {
   var hasOwn$1 = hasOwnProperty_1;
   var ownKeys = ownKeys$1;
   var getOwnPropertyDescriptorModule = objectGetOwnPropertyDescriptor;
-  var definePropertyModule$3 = objectDefineProperty;
+  var definePropertyModule$2 = objectDefineProperty;
 
   var copyConstructorProperties$1 = function (target, source, exceptions) {
     var keys = ownKeys(source);
-    var defineProperty = definePropertyModule$3.f;
+    var defineProperty = definePropertyModule$2.f;
     var getOwnPropertyDescriptor = getOwnPropertyDescriptorModule.f;
 
     for (var i = 0; i < keys.length; i++) {
@@ -1070,27 +1074,27 @@ var markerClusterer = (function (exports) {
   var POLYFILL = isForced$2.POLYFILL = 'P';
   var isForced_1 = isForced$2;
 
-  var global$b = global$v;
+  var global$b = global$u;
   var getOwnPropertyDescriptor$1 = objectGetOwnPropertyDescriptor.f;
   var createNonEnumerableProperty$1 = createNonEnumerableProperty$4;
   var defineBuiltIn$2 = defineBuiltIn$3;
-  var setGlobal = setGlobal$3;
+  var defineGlobalProperty = defineGlobalProperty$3;
   var copyConstructorProperties = copyConstructorProperties$1;
   var isForced$1 = isForced_1;
   /*
-    options.target      - name of the target object
-    options.global      - target is the global object
-    options.stat        - export as static methods of target
-    options.proto       - export as prototype methods of target
-    options.real        - real prototype method for the `pure` version
-    options.forced      - export even if the native feature is available
-    options.bind        - bind methods to the target, required for the `pure` version
-    options.wrap        - wrap constructors to preventing global pollution, required for the `pure` version
-    options.unsafe      - use the simple assignment of property instead of delete + defineProperty
-    options.sham        - add a flag to not completely full polyfills
-    options.enumerable  - export as enumerable property
-    options.noTargetGet - prevent calling a getter on target
-    options.name        - the .name of the function if it does not match the key
+    options.target         - name of the target object
+    options.global         - target is the global object
+    options.stat           - export as static methods of target
+    options.proto          - export as prototype methods of target
+    options.real           - real prototype method for the `pure` version
+    options.forced         - export even if the native feature is available
+    options.bind           - bind methods to the target, required for the `pure` version
+    options.wrap           - wrap constructors to preventing global pollution, required for the `pure` version
+    options.unsafe         - use the simple assignment of property instead of delete + defineProperty
+    options.sham           - add a flag to not completely full polyfills
+    options.enumerable     - export as enumerable property
+    options.dontCallGetSet - prevent calling a getter on target
+    options.name           - the .name of the function if it does not match the key
   */
 
   var _export = function (options, source) {
@@ -1102,7 +1106,7 @@ var markerClusterer = (function (exports) {
     if (GLOBAL) {
       target = global$b;
     } else if (STATIC) {
-      target = global$b[TARGET] || setGlobal(TARGET, {});
+      target = global$b[TARGET] || defineGlobalProperty(TARGET, {});
     } else {
       target = (global$b[TARGET] || {}).prototype;
     }
@@ -1110,7 +1114,7 @@ var markerClusterer = (function (exports) {
     if (target) for (key in source) {
       sourceProperty = source[key];
 
-      if (options.noTargetGet) {
+      if (options.dontCallGetSet) {
         descriptor = getOwnPropertyDescriptor$1(target, key);
         targetProperty = descriptor && descriptor.value;
       } else targetProperty = target[key];
@@ -1159,7 +1163,7 @@ var markerClusterer = (function (exports) {
   test[TO_STRING_TAG$1] = 'z';
   var toStringTagSupport = String(test) === '[object z]';
 
-  var global$a = global$v;
+  var global$a = global$u;
   var TO_STRING_TAG_SUPPORT$2 = toStringTagSupport;
   var isCallable$3 = isCallable$e;
   var classofRaw = classofRaw$1;
@@ -1246,7 +1250,7 @@ var markerClusterer = (function (exports) {
     }) || called;
   }) ? isConstructorLegacy : isConstructorModern;
 
-  var global$9 = global$v;
+  var global$9 = global$u;
   var isArray = isArray$1;
   var isConstructor = isConstructor$1;
   var isObject$2 = isObject$8;
@@ -1435,7 +1439,7 @@ var markerClusterer = (function (exports) {
     return t;
   }
 
-  var global$8 = global$v;
+  var global$8 = global$u;
   var aCallable = aCallable$3;
   var toObject$2 = toObject$5;
   var IndexedObject$1 = indexedObject;
@@ -1494,7 +1498,7 @@ var markerClusterer = (function (exports) {
   };
 
   var classof$3 = classofRaw$1;
-  var global$7 = global$v;
+  var global$7 = global$u;
   var engineIsNode = classof$3(global$7.process) == 'process';
 
   var $$7 = _export;
@@ -1896,7 +1900,7 @@ var markerClusterer = (function (exports) {
     return $forEach(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined); // eslint-disable-next-line es-x/no-array-prototype-foreach -- safe
   } : [].forEach;
 
-  var global$6 = global$v;
+  var global$6 = global$u;
   var DOMIterables = domIterables;
   var DOMTokenListPrototype = domTokenListPrototype;
   var forEach = arrayForEach;
@@ -2073,7 +2077,7 @@ var markerClusterer = (function (exports) {
 
   var $assign = Object.assign; // eslint-disable-next-line es-x/no-object-defineproperty -- required for testing
 
-  var defineProperty$1 = Object.defineProperty;
+  var defineProperty$2 = Object.defineProperty;
   var concat = uncurryThis$6([].concat); // `Object.assign` method
   // https://tc39.es/ecma262/#sec-object.assign
 
@@ -2081,10 +2085,10 @@ var markerClusterer = (function (exports) {
     // should have correct order of operations (Edge bug)
     if (DESCRIPTORS$2 && $assign({
       b: 1
-    }, $assign(defineProperty$1({}, 'a', {
+    }, $assign(defineProperty$2({}, 'a', {
       enumerable: true,
       get: function () {
-        defineProperty$1(this, 'b', {
+        defineProperty$2(this, 'b', {
           value: 3,
           enumerable: false
         });
@@ -2955,7 +2959,7 @@ var markerClusterer = (function (exports) {
 
   var DESCRIPTORS$1 = descriptors;
   var V8_PROTOTYPE_DEFINE_BUG = v8PrototypeDefineBug;
-  var definePropertyModule$2 = objectDefineProperty;
+  var definePropertyModule$1 = objectDefineProperty;
   var anObject$2 = anObject$5;
   var toIndexedObject = toIndexedObject$4;
   var objectKeys = objectKeys$2; // `Object.defineProperties` method
@@ -2970,7 +2974,7 @@ var markerClusterer = (function (exports) {
     var index = 0;
     var key;
 
-    while (length > index) definePropertyModule$2.f(O, key = keys[index++], props[key]);
+    while (length > index) definePropertyModule$1.f(O, key = keys[index++], props[key]);
 
     return O;
   };
@@ -3071,13 +3075,13 @@ var markerClusterer = (function (exports) {
 
   var wellKnownSymbol$2 = wellKnownSymbol$8;
   var create = objectCreate;
-  var definePropertyModule$1 = objectDefineProperty;
+  var defineProperty$1 = objectDefineProperty.f;
   var UNSCOPABLES = wellKnownSymbol$2('unscopables');
   var ArrayPrototype = Array.prototype; // Array.prototype[@@unscopables]
   // https://tc39.es/ecma262/#sec-array.prototype-@@unscopables
 
   if (ArrayPrototype[UNSCOPABLES] == undefined) {
-    definePropertyModule$1.f(ArrayPrototype, UNSCOPABLES, {
+    defineProperty$1(ArrayPrototype, UNSCOPABLES, {
       configurable: true,
       value: create(null)
     });
@@ -3123,7 +3127,7 @@ var markerClusterer = (function (exports) {
     return isObject$1(it) && ((isRegExp = it[MATCH$1]) !== undefined ? !!isRegExp : classof$1(it) == 'RegExp');
   };
 
-  var global$5 = global$v;
+  var global$5 = global$u;
   var isRegExp = isRegexp;
   var TypeError$4 = global$5.TypeError;
 
@@ -3135,7 +3139,7 @@ var markerClusterer = (function (exports) {
     return it;
   };
 
-  var global$4 = global$v;
+  var global$4 = global$u;
   var classof = classof$5;
   var String$2 = global$4.String;
 
@@ -3221,7 +3225,7 @@ var markerClusterer = (function (exports) {
   };
 
   var $ = _export;
-  var global$3 = global$v;
+  var global$3 = global$u;
   var toAbsoluteIndex = toAbsoluteIndex$2;
   var toIntegerOrInfinity = toIntegerOrInfinity$3;
   var lengthOfArrayLike = lengthOfArrayLike$4;
@@ -3300,7 +3304,7 @@ var markerClusterer = (function (exports) {
     }
   });
 
-  var global$2 = global$v;
+  var global$2 = global$u;
   var isCallable$1 = isCallable$e;
   var String$1 = global$2.String;
   var TypeError$2 = global$2.TypeError;
@@ -3390,7 +3394,7 @@ var markerClusterer = (function (exports) {
   };
 
   var DESCRIPTORS = descriptors;
-  var global$1 = global$v;
+  var global$1 = global$u;
   var uncurryThis = functionUncurryThis;
   var isForced = isForced_1;
   var defineBuiltIn = defineBuiltIn$3;
