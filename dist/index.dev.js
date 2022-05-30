@@ -463,10 +463,10 @@ var markerClusterer = (function (exports) {
   (shared$3.exports = function (key, value) {
     return store$2[key] || (store$2[key] = value !== undefined ? value : {});
   })('versions', []).push({
-    version: '3.22.6',
+    version: '3.22.7',
     mode: 'global',
     copyright: '© 2014-2022 Denis Pushkarev (zloirock.ru)',
-    license: 'https://github.com/zloirock/core-js/blob/v3.22.6/LICENSE',
+    license: 'https://github.com/zloirock/core-js/blob/v3.22.7/LICENSE',
     source: 'https://github.com/zloirock/core-js'
   });
 
@@ -860,15 +860,15 @@ var markerClusterer = (function (exports) {
       });
     }
 
-    if (options && hasOwn$3(options, 'constructor') && options.constructor) {
-      if (DESCRIPTORS$3) try {
-        defineProperty$3(value, 'prototype', {
+    try {
+      if (options && hasOwn$3(options, 'constructor') && options.constructor) {
+        if (DESCRIPTORS$3) defineProperty$3(value, 'prototype', {
           writable: false
-        });
-      } catch (error) {
-        /* empty */
-      }
-    } else value.prototype = undefined;
+        }); // in V8 ~ Chrome 53, prototypes of some methods, like `Array.prototype.values`, are non-writable
+      } else if (value.prototype) value.prototype = undefined;
+    } catch (error) {
+      /* empty */
+    }
 
     var state = enforceInternalState(value);
 
