@@ -457,10 +457,10 @@ var markerClusterer = (function (exports) {
   (shared$3.exports = function (key, value) {
     return store$2[key] || (store$2[key] = value !== undefined ? value : {});
   })('versions', []).push({
-    version: '3.22.8',
+    version: '3.23.0',
     mode: 'global',
     copyright: '© 2014-2022 Denis Pushkarev (zloirock.ru)',
-    license: 'https://github.com/zloirock/core-js/blob/v3.22.8/LICENSE',
+    license: 'https://github.com/zloirock/core-js/blob/v3.23.0/LICENSE',
     source: 'https://github.com/zloirock/core-js'
   });
 
@@ -673,10 +673,10 @@ var markerClusterer = (function (exports) {
   };
 
   var DESCRIPTORS$5 = descriptors;
-  var definePropertyModule$3 = objectDefineProperty;
+  var definePropertyModule$4 = objectDefineProperty;
   var createPropertyDescriptor$1 = createPropertyDescriptor$3;
-  var createNonEnumerableProperty$4 = DESCRIPTORS$5 ? function (object, key, value) {
-    return definePropertyModule$3.f(object, key, createPropertyDescriptor$1(1, value));
+  var createNonEnumerableProperty$3 = DESCRIPTORS$5 ? function (object, key, value) {
+    return definePropertyModule$4.f(object, key, createPropertyDescriptor$1(1, value));
   } : function (object, key, value) {
     object[key] = value;
     return object;
@@ -735,7 +735,7 @@ var markerClusterer = (function (exports) {
   var global$5 = global$d;
   var uncurryThis$c = functionUncurryThis;
   var isObject$3 = isObject$8;
-  var createNonEnumerableProperty$3 = createNonEnumerableProperty$4;
+  var createNonEnumerableProperty$2 = createNonEnumerableProperty$3;
   var hasOwn$4 = hasOwnProperty_1;
   var shared = sharedStore;
   var sharedKey$1 = sharedKey$2;
@@ -788,7 +788,7 @@ var markerClusterer = (function (exports) {
     set = function (it, metadata) {
       if (hasOwn$4(it, STATE)) throw new TypeError$2(OBJECT_ALREADY_INITIALIZED);
       metadata.facade = it;
-      createNonEnumerableProperty$3(it, STATE, metadata);
+      createNonEnumerableProperty$2(it, STATE, metadata);
       return metadata;
     };
 
@@ -876,7 +876,7 @@ var markerClusterer = (function (exports) {
   }, 'toString');
 
   var isCallable$5 = isCallable$e;
-  var createNonEnumerableProperty$2 = createNonEnumerableProperty$4;
+  var definePropertyModule$3 = objectDefineProperty;
   var makeBuiltIn = makeBuiltIn$2.exports;
   var defineGlobalProperty$1 = defineGlobalProperty$3;
 
@@ -890,7 +890,12 @@ var markerClusterer = (function (exports) {
       if (simple) O[key] = value;else defineGlobalProperty$1(key, value);
     } else {
       if (!options.unsafe) delete O[key];else if (O[key]) simple = true;
-      if (simple) O[key] = value;else createNonEnumerableProperty$2(O, key, value);
+      if (simple) O[key] = value;else definePropertyModule$3.f(O, key, {
+        value: value,
+        enumerable: false,
+        configurable: !options.nonConfigurable,
+        writable: !options.nonWritable
+      });
     }
 
     return O;
@@ -1066,7 +1071,7 @@ var markerClusterer = (function (exports) {
 
   var global$4 = global$d;
   var getOwnPropertyDescriptor$1 = objectGetOwnPropertyDescriptor.f;
-  var createNonEnumerableProperty$1 = createNonEnumerableProperty$4;
+  var createNonEnumerableProperty$1 = createNonEnumerableProperty$3;
   var defineBuiltIn$2 = defineBuiltIn$3;
   var defineGlobalProperty = defineGlobalProperty$3;
   var copyConstructorProperties = copyConstructorProperties$1;
@@ -1891,7 +1896,7 @@ var markerClusterer = (function (exports) {
   var DOMIterables = domIterables;
   var DOMTokenListPrototype = domTokenListPrototype;
   var forEach = arrayForEach;
-  var createNonEnumerableProperty = createNonEnumerableProperty$4;
+  var createNonEnumerableProperty = createNonEnumerableProperty$3;
 
   var handlePrototype = function (CollectionPrototype) {
     // some Chrome versions have non-configurable methods on DOMTokenList
