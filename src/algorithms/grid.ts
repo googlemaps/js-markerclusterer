@@ -17,11 +17,17 @@
 import {
   AbstractViewportAlgorithm,
   AlgorithmInput,
+  AlgorithmOutput,
   ViewportAlgorithmOptions,
 } from "./core";
-import { distanceBetweenPoints, extendBoundsToPaddedViewport } from "./utils";
+import {
+  distanceBetweenPoints,
+  extendBoundsToPaddedViewport,
+  filterMarkersToPaddedViewport,
+} from "./utils";
 
 import { Cluster } from "../cluster";
+import equal from "fast-deep-equal";
 
 export interface GridOptions extends ViewportAlgorithmOptions {
   gridSize?: number;
@@ -43,12 +49,53 @@ export class GridAlgorithm extends AbstractViewportAlgorithm {
   protected gridSize: number;
   protected maxDistance: number;
   protected clusters: Cluster[] = [];
+  protected state: { zoom: number };
 
   constructor({ maxDistance = 40000, gridSize = 40, ...options }: GridOptions) {
     super(options);
 
     this.maxDistance = maxDistance;
     this.gridSize = gridSize;
+    this.state = { zoom: null };
+  }
+
+  public calculate({
+    markers,
+    map,
+    mapCanvasProjection,
+  }: AlgorithmInput): AlgorithmOutput {
+    const state = { zoom: map.getZoom() };
+    let changed = false;
+    if (this.state.zoom > this.maxZoom && state.zoom > this.maxZoom) {
+      // still beyond maxZoom, no change
+    } else {
+      changed = !equal(this.state, state);
+    }
+    this.state = state;
+
+    if (map.getZoom() >= this.maxZoom) {
+      return {
+        clusters: this.noop({
+          markers,
+          map,
+          mapCanvasProjection,
+        }),
+        changed: changed,
+      };
+    }
+
+    return {
+      clusters: this.cluster({
+        markers: filterMarkersToPaddedViewport(
+          map,
+          mapCanvasProjection,
+          markers,
+          this.viewportPadding
+        ),
+        map,
+        mapCanvasProjection,
+      }),
+    };
   }
 
   protected cluster({
