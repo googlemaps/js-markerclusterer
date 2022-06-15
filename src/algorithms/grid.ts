@@ -86,7 +86,7 @@ export class GridAlgorithm extends AbstractViewportAlgorithm {
 
     return {
       clusters: this.cluster({
-        markers: filterMarkersToPaddedViewport(
+        markers: this.filterMarkersToPaddedViewport(
           map,
           mapCanvasProjection,
           markers,
@@ -145,5 +145,19 @@ export class GridAlgorithm extends AbstractViewportAlgorithm {
       const cluster = new Cluster({ markers: [marker] });
       this.clusters.push(cluster);
     }
+  }
+
+  protected filterMarkersToPaddedViewport(
+    map: google.maps.Map,
+    mapCanvasProjection: google.maps.MapCanvasProjection,
+    markers: google.maps.Marker[],
+    viewportPadding: number
+  ): google.maps.Marker[] {
+    return filterMarkersToPaddedViewport(
+      map,
+      mapCanvasProjection,
+      markers,
+      viewportPadding
+    );
   }
 }
