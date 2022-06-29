@@ -123,8 +123,8 @@ export class DefaultRenderer implements Renderer {
     const svg = window.btoa(`
       <svg fill="${color}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
         <circle cx="120" cy="120" opacity=".6" r="70" />
-        <circle cx="120" cy="120" opacity=".3" r="90" />
-        <circle cx="120" cy="120" opacity=".2" r="110" />
+        <circle cx="120" cy="120" opacity=".4" r="90" />
+        <circle cx="120" cy="120" opacity=".3" r="110" />
       </svg>`
     );
 
@@ -141,8 +141,6 @@ export class DefaultRenderer implements Renderer {
         fontSize: "12px",
         fontWeight: "bold",
       },
-      title: `Cluster of ${count} markers`,
-      // adjust zIndex to be above other markers
       zIndex: Number(google.maps.Marker.MAX_ZINDEX) + count,
     });
   }

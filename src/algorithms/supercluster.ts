@@ -86,9 +86,7 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
 
     this.state = state;
 
-    if (changed) {
-      this.clusters = this.cluster(input);
-    }
+    this.clusters = this.cluster(input);
 
     return { clusters: this.clusters, changed };
   }

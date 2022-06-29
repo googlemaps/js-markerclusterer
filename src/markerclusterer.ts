@@ -165,13 +165,13 @@ export class MarkerClusterer extends OverlayViewSafe {
    * Recalculates and draws all the marker clusters.
    */
   public redraw() : void {
-    this.render();
+    this.render(true);
   }
   
   /**
    * Recalculates and draws all the marker clusters.
    */
-  public render(): void {
+  public render(force = false): void {
     const map = this.getMap();
     if (map instanceof google.maps.Map && this.getProjection()) {
       google.maps.event.trigger(
@@ -184,9 +184,8 @@ export class MarkerClusterer extends OverlayViewSafe {
         map,
         mapCanvasProjection: this.getProjection(),
       });
-
       // allow algorithms to return flag on whether the clusters/markers have changed
-      if (changed || changed == undefined) {
+      if (changed || changed == undefined || force) {
         // reset visibility of markers and clusters
         this.reset();
 
@@ -244,7 +243,6 @@ export class MarkerClusterer extends OverlayViewSafe {
         // @ts-ignore
           cluster.markers.map(marker => marker["id"])
         );
-      // if (defaultOnClusterClickHandler) {
         cluster.marker.addListener(
           "click",
           /* istanbul ignore next */
@@ -257,7 +255,6 @@ export class MarkerClusterer extends OverlayViewSafe {
             defaultOnClusterClickHandler(event, cluster, map);
           }
         );
-        // }
       }
 
       cluster.marker.setMap(map);
