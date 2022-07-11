@@ -28,7 +28,7 @@
 <p>The library creates and manages per-zoom-level clusters for large amounts of markers.</p>
 <p><a href="https://googlemaps.github.io/js-markerclusterer/public/defaults/"><strong>Try the demo</strong></a></p>
 <p><img src="https://user-images.githubusercontent.com/3392975/135143029-20abd824-0f3e-4e28-bad3-327acf7aec04.png" alt="screenshot"></p>
-<p>See the <a href="#history">history section</a> and <a href="#migration">migration section</a> for how this library relates to [@google/markerclusterer][@google/markerclusterer] and [@googlemaps/markerclustererplus][@googlemaps/markerclustererplus].</p>
+<p>See the <a href="#history">history section</a> and <a href="#migration">migration section</a> for how this library relates to <a href="https://www.npmjs.com/package/@google/markerclusterer">@google/markerclusterer</a> and <a href="https://www.npmjs.com/package/@googlemaps/markerclustererplus">@googlemaps/markerclustererplus</a>.</p>
 
 <a href="#install" id="install" style="color: inherit; text-decoration: none;">
   <h2>Install</h2>
@@ -70,22 +70,34 @@
 <a href="#history" id="history" style="color: inherit; text-decoration: none;">
   <h2>History</h2>
 </a>
-<p>This library has a heritage in [@google/markerclusterer][@google/markerclusterer] and [@googlemaps/markerclustererplus][@googlemaps/markerclustererplus], originally made available on <a href="https://code.google.com/archive/">code.google.com</a> and then transferred to GitHub at <a href="https://github.com/googlemaps/v3-utility-library">https://github.com/googlemaps/v3-utility-library</a>. The following is an approximate timeline.</p>
+<p>This library has a heritage in <a href="https://www.npmjs.com/package/@google/markerclusterer">@google/markerclusterer</a> and <a href="https://www.npmjs.com/package/@googlemaps/markerclustererplus">@googlemaps/markerclustererplus</a>, originally made available on <a href="https://code.google.com/archive/">code.google.com</a> and then transferred to GitHub at <a href="https://github.com/googlemaps/v3-utility-library">https://github.com/googlemaps/v3-utility-library</a>. The following is an approximate timeline.</p>
 <ul>
-<li>201X - [@google/markerclusterer][@google/markerclusterer] was created.</li>
-<li>201X - [@googlemaps/markerclustererplus][@googlemaps/markerclustererplus] was created.</li>
+<li>201X - <a href="https://www.npmjs.com/package/@google/markerclusterer">@google/markerclusterer</a> was created.</li>
+<li>201X - <a href="https://www.npmjs.com/package/@googlemaps/markerclustererplus">@googlemaps/markerclustererplus</a> was created.</li>
 <li>2019 - Libraries were published to NPM.</li>
-<li>2019 - [@google/markerclusterer][@google/markerclusterer] was deprecated for [@googlemaps/markerclustererplus][@googlemaps/markerclustererplus].</li>
-<li>2020 - [@googlemaps/markerclustererplus][@googlemaps/markerclustererplus] was refactored to TypeScript.</li>
-<li>2020 - [@googlemaps/markerclustererplus][@googlemaps/markerclustererplus] was moved to a separate repository.</li>
-<li>2021 - [@googlemaps/markerclustererplus][@googlemaps/markerclustererplus] was rewritten as [@googlemaps/markerclusterer (<strong>new</strong>)][@googlemaps/markerclusterer].</li>
-<li>TBD - [@googlemaps/markerclustererplus][@googlemaps/markerclustererplus] is deprecated for [@googlemaps/markerclusterer (<strong>new</strong>)][@googlemaps/markerclusterer].</li>
+<li>2019 - <a href="https://www.npmjs.com/package/@google/markerclusterer">@google/markerclusterer</a> was deprecated for <a href="https://www.npmjs.com/package/@googlemaps/markerclustererplus">@googlemaps/markerclustererplus</a>.</li>
+<li>2020 - <a href="https://www.npmjs.com/package/@googlemaps/markerclustererplus">@googlemaps/markerclustererplus</a> was refactored to TypeScript.</li>
+<li>2020 - <a href="https://www.npmjs.com/package/@googlemaps/markerclustererplus">@googlemaps/markerclustererplus</a> was moved to a separate repository.</li>
+<li>2021 - <a href="https://www.npmjs.com/package/@googlemaps/markerclustererplus">@googlemaps/markerclustererplus</a> was rewritten as <a href="https://www.npmjs.com/package/@googlemaps/markerclusterer">@googlemaps/markerclusterer (<strong>new</strong>)</a>.</li>
+<li>TBD - <a href="https://www.npmjs.com/package/@googlemaps/markerclustererplus">@googlemaps/markerclustererplus</a> is deprecated for <a href="https://www.npmjs.com/package/@googlemaps/markerclusterer">@googlemaps/markerclusterer (<strong>new</strong>)</a>.</li>
 </ul>
 
 <a href="#migration" id="migration" style="color: inherit; text-decoration: none;">
   <h2>Migration</h2>
 </a>
-<p>The API of</p>
+<p>The API of @googlemaps/markerclusterer has changed in a number of ways from <a href="https://www.npmjs.com/package/@googlemaps/markerclustererplus">@googlemaps/markerclustererplus</a>.</p>
+<ul>
+<li>The <code>MarkerClusterer</code> class now accepts an <code>algorithm</code> and <code>renderer</code> parameter to allow for more flexibility. The interface looks like the following:</li>
+</ul>
+<pre><code class="language-js"><span class="hl-1">{</span><br/><span class="hl-1">    </span><span class="hl-0">algorithm</span><span class="hl-1">?: </span><span class="hl-0">Algorithm</span><span class="hl-1">;</span><br/><span class="hl-1">    </span><span class="hl-0">map</span><span class="hl-1">?: </span><span class="hl-0">google</span><span class="hl-1">.</span><span class="hl-0">maps</span><span class="hl-1">.</span><span class="hl-0">Map</span><span class="hl-1">;</span><br/><span class="hl-1">    </span><span class="hl-0">markers</span><span class="hl-1">?: </span><span class="hl-0">google</span><span class="hl-1">.</span><span class="hl-0">maps</span><span class="hl-1">.</span><span class="hl-0">Marker</span><span class="hl-1">[];</span><br/><span class="hl-1">    </span><span class="hl-0">renderer</span><span class="hl-1">?: </span><span class="hl-0">Renderer</span><span class="hl-1">;</span><br/><span class="hl-1">    </span><span class="hl-0">onClusterClick</span><span class="hl-1">?: </span><span class="hl-0">onClusterClickHandler</span><span class="hl-1">;</span><br/><span class="hl-1">  }</span>
+</code></pre>
+<ul>
+<li>The <code>MarkerClusterer</code> accepts a single options argument instead of positional parameters.</li>
+<li>The traditional <code>GridAlgorithm</code> is still supported, <strong>but is not the default</strong>. The default is <a href="https://www.npmjs.com/package/supercluster">supercluster</a> which uses <a href="https://en.wikipedia.org/wiki/K-d_tree">k-d trees</a> for improved performance.</li>
+<li>Styling of clusters has been simplifed and moved to the renderer interface.</li>
+<li>The <code>MarkerClusterer</code> class is still an instance of <code>google.maps.OverlayView</code>, but uses <code>google.maps.Marker</code>s instead of <code>google.maps.Overlay</code> to render the clusters. This solves issues related to the usage of map panes and click handlers.</li>
+<li>@googlemaps/markerclusterer supports Marker and Map <a href="https://cloud.google.com/blog/products/maps-platform/improved-accessibility-maps-javascript-api">a11y improvements</a>.</li>
+</ul>
 </div></div>
 <div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 <div class="tsd-navigation settings">
