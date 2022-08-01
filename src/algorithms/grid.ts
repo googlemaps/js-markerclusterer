@@ -72,7 +72,6 @@ export class GridAlgorithm extends AbstractViewportAlgorithm {
       changed = !equal(this.state, state);
     }
     this.state = state;
-
     if (map.getZoom() >= this.maxZoom) {
       return {
         clusters: this.noop({
@@ -86,7 +85,7 @@ export class GridAlgorithm extends AbstractViewportAlgorithm {
 
     return {
       clusters: this.cluster({
-        markers: this.filterMarkersToPaddedViewport(
+        markers: filterMarkersToPaddedViewport(
           map,
           mapCanvasProjection,
           markers,
@@ -145,19 +144,5 @@ export class GridAlgorithm extends AbstractViewportAlgorithm {
       const cluster = new Cluster({ markers: [marker] });
       this.clusters.push(cluster);
     }
-  }
-
-  protected filterMarkersToPaddedViewport(
-    map: google.maps.Map,
-    mapCanvasProjection: google.maps.MapCanvasProjection,
-    markers: google.maps.Marker[],
-    viewportPadding: number
-  ): google.maps.Marker[] {
-    return filterMarkersToPaddedViewport(
-      map,
-      mapCanvasProjection,
-      markers,
-      viewportPadding
-    );
   }
 }

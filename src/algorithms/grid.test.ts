@@ -33,8 +33,7 @@ test("calculate should return changed: true for first call when zoom > max zoom"
   const grid = new GridAlgorithm({ maxZoom: 16 });
   grid["noop"] = jest.fn();
   grid["cluster"] = jest.fn();
-  grid["filterMarkersToPaddedViewport"] = jest.fn();
-
+  
   map.getZoom = jest.fn().mockReturnValue(15);
 
   grid.calculate({
