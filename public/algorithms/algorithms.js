@@ -1,4 +1,4 @@
-import { _ as __rest, S as Supercluster, f as fastDeepEqual, L as Loader } from './vendor.js';
+import { _ as __rest, f as fastDeepEqual, S as Supercluster, L as Loader } from './vendor.js';
 
 /**
  * Copyright 2021 Google LLC
@@ -245,6 +245,33 @@ class GridAlgorithm extends AbstractViewportAlgorithm {
         this.clusters = [];
         this.maxDistance = maxDistance;
         this.gridSize = gridSize;
+        this.state = { zoom: null };
+    }
+    calculate({ markers, map, mapCanvasProjection, }) {
+        const state = { zoom: map.getZoom() };
+        let changed = false;
+        if (this.state.zoom > this.maxZoom && state.zoom > this.maxZoom) ;
+        else {
+            changed = !fastDeepEqual(this.state, state);
+        }
+        this.state = state;
+        if (map.getZoom() >= this.maxZoom) {
+            return {
+                clusters: this.noop({
+                    markers,
+                    map,
+                    mapCanvasProjection,
+                }),
+                changed: changed,
+            };
+        }
+        return {
+            clusters: this.cluster({
+                markers: filterMarkersToPaddedViewport(map, mapCanvasProjection, markers, this.viewportPadding),
+                map,
+                mapCanvasProjection,
+            }),
+        };
     }
     cluster({ markers, map, mapCanvasProjection, }) {
         this.clusters = [];

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /// <reference types="google.maps" />
-import { AbstractViewportAlgorithm, AlgorithmInput, ViewportAlgorithmOptions } from "./core";
+import { AbstractViewportAlgorithm, AlgorithmInput, AlgorithmOutput, ViewportAlgorithmOptions } from "./core";
 import { Cluster } from "../cluster";
 export interface GridOptions extends ViewportAlgorithmOptions {
     gridSize?: number;
@@ -35,7 +35,11 @@ export declare class GridAlgorithm extends AbstractViewportAlgorithm {
     protected gridSize: number;
     protected maxDistance: number;
     protected clusters: Cluster[];
+    protected state: {
+        zoom: number;
+    };
     constructor({ maxDistance, gridSize, ...options }: GridOptions);
+    calculate({ markers, map, mapCanvasProjection, }: AlgorithmInput): AlgorithmOutput;
     protected cluster({ markers, map, mapCanvasProjection, }: AlgorithmInput): Cluster[];
     protected addToClosestCluster(marker: google.maps.Marker, map: google.maps.Map, projection: google.maps.MapCanvasProjection): void;
 }

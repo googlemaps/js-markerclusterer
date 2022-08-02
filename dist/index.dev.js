@@ -1934,6 +1934,43 @@ var markerClusterer = (function (exports) {
     }
   });
 
+  var fastDeepEqual = function equal(a, b) {
+    if (a === b) return true;
+
+    if (a && b && typeof a == 'object' && typeof b == 'object') {
+      if (a.constructor !== b.constructor) return false;
+      var length, i, keys;
+
+      if (Array.isArray(a)) {
+        length = a.length;
+        if (length != b.length) return false;
+
+        for (i = length; i-- !== 0;) if (!equal(a[i], b[i])) return false;
+
+        return true;
+      }
+
+      if (a.constructor === RegExp) return a.source === b.source && a.flags === b.flags;
+      if (a.valueOf !== Object.prototype.valueOf) return a.valueOf() === b.valueOf();
+      if (a.toString !== Object.prototype.toString) return a.toString() === b.toString();
+      keys = Object.keys(a);
+      length = keys.length;
+      if (length !== Object.keys(b).length) return false;
+
+      for (i = length; i-- !== 0;) if (!Object.prototype.hasOwnProperty.call(b, keys[i])) return false;
+
+      for (i = length; i-- !== 0;) {
+        var key = keys[i];
+        if (!equal(a[key], b[key])) return false;
+      }
+
+      return true;
+    } // true if both NaN, false otherwise
+
+
+    return a !== a && b !== b;
+  };
+
   /**
    * The default Grid algorithm historically used in Google Maps marker
    * clustering.
@@ -1962,17 +1999,56 @@ var markerClusterer = (function (exports) {
       _this.clusters = [];
       _this.maxDistance = maxDistance;
       _this.gridSize = gridSize;
+      _this.state = {
+        zoom: null
+      };
       return _this;
     }
 
     _createClass(GridAlgorithm, [{
-      key: "cluster",
-      value: function cluster(_ref) {
-        var _this2 = this;
-
+      key: "calculate",
+      value: function calculate(_ref) {
         var markers = _ref.markers,
             map = _ref.map,
             mapCanvasProjection = _ref.mapCanvasProjection;
+        var state = {
+          zoom: map.getZoom()
+        };
+        var changed = false;
+
+        if (this.state.zoom > this.maxZoom && state.zoom > this.maxZoom) ; else {
+          changed = !fastDeepEqual(this.state, state);
+        }
+
+        this.state = state;
+
+        if (map.getZoom() >= this.maxZoom) {
+          return {
+            clusters: this.noop({
+              markers: markers,
+              map: map,
+              mapCanvasProjection: mapCanvasProjection
+            }),
+            changed: changed
+          };
+        }
+
+        return {
+          clusters: this.cluster({
+            markers: filterMarkersToPaddedViewport(map, mapCanvasProjection, markers, this.viewportPadding),
+            map: map,
+            mapCanvasProjection: mapCanvasProjection
+          })
+        };
+      }
+    }, {
+      key: "cluster",
+      value: function cluster(_ref2) {
+        var _this2 = this;
+
+        var markers = _ref2.markers,
+            map = _ref2.map,
+            mapCanvasProjection = _ref2.mapCanvasProjection;
         this.clusters = [];
         markers.forEach(function (marker) {
           _this2.addToClosestCluster(marker, map, mapCanvasProjection);
@@ -2798,43 +2874,6 @@ var markerClusterer = (function (exports) {
   function getY(p) {
     return p.y;
   }
-
-  var fastDeepEqual = function equal(a, b) {
-    if (a === b) return true;
-
-    if (a && b && typeof a == 'object' && typeof b == 'object') {
-      if (a.constructor !== b.constructor) return false;
-      var length, i, keys;
-
-      if (Array.isArray(a)) {
-        length = a.length;
-        if (length != b.length) return false;
-
-        for (i = length; i-- !== 0;) if (!equal(a[i], b[i])) return false;
-
-        return true;
-      }
-
-      if (a.constructor === RegExp) return a.source === b.source && a.flags === b.flags;
-      if (a.valueOf !== Object.prototype.valueOf) return a.valueOf() === b.valueOf();
-      if (a.toString !== Object.prototype.toString) return a.toString() === b.toString();
-      keys = Object.keys(a);
-      length = keys.length;
-      if (length !== Object.keys(b).length) return false;
-
-      for (i = length; i-- !== 0;) if (!Object.prototype.hasOwnProperty.call(b, keys[i])) return false;
-
-      for (i = length; i-- !== 0;) {
-        var key = keys[i];
-        if (!equal(a[key], b[key])) return false;
-      }
-
-      return true;
-    } // true if both NaN, false otherwise
-
-
-    return a !== a && b !== b;
-  };
 
   /**
    * A very fast JavaScript algorithm for geospatial point clustering using KD trees.
