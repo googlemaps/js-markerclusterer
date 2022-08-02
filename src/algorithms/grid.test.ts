@@ -15,7 +15,7 @@
  */
 
 import { GridAlgorithm } from "./grid";
-import { initialize } from "@googlemaps/jest-mocks";
+import { initialize, MapCanvasProjection } from "@googlemaps/jest-mocks";
 
 let map: google.maps.Map;
 
@@ -26,8 +26,7 @@ beforeEach(() => {
 });
 
 test("calculate should return changed: true for first call when zoom > max zoom", () => {
-  const mapCanvasProjection =
-    jest.fn() as unknown as google.maps.MapCanvasProjection;
+  const mapCanvasProjection = new MapCanvasProjection();
   const markers: google.maps.Marker[] = [new google.maps.Marker()];
 
   const grid = new GridAlgorithm({ maxZoom: 16 });
