@@ -21,7 +21,9 @@ import { Cluster } from "../cluster";
 import equal from "fast-deep-equal";
 
 export type SuperClusterOptions = SuperCluster.Options<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   { [name: string]: any },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   { [name: string]: any }
 >;
 
