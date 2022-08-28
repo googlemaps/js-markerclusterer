@@ -102,11 +102,19 @@ test("should not cluster if zoom didn't change", () => {
 
   const superCluster = new SuperClusterAlgorithm({});
   superCluster["markers"] = markers;
-  superCluster["state"] = { zoom: 12 };
+  superCluster["state"] = { zoom: 12, boundingBox: [-180, -90, 180, 90] };
   superCluster.cluster = jest.fn().mockReturnValue([]);
   superCluster["clusters"] = [];
 
   map.getZoom = jest.fn().mockReturnValue(superCluster["state"].zoom);
+  map.getBounds = jest.fn().mockReturnValue({
+    toJSON: () => ({
+      west: -180,
+      south: -90,
+      east: 180,
+      north: 90,
+    }),
+  });
 
   const { clusters, changed } = superCluster.calculate({
     markers,
@@ -128,7 +136,7 @@ test("should not cluster if zoom beyond maxZoom", () => {
 
   const superCluster = new SuperClusterAlgorithm({});
   superCluster["markers"] = markers;
-  superCluster["state"] = { zoom: 20 };
+  superCluster["state"] = { zoom: 20, boundingBox: [-180, -90, 180, 90] };
   superCluster.cluster = jest.fn().mockReturnValue([]);
   superCluster["clusters"] = [];
 

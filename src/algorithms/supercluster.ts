@@ -27,6 +27,8 @@ export type SuperClusterOptions = SuperCluster.Options<
   { [name: string]: any }
 >;
 
+type BoundingBox = [number, number, number, number];
+
 /**
  * A very fast JavaScript algorithm for geospatial point clustering using KD trees.
  *
@@ -36,7 +38,7 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
   protected superCluster: SuperCluster;
   protected markers: google.maps.Marker[];
   protected clusters: Cluster[];
-  protected state: { zoom: number };
+  protected state: { zoom: number, boundingBox: BoundingBox };
 
   constructor({ maxZoom, radius = 60, ...options }: SuperClusterOptions) {
     super({ maxZoom });
@@ -47,7 +49,7 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
       ...options,
     });
 
-    this.state = { zoom: null };
+    this.state = { zoom: null, boundingBox: [-180, -90, 180, 90] };
   }
   public calculate(input: AlgorithmInput): AlgorithmOutput {
     let changed = false;
@@ -74,7 +76,10 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
       this.superCluster.load(points);
     }
 
-    const state = { zoom: input.map.getZoom() };
+    const state = {
+      zoom: input.map.getZoom(),
+      boundingBox: this.getBoundingBox(input.map)
+    };
 
     if (!changed) {
       if (this.state.zoom > this.maxZoom && state.zoom > this.maxZoom) {
@@ -99,7 +104,7 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
       .map(this.transformCluster.bind(this));
   }
 
-  protected getBoundingBox(map: google.maps.Map): [number, number, number, number] {
+  protected getBoundingBox(map: google.maps.Map): BoundingBox {
     const bounds = map.getBounds().toJSON();
     return [bounds.west, bounds.south, bounds.east, bounds.north];
   }
