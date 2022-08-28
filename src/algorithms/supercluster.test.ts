@@ -152,6 +152,15 @@ test("should round fractional zoom", () => {
   const superCluster = new SuperClusterAlgorithm({});
   superCluster["superCluster"].getClusters = jest.fn().mockReturnValue([]);
 
+  map.getBounds = jest.fn().mockReturnValue({
+    toJSON: () => ({
+      west: -180,
+      south: -90,
+      east: 180,
+      north: 90,
+    }),
+  });
+
   map.getZoom = jest.fn().mockReturnValue(1.534);
   superCluster.cluster({ map, mapCanvasProjection, markers });
   expect(superCluster["superCluster"].getClusters).toHaveBeenCalledWith(

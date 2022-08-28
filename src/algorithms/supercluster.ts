@@ -95,8 +95,13 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
 
   public cluster({ map }: AlgorithmInput): Cluster[] {
     return this.superCluster
-      .getClusters([-180, -90, 180, 90], Math.round(map.getZoom()))
+      .getClusters(this.getBoundingBox(map), Math.round(map.getZoom()))
       .map(this.transformCluster.bind(this));
+  }
+
+  protected getBoundingBox(map: google.maps.Map): [number, number, number, number] {
+    const bounds = map.getBounds().toJSON();
+    return [bounds.west, bounds.south, bounds.east, bounds.north];
   }
 
   protected transformCluster({
