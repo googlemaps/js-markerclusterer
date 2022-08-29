@@ -230,15 +230,15 @@ var markerClusterer = (function (exports) {
 
   var $propertyIsEnumerable = {}.propertyIsEnumerable; // eslint-disable-next-line es-x/no-object-getownpropertydescriptor -- safe
 
-  var getOwnPropertyDescriptor$2 = Object.getOwnPropertyDescriptor; // Nashorn ~ JDK8 bug
+  var getOwnPropertyDescriptor$3 = Object.getOwnPropertyDescriptor; // Nashorn ~ JDK8 bug
 
-  var NASHORN_BUG = getOwnPropertyDescriptor$2 && !$propertyIsEnumerable.call({
+  var NASHORN_BUG = getOwnPropertyDescriptor$3 && !$propertyIsEnumerable.call({
     1: 2
   }, 1); // `Object.prototype.propertyIsEnumerable` method implementation
   // https://tc39.es/ecma262/#sec-object.prototype.propertyisenumerable
 
   objectPropertyIsEnumerable.f = NASHORN_BUG ? function propertyIsEnumerable(V) {
-    var descriptor = getOwnPropertyDescriptor$2(this, V);
+    var descriptor = getOwnPropertyDescriptor$3(this, V);
     return !!descriptor && descriptor.enumerable;
   } : $propertyIsEnumerable;
 
@@ -286,11 +286,18 @@ var markerClusterer = (function (exports) {
     return classof$7(it) == 'String' ? split(it, '') : $Object$3(it);
   } : $Object$3;
 
-  var $TypeError$a = TypeError; // `RequireObjectCoercible` abstract operation
+  // https://tc39.es/ecma262/#sec-IsHTMLDDA-internal-slot-aec
+
+  var isNullOrUndefined$2 = function (it) {
+    return it === null || it === undefined;
+  };
+
+  var isNullOrUndefined$1 = isNullOrUndefined$2;
+  var $TypeError$b = TypeError; // `RequireObjectCoercible` abstract operation
   // https://tc39.es/ecma262/#sec-requireobjectcoercible
 
   var requireObjectCoercible$4 = function (it) {
-    if (it == undefined) throw $TypeError$a("Can't call method on " + it);
+    if (isNullOrUndefined$1(it)) throw $TypeError$b("Can't call method on " + it);
     return it;
   };
 
@@ -308,8 +315,12 @@ var markerClusterer = (function (exports) {
   };
 
   var isCallable$d = isCallable$e;
+  var documentAll = typeof document == 'object' && document.all; // https://tc39.es/ecma262/#sec-IsHTMLDDA-internal-slot
 
-  var isObject$8 = function (it) {
+  var SPECIAL_DOCUMENT_ALL = typeof documentAll == 'undefined' && documentAll !== undefined;
+  var isObject$8 = SPECIAL_DOCUMENT_ALL ? function (it) {
+    return typeof it == 'object' ? it !== null : isCallable$d(it) || it === documentAll;
+  } : function (it) {
     return typeof it == 'object' ? it !== null : isCallable$d(it);
   };
 
@@ -362,7 +373,7 @@ var markerClusterer = (function (exports) {
   var V8_VERSION$1 = engineV8Version;
   var fails$a = fails$e; // eslint-disable-next-line es-x/no-object-getownpropertysymbols -- required for testing
 
-  var nativeSymbol = !!Object.getOwnPropertySymbols && !fails$a(function () {
+  var symbolConstructorDetection = !!Object.getOwnPropertySymbols && !fails$a(function () {
     var symbol = Symbol(); // Chrome 38 Symbol has incorrect toString conversion
     // `get-own-property-symbols` polyfill symbols converted to object are not Symbol instances
 
@@ -371,7 +382,7 @@ var markerClusterer = (function (exports) {
   });
 
   /* eslint-disable es-x/no-symbol -- required for testing */
-  var NATIVE_SYMBOL$1 = nativeSymbol;
+  var NATIVE_SYMBOL$1 = symbolConstructorDetection;
   var useSymbolAsUid = NATIVE_SYMBOL$1 && !Symbol.sham && typeof Symbol.iterator == 'symbol';
 
   var getBuiltIn$3 = getBuiltIn$5;
@@ -398,25 +409,26 @@ var markerClusterer = (function (exports) {
 
   var isCallable$a = isCallable$e;
   var tryToString$1 = tryToString$2;
-  var $TypeError$9 = TypeError; // `Assert: IsCallable(argument) is true`
+  var $TypeError$a = TypeError; // `Assert: IsCallable(argument) is true`
 
   var aCallable$3 = function (argument) {
     if (isCallable$a(argument)) return argument;
-    throw $TypeError$9(tryToString$1(argument) + ' is not a function');
+    throw $TypeError$a(tryToString$1(argument) + ' is not a function');
   };
 
-  var aCallable$2 = aCallable$3; // `GetMethod` abstract operation
+  var aCallable$2 = aCallable$3;
+  var isNullOrUndefined = isNullOrUndefined$2; // `GetMethod` abstract operation
   // https://tc39.es/ecma262/#sec-getmethod
 
   var getMethod$1 = function (V, P) {
     var func = V[P];
-    return func == null ? undefined : aCallable$2(func);
+    return isNullOrUndefined(func) ? undefined : aCallable$2(func);
   };
 
   var call$4 = functionCall;
   var isCallable$9 = isCallable$e;
   var isObject$7 = isObject$8;
-  var $TypeError$8 = TypeError; // `OrdinaryToPrimitive` abstract operation
+  var $TypeError$9 = TypeError; // `OrdinaryToPrimitive` abstract operation
   // https://tc39.es/ecma262/#sec-ordinarytoprimitive
 
   var ordinaryToPrimitive$1 = function (input, pref) {
@@ -424,7 +436,7 @@ var markerClusterer = (function (exports) {
     if (pref === 'string' && isCallable$9(fn = input.toString) && !isObject$7(val = call$4(fn, input))) return val;
     if (isCallable$9(fn = input.valueOf) && !isObject$7(val = call$4(fn, input))) return val;
     if (pref !== 'string' && isCallable$9(fn = input.toString) && !isObject$7(val = call$4(fn, input))) return val;
-    throw $TypeError$8("Can't convert object to primitive value");
+    throw $TypeError$9("Can't convert object to primitive value");
   };
 
   var shared$3 = {exports: {}};
@@ -457,10 +469,10 @@ var markerClusterer = (function (exports) {
   (shared$3.exports = function (key, value) {
     return store$2[key] || (store$2[key] = value !== undefined ? value : {});
   })('versions', []).push({
-    version: '3.24.1',
+    version: '3.25.0',
     mode: 'global',
     copyright: '© 2014-2022 Denis Pushkarev (zloirock.ru)',
-    license: 'https://github.com/zloirock/core-js/blob/v3.24.1/LICENSE',
+    license: 'https://github.com/zloirock/core-js/blob/v3.25.0/LICENSE',
     source: 'https://github.com/zloirock/core-js'
   });
 
@@ -495,7 +507,7 @@ var markerClusterer = (function (exports) {
   var shared$2 = shared$3.exports;
   var hasOwn$7 = hasOwnProperty_1;
   var uid$1 = uid$2;
-  var NATIVE_SYMBOL = nativeSymbol;
+  var NATIVE_SYMBOL = symbolConstructorDetection;
   var USE_SYMBOL_AS_UID = useSymbolAsUid;
   var WellKnownSymbolsStore = shared$2('wks');
   var Symbol$1 = global$8.Symbol;
@@ -524,7 +536,7 @@ var markerClusterer = (function (exports) {
   var getMethod = getMethod$1;
   var ordinaryToPrimitive = ordinaryToPrimitive$1;
   var wellKnownSymbol$7 = wellKnownSymbol$8;
-  var $TypeError$7 = TypeError;
+  var $TypeError$8 = TypeError;
   var TO_PRIMITIVE = wellKnownSymbol$7('toPrimitive'); // `ToPrimitive` abstract operation
   // https://tc39.es/ecma262/#sec-toprimitive
 
@@ -537,7 +549,7 @@ var markerClusterer = (function (exports) {
       if (pref === undefined) pref = 'default';
       result = call$3(exoticToPrim, input, pref);
       if (!isObject$6(result) || isSymbol$2(result)) return result;
-      throw $TypeError$7("Can't convert object to primitive value");
+      throw $TypeError$8("Can't convert object to primitive value");
     }
 
     if (pref === undefined) pref = 'number';
@@ -563,11 +575,11 @@ var markerClusterer = (function (exports) {
     return EXISTS$1 ? document$1.createElement(it) : {};
   };
 
-  var DESCRIPTORS$9 = descriptors;
+  var DESCRIPTORS$a = descriptors;
   var fails$9 = fails$e;
   var createElement = documentCreateElement$2; // Thanks to IE8 for its funny defineProperty
 
-  var ie8DomDefine = !DESCRIPTORS$9 && !fails$9(function () {
+  var ie8DomDefine = !DESCRIPTORS$a && !fails$9(function () {
     // eslint-disable-next-line es-x/no-object-defineproperty -- required for testing
     return Object.defineProperty(createElement('div'), 'a', {
       get: function () {
@@ -576,7 +588,7 @@ var markerClusterer = (function (exports) {
     }).a != 7;
   });
 
-  var DESCRIPTORS$8 = descriptors;
+  var DESCRIPTORS$9 = descriptors;
   var call$2 = functionCall;
   var propertyIsEnumerableModule$1 = objectPropertyIsEnumerable;
   var createPropertyDescriptor$2 = createPropertyDescriptor$3;
@@ -588,7 +600,7 @@ var markerClusterer = (function (exports) {
   var $getOwnPropertyDescriptor$1 = Object.getOwnPropertyDescriptor; // `Object.getOwnPropertyDescriptor` method
   // https://tc39.es/ecma262/#sec-object.getownpropertydescriptor
 
-  objectGetOwnPropertyDescriptor.f = DESCRIPTORS$8 ? $getOwnPropertyDescriptor$1 : function getOwnPropertyDescriptor(O, P) {
+  objectGetOwnPropertyDescriptor.f = DESCRIPTORS$9 ? $getOwnPropertyDescriptor$1 : function getOwnPropertyDescriptor(O, P) {
     O = toIndexedObject$3(O);
     P = toPropertyKey$2(P);
     if (IE8_DOM_DEFINE$1) try {
@@ -601,11 +613,11 @@ var markerClusterer = (function (exports) {
 
   var objectDefineProperty = {};
 
-  var DESCRIPTORS$7 = descriptors;
+  var DESCRIPTORS$8 = descriptors;
   var fails$8 = fails$e; // V8 ~ Chrome 36-
   // https://bugs.chromium.org/p/v8/issues/detail?id=3334
 
-  var v8PrototypeDefineBug = DESCRIPTORS$7 && fails$8(function () {
+  var v8PrototypeDefineBug = DESCRIPTORS$8 && fails$8(function () {
     // eslint-disable-next-line es-x/no-object-defineproperty -- required for testing
     return Object.defineProperty(function () {
       /* empty */
@@ -617,19 +629,19 @@ var markerClusterer = (function (exports) {
 
   var isObject$4 = isObject$8;
   var $String$2 = String;
-  var $TypeError$6 = TypeError; // `Assert: Type(argument) is Object`
+  var $TypeError$7 = TypeError; // `Assert: Type(argument) is Object`
 
   var anObject$5 = function (argument) {
     if (isObject$4(argument)) return argument;
-    throw $TypeError$6($String$2(argument) + ' is not an object');
+    throw $TypeError$7($String$2(argument) + ' is not an object');
   };
 
-  var DESCRIPTORS$6 = descriptors;
+  var DESCRIPTORS$7 = descriptors;
   var IE8_DOM_DEFINE = ie8DomDefine;
   var V8_PROTOTYPE_DEFINE_BUG$1 = v8PrototypeDefineBug;
   var anObject$4 = anObject$5;
   var toPropertyKey$1 = toPropertyKey$3;
-  var $TypeError$5 = TypeError; // eslint-disable-next-line es-x/no-object-defineproperty -- safe
+  var $TypeError$6 = TypeError; // eslint-disable-next-line es-x/no-object-defineproperty -- safe
 
   var $defineProperty = Object.defineProperty; // eslint-disable-next-line es-x/no-object-getownpropertydescriptor -- safe
 
@@ -639,7 +651,7 @@ var markerClusterer = (function (exports) {
   var WRITABLE = 'writable'; // `Object.defineProperty` method
   // https://tc39.es/ecma262/#sec-object.defineproperty
 
-  objectDefineProperty.f = DESCRIPTORS$6 ? V8_PROTOTYPE_DEFINE_BUG$1 ? function defineProperty(O, P, Attributes) {
+  objectDefineProperty.f = DESCRIPTORS$7 ? V8_PROTOTYPE_DEFINE_BUG$1 ? function defineProperty(O, P, Attributes) {
     anObject$4(O);
     P = toPropertyKey$1(P);
     anObject$4(Attributes);
@@ -667,15 +679,15 @@ var markerClusterer = (function (exports) {
     } catch (error) {
       /* empty */
     }
-    if ('get' in Attributes || 'set' in Attributes) throw $TypeError$5('Accessors not supported');
+    if ('get' in Attributes || 'set' in Attributes) throw $TypeError$6('Accessors not supported');
     if ('value' in Attributes) O[P] = Attributes.value;
     return O;
   };
 
-  var DESCRIPTORS$5 = descriptors;
+  var DESCRIPTORS$6 = descriptors;
   var definePropertyModule$4 = objectDefineProperty;
   var createPropertyDescriptor$1 = createPropertyDescriptor$3;
-  var createNonEnumerableProperty$3 = DESCRIPTORS$5 ? function (object, key, value) {
+  var createNonEnumerableProperty$3 = DESCRIPTORS$6 ? function (object, key, value) {
     return definePropertyModule$4.f(object, key, createPropertyDescriptor$1(1, value));
   } : function (object, key, value) {
     object[key] = value;
@@ -684,18 +696,18 @@ var markerClusterer = (function (exports) {
 
   var makeBuiltIn$2 = {exports: {}};
 
-  var DESCRIPTORS$4 = descriptors;
+  var DESCRIPTORS$5 = descriptors;
   var hasOwn$5 = hasOwnProperty_1;
   var FunctionPrototype = Function.prototype; // eslint-disable-next-line es-x/no-object-getownpropertydescriptor -- safe
 
-  var getDescriptor = DESCRIPTORS$4 && Object.getOwnPropertyDescriptor;
+  var getDescriptor = DESCRIPTORS$5 && Object.getOwnPropertyDescriptor;
   var EXISTS = hasOwn$5(FunctionPrototype, 'name'); // additional protection from minified / mangled / dropped function names
 
   var PROPER = EXISTS && function something() {
     /* empty */
   }.name === 'something';
 
-  var CONFIGURABLE = EXISTS && (!DESCRIPTORS$4 || DESCRIPTORS$4 && getDescriptor(FunctionPrototype, 'name').configurable);
+  var CONFIGURABLE = EXISTS && (!DESCRIPTORS$5 || DESCRIPTORS$5 && getDescriptor(FunctionPrototype, 'name').configurable);
   var functionName = {
     EXISTS: EXISTS,
     PROPER: PROPER,
@@ -713,13 +725,12 @@ var markerClusterer = (function (exports) {
     };
   }
 
-  var inspectSource$3 = store$1.inspectSource;
+  var inspectSource$2 = store$1.inspectSource;
 
   var global$6 = global$d;
   var isCallable$7 = isCallable$e;
-  var inspectSource$2 = inspectSource$3;
   var WeakMap$1 = global$6.WeakMap;
-  var nativeWeakMap = isCallable$7(WeakMap$1) && /native code/.test(inspectSource$2(WeakMap$1));
+  var weakMapBasicDetection = isCallable$7(WeakMap$1) && /native code/.test(String(WeakMap$1));
 
   var shared$1 = shared$3.exports;
   var uid = uid$2;
@@ -731,7 +742,7 @@ var markerClusterer = (function (exports) {
 
   var hiddenKeys$4 = {};
 
-  var NATIVE_WEAK_MAP = nativeWeakMap;
+  var NATIVE_WEAK_MAP = weakMapBasicDetection;
   var global$5 = global$d;
   var uncurryThis$c = functionUncurryThis;
   var isObject$3 = isObject$8;
@@ -768,7 +779,7 @@ var markerClusterer = (function (exports) {
     var wmset = uncurryThis$c(store.set);
 
     set = function (it, metadata) {
-      if (wmhas(store, it)) throw new TypeError$2(OBJECT_ALREADY_INITIALIZED);
+      if (wmhas(store, it)) throw TypeError$2(OBJECT_ALREADY_INITIALIZED);
       metadata.facade = it;
       wmset(store, it, metadata);
       return metadata;
@@ -786,7 +797,7 @@ var markerClusterer = (function (exports) {
     hiddenKeys$3[STATE] = true;
 
     set = function (it, metadata) {
-      if (hasOwn$4(it, STATE)) throw new TypeError$2(OBJECT_ALREADY_INITIALIZED);
+      if (hasOwn$4(it, STATE)) throw TypeError$2(OBJECT_ALREADY_INITIALIZED);
       metadata.facade = it;
       createNonEnumerableProperty$2(it, STATE, metadata);
       return metadata;
@@ -812,15 +823,15 @@ var markerClusterer = (function (exports) {
   var fails$7 = fails$e;
   var isCallable$6 = isCallable$e;
   var hasOwn$3 = hasOwnProperty_1;
-  var DESCRIPTORS$3 = descriptors;
+  var DESCRIPTORS$4 = descriptors;
   var CONFIGURABLE_FUNCTION_NAME = functionName.CONFIGURABLE;
-  var inspectSource$1 = inspectSource$3;
+  var inspectSource$1 = inspectSource$2;
   var InternalStateModule = internalState;
   var enforceInternalState = InternalStateModule.enforce;
   var getInternalState = InternalStateModule.get; // eslint-disable-next-line es-x/no-object-defineproperty -- safe
 
   var defineProperty$3 = Object.defineProperty;
-  var CONFIGURABLE_LENGTH = DESCRIPTORS$3 && !fails$7(function () {
+  var CONFIGURABLE_LENGTH = DESCRIPTORS$4 && !fails$7(function () {
     return defineProperty$3(function () {
       /* empty */
     }, 'length', {
@@ -838,7 +849,7 @@ var markerClusterer = (function (exports) {
     if (options && options.setter) name = 'set ' + name;
 
     if (!hasOwn$3(value, 'name') || CONFIGURABLE_FUNCTION_NAME && value.name !== name) {
-      if (DESCRIPTORS$3) defineProperty$3(value, 'name', {
+      if (DESCRIPTORS$4) defineProperty$3(value, 'name', {
         value: name,
         configurable: true
       });else value.name = name;
@@ -852,7 +863,7 @@ var markerClusterer = (function (exports) {
 
     try {
       if (options && hasOwn$3(options, 'constructor') && options.constructor) {
-        if (DESCRIPTORS$3) defineProperty$3(value, 'prototype', {
+        if (DESCRIPTORS$4) defineProperty$3(value, 'prototype', {
           writable: false
         }); // in V8 ~ Chrome 53, prototypes of some methods, like `Array.prototype.values`, are non-writable
       } else if (value.prototype) value.prototype = undefined;
@@ -1075,7 +1086,7 @@ var markerClusterer = (function (exports) {
   var isForced_1 = isForced$2;
 
   var global$4 = global$d;
-  var getOwnPropertyDescriptor$1 = objectGetOwnPropertyDescriptor.f;
+  var getOwnPropertyDescriptor$2 = objectGetOwnPropertyDescriptor.f;
   var createNonEnumerableProperty$1 = createNonEnumerableProperty$3;
   var defineBuiltIn$2 = defineBuiltIn$3;
   var defineGlobalProperty = defineGlobalProperty$3;
@@ -1115,7 +1126,7 @@ var markerClusterer = (function (exports) {
       sourceProperty = source[key];
 
       if (options.dontCallGetSet) {
-        descriptor = getOwnPropertyDescriptor$1(target, key);
+        descriptor = getOwnPropertyDescriptor$2(target, key);
         targetProperty = descriptor && descriptor.value;
       } else targetProperty = target[key];
 
@@ -1153,7 +1164,7 @@ var markerClusterer = (function (exports) {
   // https://tc39.es/ecma262/#sec-isarray
   // eslint-disable-next-line es-x/no-array-isarray -- safe
 
-  var isArray$1 = Array.isArray || function isArray(argument) {
+  var isArray$2 = Array.isArray || function isArray(argument) {
     return classof$6(argument) == 'Array';
   };
 
@@ -1196,7 +1207,7 @@ var markerClusterer = (function (exports) {
   var isCallable$2 = isCallable$e;
   var classof$4 = classof$5;
   var getBuiltIn$1 = getBuiltIn$5;
-  var inspectSource = inspectSource$3;
+  var inspectSource = inspectSource$2;
 
   var noop = function () {
     /* empty */
@@ -1249,7 +1260,7 @@ var markerClusterer = (function (exports) {
     }) || called;
   }) ? isConstructorLegacy : isConstructorModern;
 
-  var isArray = isArray$1;
+  var isArray$1 = isArray$2;
   var isConstructor = isConstructor$1;
   var isObject$2 = isObject$8;
   var wellKnownSymbol$4 = wellKnownSymbol$8;
@@ -1260,10 +1271,10 @@ var markerClusterer = (function (exports) {
   var arraySpeciesConstructor$1 = function (originalArray) {
     var C;
 
-    if (isArray(originalArray)) {
+    if (isArray$1(originalArray)) {
       C = originalArray.constructor; // cross-realm fallback
 
-      if (isConstructor(C) && (C === $Array || isArray(C.prototype))) C = undefined;else if (isObject$2(C)) {
+      if (isConstructor(C) && (C === $Array || isArray$1(C.prototype))) C = undefined;else if (isObject$2(C)) {
         C = C[SPECIES$1];
         if (C === null) C = undefined;
       }
@@ -1441,7 +1452,7 @@ var markerClusterer = (function (exports) {
   var toObject$2 = toObject$5;
   var IndexedObject$1 = indexedObject;
   var lengthOfArrayLike$1 = lengthOfArrayLike$4;
-  var $TypeError$4 = TypeError; // `Array.prototype.{ reduce, reduceRight }` methods implementation
+  var $TypeError$5 = TypeError; // `Array.prototype.{ reduce, reduceRight }` methods implementation
 
   var createMethod$1 = function (IS_RIGHT) {
     return function (that, callbackfn, argumentsLength, memo) {
@@ -1461,7 +1472,7 @@ var markerClusterer = (function (exports) {
         index += i;
 
         if (IS_RIGHT ? index < 0 : length <= index) {
-          throw $TypeError$4('Reduce of empty array with no initial value');
+          throw $TypeError$5('Reduce of empty array with no initial value');
         }
       }
 
@@ -2138,7 +2149,7 @@ var markerClusterer = (function (exports) {
     return internalObjectKeys(O, enumBugKeys$1);
   };
 
-  var DESCRIPTORS$2 = descriptors;
+  var DESCRIPTORS$3 = descriptors;
   var uncurryThis$6 = functionUncurryThis;
   var call = functionCall;
   var fails$2 = fails$e;
@@ -2156,7 +2167,7 @@ var markerClusterer = (function (exports) {
 
   var objectAssign = !$assign || fails$2(function () {
     // should have correct order of operations (Edge bug)
-    if (DESCRIPTORS$2 && $assign({
+    if (DESCRIPTORS$3 && $assign({
       b: 1
     }, $assign(defineProperty$2({}, 'a', {
       enumerable: true,
@@ -2197,7 +2208,7 @@ var markerClusterer = (function (exports) {
 
       while (length > j) {
         key = keys[j++];
-        if (!DESCRIPTORS$2 || call(propertyIsEnumerable, S, key)) T[key] = S[key];
+        if (!DESCRIPTORS$3 || call(propertyIsEnumerable, S, key)) T[key] = S[key];
       }
     }
 
@@ -2993,7 +3004,7 @@ var markerClusterer = (function (exports) {
 
   var objectDefineProperties = {};
 
-  var DESCRIPTORS$1 = descriptors;
+  var DESCRIPTORS$2 = descriptors;
   var V8_PROTOTYPE_DEFINE_BUG = v8PrototypeDefineBug;
   var definePropertyModule$1 = objectDefineProperty;
   var anObject$2 = anObject$5;
@@ -3002,7 +3013,7 @@ var markerClusterer = (function (exports) {
   // https://tc39.es/ecma262/#sec-object.defineproperties
   // eslint-disable-next-line es-x/no-object-defineproperties -- safe
 
-  objectDefineProperties.f = DESCRIPTORS$1 && !V8_PROTOTYPE_DEFINE_BUG ? Object.defineProperties : function defineProperties(O, Properties) {
+  objectDefineProperties.f = DESCRIPTORS$2 && !V8_PROTOTYPE_DEFINE_BUG ? Object.defineProperties : function defineProperties(O, Properties) {
     anObject$2(O);
     var props = toIndexedObject(Properties);
     var keys = objectKeys(Properties);
@@ -3164,11 +3175,11 @@ var markerClusterer = (function (exports) {
   };
 
   var isRegExp = isRegexp;
-  var $TypeError$3 = TypeError;
+  var $TypeError$4 = TypeError;
 
   var notARegexp = function (it) {
     if (isRegExp(it)) {
-      throw $TypeError$3("The method doesn't accept regular expressions");
+      throw $TypeError$4("The method doesn't accept regular expressions");
     }
 
     return it;
@@ -3228,10 +3239,10 @@ var markerClusterer = (function (exports) {
 
   var $$1 = _export;
   var uncurryThis$4 = functionUncurryThis;
-  var $IndexOf = arrayIncludes.indexOf;
+  var $indexOf = arrayIncludes.indexOf;
   var arrayMethodIsStrict = arrayMethodIsStrict$3;
-  var un$IndexOf = uncurryThis$4([].indexOf);
-  var NEGATIVE_ZERO = !!un$IndexOf && 1 / un$IndexOf([1], 1, -0) < 0;
+  var nativeIndexOf = uncurryThis$4([].indexOf);
+  var NEGATIVE_ZERO = !!nativeIndexOf && 1 / nativeIndexOf([1], 1, -0) < 0;
   var STRICT_METHOD = arrayMethodIsStrict('indexOf'); // `Array.prototype.indexOf` method
   // https://tc39.es/ecma262/#sec-array.prototype.indexof
 
@@ -3245,9 +3256,38 @@ var markerClusterer = (function (exports) {
     ) {
       var fromIndex = arguments.length > 1 ? arguments[1] : undefined;
       return NEGATIVE_ZERO // convert -0 to +0
-      ? un$IndexOf(this, searchElement, fromIndex) || 0 : $IndexOf(this, searchElement, fromIndex);
+      ? nativeIndexOf(this, searchElement, fromIndex) || 0 : $indexOf(this, searchElement, fromIndex);
     }
   });
+
+  var DESCRIPTORS$1 = descriptors;
+  var isArray = isArray$2;
+  var $TypeError$3 = TypeError; // eslint-disable-next-line es-x/no-object-getownpropertydescriptor -- safe
+
+  var getOwnPropertyDescriptor$1 = Object.getOwnPropertyDescriptor; // Safari < 13 does not throw an error in this case
+
+  var SILENT_ON_NON_WRITABLE_LENGTH_SET = DESCRIPTORS$1 && !function () {
+    // makes no sense without proper strict mode support
+    if (this !== undefined) return true;
+
+    try {
+      // eslint-disable-next-line es-x/no-object-defineproperty -- safe
+      Object.defineProperty([], 'length', {
+        writable: false
+      }).length = 1;
+    } catch (error) {
+      return error instanceof TypeError;
+    }
+  }();
+  var arraySetLength = SILENT_ON_NON_WRITABLE_LENGTH_SET ? function (O, length) {
+    if (isArray(O) && !getOwnPropertyDescriptor$1(O, 'length').writable) {
+      throw $TypeError$3('Cannot set read only .length');
+    }
+
+    return O.length = length;
+  } : function (O, length) {
+    return O.length = length;
+  };
 
   var $TypeError$2 = TypeError;
   var MAX_SAFE_INTEGER = 0x1FFFFFFFFFFFFF; // 2 ** 53 - 1 == 9007199254740991
@@ -3278,6 +3318,7 @@ var markerClusterer = (function (exports) {
   var toAbsoluteIndex = toAbsoluteIndex$2;
   var toIntegerOrInfinity = toIntegerOrInfinity$3;
   var lengthOfArrayLike = lengthOfArrayLike$4;
+  var setArrayLength = arraySetLength;
   var doesNotExceedSafeInteger = doesNotExceedSafeInteger$1;
   var arraySpeciesCreate = arraySpeciesCreate$2;
   var createProperty = createProperty$1;
@@ -3343,7 +3384,7 @@ var markerClusterer = (function (exports) {
         O[k + actualStart] = arguments[k + 2];
       }
 
-      O.length = len - actualDeleteCount + insertCount;
+      setArrayLength(O, len - actualDeleteCount + insertCount);
       return A;
     }
   });
