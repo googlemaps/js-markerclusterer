@@ -1,7 +1,7 @@
 # Google Maps JavaScript MarkerClusterer
 
 [![npm](https://img.shields.io/npm/v/@googlemaps/markerclusterer)](https://www.npmjs.com/package/@googlemaps/markerclusterer)
-![Build](https://github.com/googlemaps/js-markerclusterer/workflows/Build/badge.svg)
+![Build](https://github.com/googlemaps/js-markerclusterer/workflows/Test/badge.svg)
 ![Release](https://github.com/googlemaps/js-markerclusterer/workflows/Release/badge.svg)
 [![codecov](https://codecov.io/gh/googlemaps/js-markerclusterer/branch/main/graph/badge.svg)](https://codecov.io/gh/googlemaps/js-markerclusterer)
 ![GitHub contributors](https://img.shields.io/github/contributors/googlemaps/js-markerclusterer?color=green)
