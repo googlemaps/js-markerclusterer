@@ -80,7 +80,7 @@ This library has a heritage in [@google/markerclusterer][@google/markerclusterer
 
 ## Migration
 
-The API of @googlemaps/markerclusterer has changed in a number of ways from [@googlemaps/markerclustererplus][@googlemaps/markerclustererplus].
+The API of [@googlemaps/markerclusterer][@googlemaps/markerclusterer] has changed in a number of ways from [@googlemaps/markerclustererplus][@googlemaps/markerclustererplus].
 
 - The `MarkerClusterer` class now accepts an `algorithm` and `renderer` parameter to allow for more flexibility. The interface looks like the following:
 
