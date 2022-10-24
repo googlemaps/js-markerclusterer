@@ -255,9 +255,8 @@ var markerClusterer = (function (exports) {
   var FunctionPrototype$1 = Function.prototype;
   var call$5 = FunctionPrototype$1.call;
   var uncurryThisWithBind = NATIVE_BIND$1 && FunctionPrototype$1.bind.bind(call$5, call$5);
-
-  var functionUncurryThisRaw = function (fn) {
-    return NATIVE_BIND$1 ? uncurryThisWithBind(fn) : function () {
+  var functionUncurryThisRaw = NATIVE_BIND$1 ? uncurryThisWithBind : function (fn) {
+    return function () {
       return call$5.apply(fn, arguments);
     };
   };
@@ -488,10 +487,10 @@ var markerClusterer = (function (exports) {
   (shared$3.exports = function (key, value) {
     return store$2[key] || (store$2[key] = value !== undefined ? value : {});
   })('versions', []).push({
-    version: '3.25.5',
+    version: '3.26.0',
     mode: 'global',
     copyright: '© 2014-2022 Denis Pushkarev (zloirock.ru)',
-    license: 'https://github.com/zloirock/core-js/blob/v3.25.5/LICENSE',
+    license: 'https://github.com/zloirock/core-js/blob/v3.26.0/LICENSE',
     source: 'https://github.com/zloirock/core-js'
   });
 
