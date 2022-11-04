@@ -16,7 +16,6 @@
 
 import { Algorithm, SuperClusterAlgorithm } from "./algorithms";
 import { ClusterStats, DefaultRenderer, Renderer } from "./renderer";
-
 import { Cluster } from "./cluster";
 import { OverlayViewSafe } from "./overlay-view-safe";
 
@@ -55,6 +54,16 @@ export const defaultOnClusterClickHandler: onClusterClickHandler = (
 ): void => {
   map.fitBounds(cluster.bounds);
 };
+
+export const setMarkerMap = (marker: google.maps.Marker | google.maps.marker.AdvancedMarkerView, map?: google.maps.Map) => {
+  if (google.maps.marker && marker instanceof google.maps.marker.AdvancedMarkerView) {
+    marker.map = map;
+  } else if (marker instanceof google.maps.Marker){
+    marker.setMap(map);
+  }
+  return;
+}
+
 /**
  * MarkerClusterer creates and manages per-zoom-level clusters for large amounts
  * of markers. See {@link MarkerClustererOptions} for more details.
@@ -222,8 +231,7 @@ export class MarkerClusterer extends OverlayViewSafe {
       if (cluster.markers.length === 1) {
         cluster.marker = cluster.markers[0];
       } else {
-        cluster.marker = this.renderer.render(cluster, stats);
-
+        cluster.marker = this.renderer.render(cluster, stats, map);
         if (this.onClusterClick) {
           cluster.marker.addListener(
             "click",
@@ -239,8 +247,7 @@ export class MarkerClusterer extends OverlayViewSafe {
           );
         }
       }
-
-      cluster.marker.setMap(map);
+      setMarkerMap(cluster.marker, map);
     });
   }
 }

@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
+import {setMarkerMap} from './markerclusterer';
+
 export interface ClusterOptions {
   position?: google.maps.LatLng | google.maps.LatLngLiteral;
   markers?: google.maps.Marker[];
 }
 
 export class Cluster {
-  public marker: google.maps.Marker;
+  public marker: google.maps.Marker | google.maps.marker.AdvancedMarkerView;
   public readonly markers?: google.maps.Marker[];
   protected _position: google.maps.LatLng;
 
@@ -70,7 +72,7 @@ export class Cluster {
    */
   public delete(): void {
     if (this.marker) {
-      this.marker.setMap(null);
+      setMarkerMap(this.marker, null);
       delete this.marker;
     }
     this.markers.length = 0;
