@@ -255,35 +255,25 @@ var markerClusterer = (function (exports) {
   var FunctionPrototype$1 = Function.prototype;
   var call$5 = FunctionPrototype$1.call;
   var uncurryThisWithBind = NATIVE_BIND$1 && FunctionPrototype$1.bind.bind(call$5, call$5);
-  var functionUncurryThisRaw = NATIVE_BIND$1 ? uncurryThisWithBind : function (fn) {
+  var functionUncurryThis = NATIVE_BIND$1 ? uncurryThisWithBind : function (fn) {
     return function () {
       return call$5.apply(fn, arguments);
     };
   };
 
-  var uncurryThisRaw$1 = functionUncurryThisRaw;
-  var toString$5 = uncurryThisRaw$1({}.toString);
-  var stringSlice = uncurryThisRaw$1(''.slice);
+  var uncurryThis$i = functionUncurryThis;
+  var toString$5 = uncurryThis$i({}.toString);
+  var stringSlice = uncurryThis$i(''.slice);
 
   var classofRaw$2 = function (it) {
     return stringSlice(toString$5(it), 8, -1);
   };
 
-  var classofRaw$1 = classofRaw$2;
-  var uncurryThisRaw = functionUncurryThisRaw;
-
-  var functionUncurryThis = function (fn) {
-    // Nashorn bug:
-    //   https://github.com/zloirock/core-js/issues/1128
-    //   https://github.com/zloirock/core-js/issues/1130
-    if (classofRaw$1(fn) === 'Function') return uncurryThisRaw(fn);
-  };
-
-  var uncurryThis$g = functionUncurryThis;
+  var uncurryThis$h = functionUncurryThis;
   var fails$b = fails$e;
   var classof$7 = classofRaw$2;
   var $Object$3 = Object;
-  var split = uncurryThis$g(''.split); // fallback for non-array-like ES3 and non-enumerable old V8 strings
+  var split = uncurryThis$h(''.split); // fallback for non-array-like ES3 and non-enumerable old V8 strings
 
   var indexedObject = fails$b(function () {
     // throws an error in rhino, see https://github.com/mozilla/rhino/issues/346
@@ -353,8 +343,8 @@ var markerClusterer = (function (exports) {
     return arguments.length < 2 ? aFunction(global$c[namespace]) : global$c[namespace] && global$c[namespace][method];
   };
 
-  var uncurryThis$f = functionUncurryThis;
-  var objectIsPrototypeOf = uncurryThis$f({}.isPrototypeOf);
+  var uncurryThis$g = functionUncurryThis;
+  var objectIsPrototypeOf = uncurryThis$g({}.isPrototypeOf);
 
   var getBuiltIn$4 = getBuiltIn$5;
   var engineUserAgent = getBuiltIn$4('navigator', 'userAgent') || '';
@@ -487,10 +477,10 @@ var markerClusterer = (function (exports) {
   (shared$3.exports = function (key, value) {
     return store$2[key] || (store$2[key] = value !== undefined ? value : {});
   })('versions', []).push({
-    version: '3.26.0',
+    version: '3.26.1',
     mode: 'global',
     copyright: '© 2014-2022 Denis Pushkarev (zloirock.ru)',
-    license: 'https://github.com/zloirock/core-js/blob/v3.26.0/LICENSE',
+    license: 'https://github.com/zloirock/core-js/blob/v3.26.1/LICENSE',
     source: 'https://github.com/zloirock/core-js'
   });
 
@@ -502,9 +492,9 @@ var markerClusterer = (function (exports) {
     return $Object$1(requireObjectCoercible$2(argument));
   };
 
-  var uncurryThis$e = functionUncurryThis;
+  var uncurryThis$f = functionUncurryThis;
   var toObject$4 = toObject$5;
-  var hasOwnProperty = uncurryThis$e({}.hasOwnProperty); // `HasOwnProperty` abstract operation
+  var hasOwnProperty = uncurryThis$f({}.hasOwnProperty); // `HasOwnProperty` abstract operation
   // https://tc39.es/ecma262/#sec-hasownproperty
   // eslint-disable-next-line es/no-object-hasown -- safe
 
@@ -512,10 +502,10 @@ var markerClusterer = (function (exports) {
     return hasOwnProperty(toObject$4(it), key);
   };
 
-  var uncurryThis$d = functionUncurryThis;
+  var uncurryThis$e = functionUncurryThis;
   var id = 0;
   var postfix = Math.random();
-  var toString$4 = uncurryThis$d(1.0.toString);
+  var toString$4 = uncurryThis$e(1.0.toString);
 
   var uid$2 = function (key) {
     return 'Symbol(' + (key === undefined ? '' : key) + ')_' + toString$4(++id + postfix, 36);
@@ -732,10 +722,10 @@ var markerClusterer = (function (exports) {
     CONFIGURABLE: CONFIGURABLE
   };
 
-  var uncurryThis$c = functionUncurryThis;
+  var uncurryThis$d = functionUncurryThis;
   var isCallable$8 = isCallable$e;
   var store$1 = sharedStore;
-  var functionToString = uncurryThis$c(Function.toString); // this helper broken in `core-js@3.4.1-3.4.4`, so we can't use `shared` helper
+  var functionToString = uncurryThis$d(Function.toString); // this helper broken in `core-js@3.4.1-3.4.4`, so we can't use `shared` helper
 
   if (!isCallable$8(store$1.inspectSource)) {
     store$1.inspectSource = function (it) {
@@ -1016,12 +1006,12 @@ var markerClusterer = (function (exports) {
     indexOf: createMethod$3(false)
   };
 
-  var uncurryThis$b = functionUncurryThis;
+  var uncurryThis$c = functionUncurryThis;
   var hasOwn$2 = hasOwnProperty_1;
   var toIndexedObject$1 = toIndexedObject$4;
   var indexOf = arrayIncludes.indexOf;
   var hiddenKeys$2 = hiddenKeys$4;
-  var push$1 = uncurryThis$b([].push);
+  var push$1 = uncurryThis$c([].push);
 
   var objectKeysInternal = function (object, names) {
     var O = toIndexedObject$1(object);
@@ -1056,11 +1046,11 @@ var markerClusterer = (function (exports) {
   objectGetOwnPropertySymbols.f = Object.getOwnPropertySymbols;
 
   var getBuiltIn$2 = getBuiltIn$5;
-  var uncurryThis$a = functionUncurryThis;
+  var uncurryThis$b = functionUncurryThis;
   var getOwnPropertyNamesModule = objectGetOwnPropertyNames;
   var getOwnPropertySymbolsModule$1 = objectGetOwnPropertySymbols;
   var anObject$3 = anObject$5;
-  var concat$1 = uncurryThis$a([].concat); // all object keys, includes non-enumerable and symbols
+  var concat$1 = uncurryThis$b([].concat); // all object keys, includes non-enumerable and symbols
 
   var ownKeys$1 = getBuiltIn$2('Reflect', 'ownKeys') || function ownKeys(it) {
     var keys = getOwnPropertyNamesModule.f(anObject$3(it));
@@ -1166,7 +1156,17 @@ var markerClusterer = (function (exports) {
     }
   };
 
-  var uncurryThis$9 = functionUncurryThis;
+  var classofRaw$1 = classofRaw$2;
+  var uncurryThis$a = functionUncurryThis;
+
+  var functionUncurryThisClause = function (fn) {
+    // Nashorn bug:
+    //   https://github.com/zloirock/core-js/issues/1128
+    //   https://github.com/zloirock/core-js/issues/1130
+    if (classofRaw$1(fn) === 'Function') return uncurryThis$a(fn);
+  };
+
+  var uncurryThis$9 = functionUncurryThisClause;
   var aCallable$1 = aCallable$3;
   var NATIVE_BIND = functionBindNative;
   var bind$1 = uncurryThis$9(uncurryThis$9.bind); // optional / simple context binding
@@ -3258,7 +3258,7 @@ var markerClusterer = (function (exports) {
 
 
   var $$1 = _export;
-  var uncurryThis$4 = functionUncurryThis;
+  var uncurryThis$4 = functionUncurryThisClause;
   var $indexOf = arrayIncludes.indexOf;
   var arrayMethodIsStrict = arrayMethodIsStrict$3;
   var nativeIndexOf = uncurryThis$4([].indexOf);
