@@ -17,7 +17,7 @@
 import { AbstractAlgorithm, AlgorithmInput, AlgorithmOutput } from "./core";
 import SuperCluster, { ClusterFeature } from "supercluster";
 import { Cluster } from "../cluster";
-export declare type SuperClusterOptions = SuperCluster.Options<{
+export type SuperClusterOptions = SuperCluster.Options<{
     [name: string]: any;
 }, {
     [name: string]: any;

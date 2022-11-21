@@ -23,7 +23,7 @@ export declare const extendBoundsToPaddedViewport: (bounds: google.maps.LatLngBo
  * @hidden
  */
 export declare const distanceBetweenPoints: (p1: google.maps.LatLngLiteral, p2: google.maps.LatLngLiteral) => number;
-declare type PixelBounds = {
+type PixelBounds = {
     northEast: google.maps.Point;
     southWest: google.maps.Point;
 };

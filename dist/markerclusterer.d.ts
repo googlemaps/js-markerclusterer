@@ -18,7 +18,7 @@ import { Algorithm } from "./algorithms";
 import { Renderer } from "./renderer";
 import { Cluster } from "./cluster";
 import { OverlayViewSafe } from "./overlay-view-safe";
-export declare type onClusterClickHandler = (event: google.maps.MapMouseEvent, cluster: Cluster, map: google.maps.Map) => void;
+export type onClusterClickHandler = (event: google.maps.MapMouseEvent, cluster: Cluster, map: google.maps.Map) => void;
 export interface MarkerClustererOptions {
     markers?: google.maps.Marker[];
     /**
