@@ -18,12 +18,12 @@ import {setMarkerMap} from './markerclusterer';
 
 export interface ClusterOptions {
   position?: google.maps.LatLng | google.maps.LatLngLiteral;
-  markers?: google.maps.Marker[];
+  markers?: google.maps.Marker[] | google.maps.marker.AdvancedMarkerView[];
 }
 
 export class Cluster {
   public marker: google.maps.Marker | google.maps.marker.AdvancedMarkerView;
-  public readonly markers?: google.maps.Marker[];
+  public readonly markers?: google.maps.Marker[] | google.maps.marker.AdvancedMarkerView[];
   protected _position: google.maps.LatLng;
 
   constructor({ markers, position }: ClusterOptions) {
@@ -63,7 +63,7 @@ export class Cluster {
   /**
    * Add a marker to the cluster.
    */
-  public push(marker: google.maps.Marker): void {
+  public push(marker: google.maps.Marker | google.maps.marker.AdvancedMarkerView): void {
     this.markers.push(marker);
   }
 

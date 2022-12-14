@@ -54,16 +54,6 @@ export const defaultOnClusterClickHandler: onClusterClickHandler = (
 ): void => {
   map.fitBounds(cluster.bounds);
 };
-
-export const setMarkerMap = (marker: google.maps.Marker | google.maps.marker.AdvancedMarkerView, map?: google.maps.Map) => {
-  if (google.maps.marker && marker instanceof google.maps.marker.AdvancedMarkerView) {
-    marker.map = map;
-  } else if (marker instanceof google.maps.Marker){
-    marker.setMap(map);
-  }
-  return;
-}
-
 /**
  * MarkerClusterer creates and manages per-zoom-level clusters for large amounts
  * of markers. See {@link MarkerClustererOptions} for more details.
@@ -75,7 +65,7 @@ export class MarkerClusterer extends OverlayViewSafe {
   /** @see {@link MarkerClustererOptions.algorithm} */
   protected algorithm: Algorithm;
   protected clusters: Cluster[];
-  protected markers: google.maps.Marker[];
+  protected markers: google.maps.Marker[]|google.maps.marker.AdvancedMarkerView[];
   /** @see {@link MarkerClustererOptions.renderer} */
   protected renderer: Renderer;
   /** @see {@link MarkerClustererOptions.map} */
@@ -115,7 +105,7 @@ export class MarkerClusterer extends OverlayViewSafe {
     }
   }
 
-  public addMarkers(markers: google.maps.Marker[], noDraw?: boolean): void {
+  public addMarkers(markers: google.maps.Marker[] | google.maps.marker.AdvancedMarkerView[], noDraw?: boolean): void {
     markers.forEach((marker) => {
       this.addMarker(marker, true);
     });
@@ -125,7 +115,7 @@ export class MarkerClusterer extends OverlayViewSafe {
     }
   }
 
-  public removeMarker(marker: google.maps.Marker, noDraw?: boolean): boolean {
+  public removeMarker(marker: google.maps.Marker | google.maps.marker.AdvancedMarkerView, noDraw?: boolean): boolean {
     const index = this.markers.indexOf(marker);
 
     if (index === -1) {
@@ -144,7 +134,7 @@ export class MarkerClusterer extends OverlayViewSafe {
   }
 
   public removeMarkers(
-    markers: google.maps.Marker[],
+    markers: google.maps.Marker[] | google.maps.marker.AdvancedMarkerView[],
     noDraw?: boolean
   ): boolean {
     let removed = false;
@@ -171,18 +161,24 @@ export class MarkerClusterer extends OverlayViewSafe {
   /**
    * Recalculates and draws all the marker clusters.
    */
+
+  //WHY DO YOU CHANGE? Initial cluster load preserves animation, but subsequent calls don't
+  //That means it's not because of the marker instance being passed through supercluster
   public render(): void {
-    const map = this.getMap();
-    if (map instanceof google.maps.Map && this.getProjection()) {
+    const map = this.map;
+    if (map instanceof google.maps.Map && this.map.getProjection()) {
       google.maps.event.trigger(
         this,
         MarkerClustererEvents.CLUSTERING_BEGIN,
         this
       );
+      this.markers.forEach(marker => {
+        marker.addListener('animation_changed', () => {console.log('animation_changed')})
+      })
       const { clusters, changed } = this.algorithm.calculate({
         markers: this.markers,
         map,
-        mapCanvasProjection: this.getProjection(),
+        mapCanvasProjection: this.getProjection()
       });
 
       // allow algorithms to return flag on whether the clusters/markers have changed
@@ -204,7 +200,7 @@ export class MarkerClusterer extends OverlayViewSafe {
   }
 
   public onAdd(): void {
-    this.idleListener = this.getMap().addListener(
+    this.idleListener = this.map.addListener(
       "idle",
       this.render.bind(this)
     );
@@ -225,13 +221,14 @@ export class MarkerClusterer extends OverlayViewSafe {
   protected renderClusters(): void {
     // generate stats to pass to renderers
     const stats = new ClusterStats(this.markers, this.clusters);
-    const map = this.getMap() as google.maps.Map;
+    const map = this.map;
 
     this.clusters.forEach((cluster) => {
       if (cluster.markers.length === 1) {
         cluster.marker = cluster.markers[0];
       } else {
         cluster.marker = this.renderer.render(cluster, stats, map);
+
         if (this.onClusterClick) {
           cluster.marker.addListener(
             "click",
@@ -247,7 +244,8 @@ export class MarkerClusterer extends OverlayViewSafe {
           );
         }
       }
-      setMarkerMap(cluster.marker, map);
+
+      cluster.marker.setMap(map);
     });
   }
 }
