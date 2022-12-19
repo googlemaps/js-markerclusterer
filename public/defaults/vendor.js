@@ -389,7 +389,11 @@ var fastDeepEqual = function equal(a, b) {
   return a!==a && b!==b;
 };
 
-var kdbush = {exports: {}};
+var kdbushExports = {};
+var kdbush = {
+  get exports(){ return kdbushExports; },
+  set exports(v){ kdbushExports = v; },
+};
 
 (function (module, exports) {
 	(function (global, factory) {
@@ -587,7 +591,7 @@ var kdbush = {exports: {}};
 	})));
 } (kdbush));
 
-var KDBush = kdbush.exports;
+var KDBush = kdbushExports;
 
 const defaultOptions = {
     minZoom: 0,   // min zoom to generate clusters on

@@ -447,7 +447,11 @@ var markerClusterer = (function (exports) {
     throw $TypeError$9("Can't convert object to primitive value");
   };
 
-  var shared$3 = {exports: {}};
+  var sharedExports = {};
+  var shared$3 = {
+    get exports(){ return sharedExports; },
+    set exports(v){ sharedExports = v; },
+  };
 
   var global$a = global$d; // eslint-disable-next-line es/no-object-defineproperty -- safe
 
@@ -512,7 +516,7 @@ var markerClusterer = (function (exports) {
   };
 
   var global$8 = global$d;
-  var shared$2 = shared$3.exports;
+  var shared$2 = sharedExports;
   var hasOwn$7 = hasOwnProperty_1;
   var uid$1 = uid$2;
   var NATIVE_SYMBOL = symbolConstructorDetection;
@@ -702,7 +706,11 @@ var markerClusterer = (function (exports) {
     return object;
   };
 
-  var makeBuiltIn$2 = {exports: {}};
+  var makeBuiltInExports = {};
+  var makeBuiltIn$2 = {
+    get exports(){ return makeBuiltInExports; },
+    set exports(v){ makeBuiltInExports = v; },
+  };
 
   var DESCRIPTORS$5 = descriptors;
   var hasOwn$5 = hasOwnProperty_1;
@@ -740,7 +748,7 @@ var markerClusterer = (function (exports) {
   var WeakMap$1 = global$6.WeakMap;
   var weakMapBasicDetection = isCallable$7(WeakMap$1) && /native code/.test(String(WeakMap$1));
 
-  var shared$1 = shared$3.exports;
+  var shared$1 = sharedExports;
   var uid = uid$2;
   var keys$1 = shared$1('keys');
 
@@ -898,7 +906,7 @@ var markerClusterer = (function (exports) {
 
   var isCallable$5 = isCallable$e;
   var definePropertyModule$3 = objectDefineProperty;
-  var makeBuiltIn = makeBuiltIn$2.exports;
+  var makeBuiltIn = makeBuiltInExports;
   var defineGlobalProperty$1 = defineGlobalProperty$3;
 
   var defineBuiltIn$3 = function (O, key, value, options) {
@@ -2249,7 +2257,11 @@ var markerClusterer = (function (exports) {
     assign: assign
   });
 
-  var kdbush = {exports: {}};
+  var kdbushExports = {};
+  var kdbush = {
+    get exports(){ return kdbushExports; },
+    set exports(v){ kdbushExports = v; },
+  };
 
   (function (module, exports) {
     (function (global, factory) {
@@ -2473,7 +2485,7 @@ var markerClusterer = (function (exports) {
     });
   })(kdbush);
 
-  var KDBush = kdbush.exports;
+  var KDBush = kdbushExports;
 
   const defaultOptions = {
     minZoom: 0,
