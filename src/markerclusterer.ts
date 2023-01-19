@@ -236,6 +236,8 @@ export class MarkerClusterer extends OverlayViewSafe {
       if (cluster.markers.length === 1) {
         cluster.marker = cluster.markers[0];
       } else {
+        // we disable the markers here only when we're re-processing the cluster marker
+        // this stops the markers from flickering on each map event.
         cluster.markers.forEach((marker) => marker.setMap(null));
         
         cluster.marker = this.renderer.render(cluster, stats);
