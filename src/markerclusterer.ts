@@ -178,8 +178,22 @@ export class MarkerClusterer extends OverlayViewSafe {
 
       // allow algorithms to return flag on whether the clusters/markers have changed
       if (changed || changed == undefined) {
+        clusters.forEach((cluster, index) => {
+          // if there's clusters that has been "processed" (Cluster.marker is set), then reuse it instead of reprocessing it
+          const duplicate = this.clusters.findIndex((old) => old.marker && old.marker.getPosition().equals(cluster.position));
+
+          if(duplicate !== -1) {
+            // we'll reset the Cluster.markers here and only add the existing item
+            // down below in renderClusters, it will assign this one item to Cluster.master
+            clusters[index].markers.length = 0;
+            clusters[index].markers.push(this.clusters[duplicate].marker);
+
+            this.clusters[duplicate].marker = null;
+          }
+        });
+
         // reset visibility of markers and clusters
-        this.reset();
+        this.clusters.forEach((cluster) => cluster.delete());
 
         // store new clusters
         this.clusters = clusters;
@@ -222,6 +236,8 @@ export class MarkerClusterer extends OverlayViewSafe {
       if (cluster.markers.length === 1) {
         cluster.marker = cluster.markers[0];
       } else {
+        cluster.markers.forEach((marker) => marker.setMap(null));
+        
         cluster.marker = this.renderer.render(cluster, stats);
 
         if (this.onClusterClick) {
