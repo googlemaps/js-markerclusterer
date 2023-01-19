@@ -184,7 +184,7 @@ export class MarkerClusterer extends OverlayViewSafe {
 
           if(duplicate !== -1) {
             // we'll reset the Cluster.markers here and only add the existing item
-            // down below in renderClusters, it will assign this one item to Cluster.master
+            // down below in renderClusters, it will assign this one item to Cluster.marker
             clusters[index].markers.length = 0;
             clusters[index].markers.push(this.clusters[duplicate].marker);
 
