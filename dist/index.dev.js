@@ -419,18 +419,18 @@ var markerClusterer = (function (exports) {
   var tryToString$1 = tryToString$2;
   var $TypeError$a = TypeError; // `Assert: IsCallable(argument) is true`
 
-  var aCallable$3 = function (argument) {
+  var aCallable$4 = function (argument) {
     if (isCallable$a(argument)) return argument;
     throw $TypeError$a(tryToString$1(argument) + ' is not a function');
   };
 
-  var aCallable$2 = aCallable$3;
+  var aCallable$3 = aCallable$4;
   var isNullOrUndefined = isNullOrUndefined$2; // `GetMethod` abstract operation
   // https://tc39.es/ecma262/#sec-getmethod
 
   var getMethod$1 = function (V, P) {
     var func = V[P];
-    return isNullOrUndefined(func) ? undefined : aCallable$2(func);
+    return isNullOrUndefined(func) ? undefined : aCallable$3(func);
   };
 
   var call$4 = functionCall;
@@ -483,10 +483,10 @@ var markerClusterer = (function (exports) {
   (shared$3.exports = function (key, value) {
     return store$2[key] || (store$2[key] = value !== undefined ? value : {});
   })('versions', []).push({
-    version: '3.27.2',
+    version: '3.28.0',
     mode: 'global',
     copyright: '© 2014-2023 Denis Pushkarev (zloirock.ru)',
-    license: 'https://github.com/zloirock/core-js/blob/v3.27.2/LICENSE',
+    license: 'https://github.com/zloirock/core-js/blob/v3.28.0/LICENSE',
     source: 'https://github.com/zloirock/core-js'
   });
 
@@ -1173,12 +1173,12 @@ var markerClusterer = (function (exports) {
   };
 
   var uncurryThis$9 = functionUncurryThisClause;
-  var aCallable$1 = aCallable$3;
+  var aCallable$2 = aCallable$4;
   var NATIVE_BIND = functionBindNative;
   var bind$1 = uncurryThis$9(uncurryThis$9.bind); // optional / simple context binding
 
   var functionBindContext = function (fn, that) {
-    aCallable$1(fn);
+    aCallable$2(fn);
     return that === undefined ? fn : NATIVE_BIND ? bind$1(fn, that) : function ()
     /* ...args */
     {
@@ -1474,7 +1474,7 @@ var markerClusterer = (function (exports) {
     return t;
   }
 
-  var aCallable = aCallable$3;
+  var aCallable$1 = aCallable$4;
   var toObject$2 = toObject$5;
   var IndexedObject$1 = indexedObject;
   var lengthOfArrayLike$1 = lengthOfArrayLike$4;
@@ -1482,7 +1482,7 @@ var markerClusterer = (function (exports) {
 
   var createMethod$1 = function (IS_RIGHT) {
     return function (that, callbackfn, argumentsLength, memo) {
-      aCallable(callbackfn);
+      aCallable$1(callbackfn);
       var O = toObject$2(that);
       var self = IndexedObject$1(O);
       var length = lengthOfArrayLike$1(O);
@@ -3121,6 +3121,7 @@ var markerClusterer = (function (exports) {
   var addToUnscopables = addToUnscopables$1; // FF99+ bug
 
   var BROKEN_ON_SPARSE = fails$1(function () {
+    // eslint-disable-next-line es/no-array-prototype-includes -- detection
     return !Array(1).includes();
   }); // `Array.prototype.includes` method
   // https://tc39.es/ecma262/#sec-array.prototype.includes
@@ -3368,6 +3369,18 @@ var markerClusterer = (function (exports) {
   var global$2 = global$d;
   var path$1 = global$2;
 
+  var uncurryThis$3 = functionUncurryThis;
+  var aCallable = aCallable$4;
+
+  var functionUncurryThisAccessor = function (object, key, method) {
+    try {
+      // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
+      return uncurryThis$3(aCallable(Object.getOwnPropertyDescriptor(object, key)[method]));
+    } catch (error) {
+      /* empty */
+    }
+  };
+
   var isCallable$1 = isCallable$e;
   var $String = String;
   var $TypeError = TypeError;
@@ -3378,7 +3391,7 @@ var markerClusterer = (function (exports) {
   };
 
   /* eslint-disable no-proto -- safe */
-  var uncurryThis$3 = functionUncurryThis;
+  var uncurryThisAccessor = functionUncurryThisAccessor;
   var anObject = anObject$5;
   var aPossiblePrototype = aPossiblePrototype$1; // `Object.setPrototypeOf` method
   // https://tc39.es/ecma262/#sec-object.setprototypeof
@@ -3391,8 +3404,7 @@ var markerClusterer = (function (exports) {
     var setter;
 
     try {
-      // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
-      setter = uncurryThis$3(Object.getOwnPropertyDescriptor(Object.prototype, '__proto__').set);
+      setter = uncurryThisAccessor(Object.prototype, '__proto__', 'set');
       setter(test, []);
       CORRECT_SETTER = test instanceof Array;
     } catch (error) {
@@ -3431,15 +3443,14 @@ var markerClusterer = (function (exports) {
   var toString = toString$2;
   var whitespaces = whitespaces$1;
   var replace = uncurryThis$1(''.replace);
-  var whitespace = '[' + whitespaces + ']';
-  var ltrim = RegExp('^' + whitespace + whitespace + '*');
-  var rtrim = RegExp(whitespace + whitespace + '*$'); // `String.prototype.{ trim, trimStart, trimEnd, trimLeft, trimRight }` methods implementation
+  var ltrim = RegExp('^[' + whitespaces + ']+');
+  var rtrim = RegExp('(^|[^' + whitespaces + '])[' + whitespaces + ']+$'); // `String.prototype.{ trim, trimStart, trimEnd, trimLeft, trimRight }` methods implementation
 
   var createMethod = function (TYPE) {
     return function ($this) {
       var string = toString(requireObjectCoercible($this));
       if (TYPE & 1) string = replace(string, ltrim, '');
-      if (TYPE & 2) string = replace(string, rtrim, '');
+      if (TYPE & 2) string = replace(string, rtrim, '$1');
       return string;
     };
   };
