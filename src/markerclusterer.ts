@@ -16,6 +16,7 @@
 
 import { Algorithm, SuperClusterAlgorithm } from "./algorithms";
 import { ClusterStats, DefaultRenderer, Renderer } from "./renderer";
+import { filterMarkersToPaddedViewport } from "./algorithms/utils";
 
 import { Cluster } from "./cluster";
 import { OverlayViewSafe } from "./overlay-view-safe";
@@ -170,10 +171,17 @@ export class MarkerClusterer extends OverlayViewSafe {
         MarkerClustererEvents.CLUSTERING_BEGIN,
         this
       );
+
+      const mapCanvasProjection = this.getProjection();
       const { clusters, changed } = this.algorithm.calculate({
-        markers: this.markers,
+        markers: filterMarkersToPaddedViewport(
+          map,
+          mapCanvasProjection,
+          this.markers,
+          this.algorithm.getViewportPadding()
+        ),
         map,
-        mapCanvasProjection: this.getProjection(),
+        mapCanvasProjection,
       });
 
       // allow algorithms to return flag on whether the clusters/markers have changed

@@ -15,7 +15,6 @@
  */
 
 import { Cluster } from "../cluster";
-import { filterMarkersToPaddedViewport } from "./utils";
 
 export interface AlgorithmInput {
   /**
@@ -53,6 +52,9 @@ export interface Algorithm {
    * Calculates an array of {@link Cluster}.
    */
   calculate: ({ markers, map }: AlgorithmInput) => AlgorithmOutput;
+
+  /** Returns the current viewportPadding value. */
+  getViewportPadding: () => number;
 }
 
 export interface AlgorithmOptions {
@@ -89,6 +91,9 @@ export abstract class AbstractAlgorithm implements Algorithm {
    * and other optimizations can also be done here.
    */
   public abstract calculate({ markers, map }: AlgorithmInput): AlgorithmOutput;
+
+  /** Returns the current viewportPadding value. */
+  public abstract getViewportPadding(): number;
 
   /**
    * Clusters the markers and called from {@link calculate}.
@@ -138,16 +143,14 @@ export abstract class AbstractViewportAlgorithm extends AbstractAlgorithm {
 
     return {
       clusters: this.cluster({
-        markers: filterMarkersToPaddedViewport(
-          map,
-          mapCanvasProjection,
-          markers,
-          this.viewportPadding
-        ),
+        markers,
         map,
         mapCanvasProjection,
       }),
     };
+  }
+  public getViewportPadding(): number {
+    return this.viewportPadding;
   }
   protected abstract cluster({ markers, map }: AlgorithmInput): Cluster[];
 }

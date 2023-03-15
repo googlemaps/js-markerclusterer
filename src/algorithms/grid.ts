@@ -20,11 +20,7 @@ import {
   AlgorithmOutput,
   ViewportAlgorithmOptions,
 } from "./core";
-import {
-  distanceBetweenPoints,
-  extendBoundsToPaddedViewport,
-  filterMarkersToPaddedViewport,
-} from "./utils";
+import { distanceBetweenPoints, extendBoundsToPaddedViewport } from "./utils";
 
 import { Cluster } from "../cluster";
 import equal from "fast-deep-equal";
@@ -85,12 +81,7 @@ export class GridAlgorithm extends AbstractViewportAlgorithm {
 
     return {
       clusters: this.cluster({
-        markers: filterMarkersToPaddedViewport(
-          map,
-          mapCanvasProjection,
-          markers,
-          this.viewportPadding
-        ),
+        markers,
         map,
         mapCanvasProjection,
       }),

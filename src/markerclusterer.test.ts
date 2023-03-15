@@ -21,10 +21,11 @@ import {
   defaultOnClusterClickHandler,
 } from ".";
 
-import { initialize } from "@googlemaps/jest-mocks";
+import { initialize, MapCanvasProjection } from "@googlemaps/jest-mocks";
 
 const calculate = jest.fn().mockReturnValue({ clusters: [] });
-const algorithm = { calculate };
+const getViewportPadding = jest.fn().mockReturnValue(60);
+const algorithm = { calculate, getViewportPadding };
 
 const render = jest.fn().mockImplementation(() => new google.maps.Marker());
 const renderer = { render };
@@ -39,24 +40,27 @@ beforeEach(() => {
 
 afterEach(() => {
   calculate.mockClear();
+  getViewportPadding.mockClear();
   render.mockClear();
 });
 
 test("markerClusterer does not render if no map", () => {
   const calculate = jest.fn();
+  const getViewportPadding = jest.fn();
   const markerClusterer = new MarkerClusterer({
     markers: [],
-    algorithm: { calculate },
+    algorithm: { calculate, getViewportPadding },
   });
   markerClusterer.getMap = jest.fn().mockImplementation(() => null);
   markerClusterer.getProjection = jest.fn().mockImplementation(() => null);
 
   markerClusterer.render();
   expect(calculate).toHaveBeenCalledTimes(0);
+  expect(getViewportPadding).toHaveBeenCalledTimes(0);
 });
 
 test("markerClusterer calls calculate correctly", () => {
-  const mapCanvasProjection = jest.fn();
+  const mapCanvasProjection = new MapCanvasProjection();
   const markers: google.maps.Marker[] = [];
 
   const markerClusterer = new MarkerClusterer({
@@ -78,10 +82,11 @@ test("markerClusterer calls calculate correctly", () => {
 });
 
 test("markerClusterer does not reset and renderClusters if no change", () => {
-  const mapCanvasProjection = jest.fn();
+  const mapCanvasProjection = new MapCanvasProjection();
   const markers: google.maps.Marker[] = [];
   const algorithm = {
     calculate: jest.fn().mockReturnValue({ clusters: [], changed: false }),
+    getViewportPadding: jest.fn().mockReturnValue(60),
   };
   const markerClusterer = new MarkerClusterer({
     markers,
