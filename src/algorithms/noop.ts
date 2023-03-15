@@ -15,7 +15,7 @@
  */
 
 import {
-  AbstractAlgorithm,
+  AbstractViewportAlgorithm,
   AlgorithmInput,
   AlgorithmOptions,
   AlgorithmOutput,
@@ -26,7 +26,7 @@ import { Cluster } from "../cluster";
 /**
  * Noop algorithm does not generate any clusters or filter markers by the an extended viewport.
  */
-export class NoopAlgorithm extends AbstractAlgorithm {
+export class NoopAlgorithm extends AbstractViewportAlgorithm {
   constructor({ ...options }: AlgorithmOptions) {
     super(options);
   }

@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import { AbstractAlgorithm, AlgorithmInput, AlgorithmOutput } from "./core";
+import {
+  AbstractViewportAlgorithm,
+  AlgorithmInput,
+  AlgorithmOutput,
+} from "./core";
 import SuperCluster, { ClusterFeature } from "supercluster";
 
 import { Cluster } from "../cluster";
@@ -32,7 +36,7 @@ export type SuperClusterOptions = SuperCluster.Options<
  *
  * @see https://www.npmjs.com/package/supercluster for more information on options.
  */
-export class SuperClusterAlgorithm extends AbstractAlgorithm {
+export class SuperClusterAlgorithm extends AbstractViewportAlgorithm {
   protected superCluster: SuperCluster;
   protected markers: google.maps.Marker[];
   protected clusters: Cluster[];
