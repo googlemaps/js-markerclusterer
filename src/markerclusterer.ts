@@ -25,6 +25,7 @@ export type onClusterClickHandler = (
   cluster: Cluster,
   map: google.maps.Map
 ) => void;
+
 export interface MarkerClustererOptions {
   markers?: google.maps.Marker[];
   /**
@@ -55,6 +56,7 @@ export const defaultOnClusterClickHandler: onClusterClickHandler = (
 ): void => {
   map.fitBounds(cluster.bounds);
 };
+
 /**
  * MarkerClusterer creates and manages per-zoom-level clusters for large amounts
  * of markers. See {@link MarkerClustererOptions} for more details.
@@ -96,11 +98,13 @@ export class MarkerClusterer extends OverlayViewSafe {
   }
 
   public addMarker(marker: google.maps.Marker, noDraw?: boolean): void {
+    console.log(this.markers.includes(marker), )
     if (this.markers.includes(marker)) {
       return;
     }
 
     this.markers.push(marker);
+
     if (!noDraw) {
       this.render();
     }
@@ -124,7 +128,14 @@ export class MarkerClusterer extends OverlayViewSafe {
       return false;
     }
 
-    marker.setMap(null);
+    // @ts-ignore
+    if(marker.element instanceof Element){
+      // @ts-ignore
+      marker.map = null;
+    } else {
+      marker.setMap(null);
+    }
+
     this.markers.splice(index, 1); // Remove the marker from the list of managed markers
 
     if (!noDraw) {
@@ -134,10 +145,7 @@ export class MarkerClusterer extends OverlayViewSafe {
     return true;
   }
 
-  public removeMarkers(
-    markers: google.maps.Marker[],
-    noDraw?: boolean
-  ): boolean {
+  public removeMarkers(markers: google.maps.Marker[], noDraw?: boolean): boolean {
     let removed = false;
 
     markers.forEach((marker) => {
@@ -208,7 +216,16 @@ export class MarkerClusterer extends OverlayViewSafe {
   }
 
   protected reset(): void {
-    this.markers.forEach((marker) => marker.setMap(null));
+    this.markers.forEach(function(marker){
+      // @ts-ignore
+      if(marker.element instanceof Element){
+        // @ts-ignore
+        marker.map = null;
+      } else {
+        marker.setMap(null)
+      }
+      console.log(marker)
+    });
     this.clusters.forEach((cluster) => cluster.delete());
     this.clusters = [];
   }
@@ -240,7 +257,13 @@ export class MarkerClusterer extends OverlayViewSafe {
         }
       }
 
-      cluster.marker.setMap(map);
+      // @ts-ignore
+      if(cluster.marker.element instanceof Element){
+        // @ts-ignore
+        cluster.marker.map = map;
+      } else {
+        cluster.marker.setMap(map);
+      }
     });
   }
 }

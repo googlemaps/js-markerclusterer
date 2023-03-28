@@ -49,6 +49,7 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
 
     this.state = { zoom: null };
   }
+  
   public calculate(input: AlgorithmInput): AlgorithmOutput {
     let changed = false;
 
@@ -56,15 +57,30 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
       changed = true;
       // TODO use proxy to avoid copy?
       this.markers = [...input.markers];
-
+      
       const points = this.markers.map((marker) => {
+
+        let lat = null;
+        let lng = null;
+
+        // @ts-ignore
+        if(marker.element instanceof Element){
+          // @ts-ignore
+          lat = marker.position.lat;
+          // @ts-ignore
+          lng = marker.position.lng;
+        } else {
+          lat = marker.getPosition().lat();
+          lng = marker.getPosition().lng();
+        }
+
         return {
           type: "Feature" as const,
           geometry: {
             type: "Point" as const,
             coordinates: [
-              marker.getPosition().lng(),
-              marker.getPosition().lat(),
+              lng,
+              lat
             ],
           },
           properties: { marker },
@@ -117,7 +133,8 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
 
       return new Cluster({
         markers: [marker],
-        position: marker.getPosition(),
+        // @ts-ignore
+        position: marker.element instanceof Element ? marker.position : marker.getPosition(),
       });
     }
   }

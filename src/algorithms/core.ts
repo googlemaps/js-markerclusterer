@@ -120,6 +120,7 @@ export abstract class AbstractViewportAlgorithm extends AbstractAlgorithm {
     super(options);
     this.viewportPadding = viewportPadding;
   }
+
   public calculate({
     markers,
     map,
@@ -157,11 +158,24 @@ export abstract class AbstractViewportAlgorithm extends AbstractAlgorithm {
  */
 export const noop = (markers: google.maps.Marker[]): Cluster[] => {
   const clusters = markers.map(
-    (marker) =>
-      new Cluster({
-        position: marker.getPosition(),
+    function(marker){
+      let position = null;
+
+      // @ts-ignore
+      if(marker.element instanceof Element){
+        // @ts-ignore
+        position = marker.position;
+      } else {
+        position = marker.getPosition();
+      }
+
+      const clust = new Cluster({
+        position: position,
         markers: [marker],
       })
+
+      return clust;
+    }
   );
   return clusters;
 };

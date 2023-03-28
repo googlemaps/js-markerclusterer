@@ -26,7 +26,8 @@ export const filterMarkersToPaddedViewport = (
     viewportPadding
   );
   return markers.filter((marker) =>
-    extendedMapBounds.contains(marker.getPosition())
+    // @ts-ignore
+    extendedMapBounds.contains(marker.element instanceof Element ? marker.position : marker.getPosition())
   );
 };
 

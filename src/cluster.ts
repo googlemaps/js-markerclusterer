@@ -42,7 +42,8 @@ export class Cluster {
     }
 
     return this.markers.reduce((bounds, marker) => {
-      return bounds.extend(marker.getPosition());
+      // @ts-ignore
+      return bounds.extend(marker.element instanceof Element ? marker.position : marker.getPosition());
     }, new google.maps.LatLngBounds(this._position, this._position));
   }
 
@@ -54,8 +55,16 @@ export class Cluster {
    * Get the count of **visible** markers.
    */
   public get count(): number {
-    return this.markers.filter((m: google.maps.Marker) => m.getVisible())
-      .length;
+    return this.markers.filter(function (m: google.maps.Marker) {
+
+      // @ts-ignore
+      if (m.element instanceof Element) {
+        // @ts-ignore
+        return m.map == null ? true : false;
+      } else {
+        return m.getVisible()
+      }
+    }).length;
   }
 
   /**
@@ -70,7 +79,14 @@ export class Cluster {
    */
   public delete(): void {
     if (this.marker) {
-      this.marker.setMap(null);
+      // @ts-ignore
+      if(this.marker.element instanceof Element){
+        // @ts-ignore
+        this.marker.map = null;
+      } else {
+        this.marker.setMap(null);
+      }
+      
       delete this.marker;
     }
     this.markers.length = 0;

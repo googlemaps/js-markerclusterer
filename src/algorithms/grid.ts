@@ -120,9 +120,20 @@ export class GridAlgorithm extends AbstractViewportAlgorithm {
 
     for (let i = 0; i < this.clusters.length; i++) {
       const candidate = this.clusters[i];
+
+      let position = null;
+
+      // @ts-ignore
+      if(marker.element instanceof Element){
+        // @ts-ignore
+        position = new google.maps.LatLng(marker.position.lat(), marker.position.lng())
+      } else {
+        position = marker.getPosition();
+      }
+
       const distance = distanceBetweenPoints(
         candidate.bounds.getCenter().toJSON(),
-        marker.getPosition().toJSON()
+        position.toJSON()
       );
 
       if (distance < maxDistance) {
@@ -131,13 +142,15 @@ export class GridAlgorithm extends AbstractViewportAlgorithm {
       }
     }
 
+    
     if (
       cluster &&
       extendBoundsToPaddedViewport(
         cluster.bounds,
         projection,
         this.gridSize
-      ).contains(marker.getPosition())
+        // @ts-ignore
+      ).contains(marker.element instanceof Element ? marker.position : marker.getPosition())
     ) {
       cluster.push(marker);
     } else {
