@@ -31,7 +31,7 @@ export class ClusterStats {
     };
   };
 
-  constructor(markers: google.maps.Marker[], clusters: Cluster[]) {
+  constructor(markers: google.maps.Marker[] | google.maps.marker.AdvancedMarkerView[], clusters: Cluster[]) {
     this.markers = { sum: markers.length };
 
     const clusterMarkerCounts = clusters.map((a) => a.count);

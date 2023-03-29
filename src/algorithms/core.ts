@@ -28,7 +28,7 @@ export interface AlgorithmInput {
    * There are some specific edge cases to be aware of including the following:
    * * Markers that are not visible.
    */
-  markers: google.maps.Marker[];
+  markers: google.maps.Marker[] | google.maps.marker.AdvancedMarkerView[];
   /**
    * The `mapCanvasProjection` enables easy conversion from lat/lng to pixel.
    *
