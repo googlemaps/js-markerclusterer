@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-import {setMarkerMap} from './markerclusterer';
+import { MarkerUtils } from "./marker-utils";
+
 
 export interface ClusterOptions {
   position?: google.maps.LatLng | google.maps.LatLngLiteral;
-  markers?: google.maps.Marker[] | google.maps.marker.AdvancedMarkerView[];
+  markers?: Marker[];
 }
 
 export class Cluster {
-  public marker: google.maps.Marker | google.maps.marker.AdvancedMarkerView;
-  public readonly markers?: google.maps.Marker[] | google.maps.marker.AdvancedMarkerView[];
+  public marker: Marker;
+  public readonly markers?: Marker[];
   protected _position: google.maps.LatLng;
 
   constructor({ markers, position }: ClusterOptions) {
@@ -44,7 +45,7 @@ export class Cluster {
     }
 
     return this.markers.reduce((bounds, marker) => {
-      return bounds.extend(marker.getPosition());
+      return bounds.extend(MarkerUtils.getPosition(marker));
     }, new google.maps.LatLngBounds(this._position, this._position));
   }
 
@@ -63,7 +64,7 @@ export class Cluster {
   /**
    * Add a marker to the cluster.
    */
-  public push(marker: google.maps.Marker | google.maps.marker.AdvancedMarkerView): void {
+  public push(marker: Marker): void {
     this.markers.push(marker);
   }
 
@@ -72,7 +73,7 @@ export class Cluster {
    */
   public delete(): void {
     if (this.marker) {
-      setMarkerMap(this.marker, null);
+      MarkerUtils.setMap(this.marker, null);
       delete this.marker;
     }
     this.markers.length = 0;

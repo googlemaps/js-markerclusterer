@@ -66,7 +66,7 @@ export class MarkerClusterer extends OverlayViewSafe {
   /** @see {@link MarkerClustererOptions.algorithm} */
   protected algorithm: Algorithm;
   protected clusters: Cluster[];
-  protected markers: google.maps.Marker[] | google.maps.marker.AdvancedMarkerView[];
+  protected markers: Marker[];
   /** @see {@link MarkerClustererOptions.renderer} */
   protected renderer: Renderer;
   /** @see {@link MarkerClustererOptions.map} */
@@ -95,7 +95,7 @@ export class MarkerClusterer extends OverlayViewSafe {
     }
   }
 
-  public addMarker(marker: google.maps.Marker | google.maps.marker.AdvancedMarkerView, noDraw?: boolean): void {
+  public addMarker(marker: Marker, noDraw?: boolean): void {
     if (this.markers.includes(marker)) {
       return;
     }
@@ -106,7 +106,7 @@ export class MarkerClusterer extends OverlayViewSafe {
     }
   }
 
-  public addMarkers(markers: google.maps.Marker[] | google.maps.marker.AdvancedMarkerView[], noDraw?: boolean): void {
+  public addMarkers(markers: Marker[], noDraw?: boolean): void {
     markers.forEach((marker) => {
       this.addMarker(marker, true);
     });
@@ -116,7 +116,7 @@ export class MarkerClusterer extends OverlayViewSafe {
     }
   }
 
-  public removeMarker(marker: google.maps.Marker | google.maps.marker.AdvancedMarkerView, noDraw?: boolean): boolean {
+  public removeMarker(marker: Marker, noDraw?: boolean): boolean {
     const index = this.markers.indexOf(marker);
 
     if (index === -1) {
@@ -135,7 +135,7 @@ export class MarkerClusterer extends OverlayViewSafe {
   }
 
   public removeMarkers(
-    markers: google.maps.Marker[] | google.maps.marker.AdvancedMarkerView[],
+    markers: Marker[],
     noDraw?: boolean
   ): boolean {
     let removed = false;
@@ -214,7 +214,7 @@ export class MarkerClusterer extends OverlayViewSafe {
   }
 
   protected reset(): void {
-    this.markers.forEach((marker) => marker.setMap(null));
+    this.markers.forEach((marker) => MarkerUtils.setMap(marker, null));
     this.clusters.forEach((cluster) => cluster.delete());
     this.clusters = [];
   }
@@ -246,7 +246,7 @@ export class MarkerClusterer extends OverlayViewSafe {
         }
       }
 
-      cluster.marker.setMap(map);
+      MarkerUtils.setMap(cluster.marker, map);
     });
   }
 }

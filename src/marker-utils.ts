@@ -1,4 +1,3 @@
-export type Marker = google.maps.Marker | google.maps.marker.AdvancedMarkerView;
 
 export class MarkerUtils {
 
@@ -15,6 +14,14 @@ export class MarkerUtils {
       return;
     }
     (marker as google.maps.Marker).setMap(map);
+  }
+
+  public static getPosition (marker: Marker): google.maps.LatLng | google.maps.LatLngLiteral | google.maps.LatLngAltitudeLiteral {
+    let position;
+    if (this.isAdvancedMarker(marker)) {
+      return (marker as google.maps.marker.AdvancedMarkerView).position;
+    }
+    return (marker as google.maps.Marker).getPosition();
   }
 
 }

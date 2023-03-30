@@ -31,7 +31,7 @@ export class ClusterStats {
     };
   };
 
-  constructor(markers: google.maps.Marker[] | google.maps.marker.AdvancedMarkerView[], clusters: Cluster[]) {
+  constructor(markers: Marker[], clusters: Cluster[]) {
     this.markers = { sum: markers.length };
 
     const clusterMarkerCounts = clusters.map((a) => a.count);
@@ -62,7 +62,7 @@ export interface Renderer {
    * });
    * ```
    */
-  render(cluster: Cluster, stats: ClusterStats, map:google.maps.Map): google.maps.Marker | google.maps.marker.AdvancedMarkerView;
+  render(cluster: Cluster, stats: ClusterStats, map:google.maps.Map): Marker;
 }
 
 export class DefaultRenderer implements Renderer {
@@ -108,7 +108,7 @@ export class DefaultRenderer implements Renderer {
     { count, position, marker }: Cluster,
     stats: ClusterStats,
     map: google.maps.Map
-  ): google.maps.Marker | google.maps.marker.AdvancedMarkerView {
+  ): Marker {
     // change color if this cluster has more markers than the mean cluster
     const color =
       count > Math.max(10, stats.clusters.markers.mean) ? "#ff0000" : "#0000ff";
