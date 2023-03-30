@@ -16,7 +16,6 @@
 
 import { MarkerUtils } from "./marker-utils";
 
-
 export interface ClusterOptions {
   position?: google.maps.LatLng | google.maps.LatLngLiteral;
   markers?: Marker[];
@@ -57,7 +56,7 @@ export class Cluster {
    * Get the count of **visible** markers.
    */
   public get count(): number {
-    return this.markers.filter((m: google.maps.Marker) => m.getVisible())
+    return this.markers.filter((m: Marker) => MarkerUtils.getVisible(m))
       .length;
   }
 

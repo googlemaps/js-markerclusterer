@@ -1,6 +1,4 @@
-
 export class MarkerUtils {
-
   public static isAdvancedMarker (marker: Marker): boolean {
     if (marker instanceof google.maps.marker.AdvancedMarkerView) {
       return true;
@@ -16,12 +14,17 @@ export class MarkerUtils {
     (marker as google.maps.Marker).setMap(map);
   }
 
-  public static getPosition (marker: Marker): google.maps.LatLng | google.maps.LatLngLiteral | google.maps.LatLngAltitudeLiteral {
+  public static getPosition (marker: Marker): google.maps.LatLng {
     let position;
     if (this.isAdvancedMarker(marker)) {
-      return (marker as google.maps.marker.AdvancedMarkerView).position;
+      return (marker as google.maps.marker.AdvancedMarkerView).position as google.maps.LatLng;
     }
     return (marker as google.maps.Marker).getPosition();
   }
-
+  public static getVisible (marker: Marker) {
+    if (this.isAdvancedMarker(marker)) {
+      return (marker as google.maps.marker.AdvancedMarkerView).map !== null ? true : false;
+    }
+    return (marker as google.maps.Marker).getVisible();
+  }
 }

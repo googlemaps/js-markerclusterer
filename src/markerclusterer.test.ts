@@ -22,351 +22,358 @@ import {
 } from ".";
 
 import { initialize } from "@googlemaps/jest-mocks";
+import { MarkerUtils } from "./marker-utils";
 
-const calculate = jest.fn().mockReturnValue({ clusters: [] });
-const algorithm = { calculate };
+initialize();
+let markers = [new google.maps.Marker, new google.maps.marker.AdvancedMarkerView];
 
-const render = jest.fn().mockImplementation(() => new google.maps.Marker());
-const renderer = { render };
+describe.each(markers)('should work with legacy and Advanced Markers', (marker) => {
+  const calculate = jest.fn().mockReturnValue({ clusters: [] });
+  const algorithm = { calculate };
 
-let map: google.maps.Map;
+  const render = jest.fn().mockImplementation(() => marker);
+  const renderer = { render };
 
-beforeEach(() => {
-  initialize();
+  let map: google.maps.Map;
 
-  map = new google.maps.Map(document.createElement("div"));
-});
-
-afterEach(() => {
-  calculate.mockClear();
-  render.mockClear();
-});
-
-test("markerClusterer does not render if no map", () => {
-  const calculate = jest.fn();
-  const markerClusterer = new MarkerClusterer({
-    markers: [],
-    algorithm: { calculate },
-  });
-  markerClusterer.getMap = jest.fn().mockImplementation(() => null);
-  markerClusterer.getProjection = jest.fn().mockImplementation(() => null);
-
-  markerClusterer.render();
-  expect(calculate).toHaveBeenCalledTimes(0);
-});
-
-test("markerClusterer calls calculate correctly", () => {
-  const mapCanvasProjection = jest.fn();
-  const markers: google.maps.Marker[] = [];
-
-  const markerClusterer = new MarkerClusterer({
-    markers,
-    algorithm,
+  beforeEach(() => {
+    map = new google.maps.Map(document.createElement("div"));
   });
 
-  markerClusterer.getMap = jest.fn().mockImplementation(() => map);
-  markerClusterer.getProjection = jest
-    .fn()
-    .mockImplementation(() => mapCanvasProjection);
-  markerClusterer["reset"] = jest.fn();
-  markerClusterer["renderClusters"] = jest.fn();
-  markerClusterer.render();
-
-  expect(calculate).toBeCalledWith({ map, markers, mapCanvasProjection });
-  expect(markerClusterer["reset"]).toHaveBeenCalledTimes(1);
-  expect(markerClusterer["renderClusters"]).toHaveBeenCalledTimes(1);
-});
-
-test("markerClusterer does not reset and renderClusters if no change", () => {
-  const mapCanvasProjection = jest.fn();
-  const markers: google.maps.Marker[] = [];
-  const algorithm = {
-    calculate: jest.fn().mockReturnValue({ clusters: [], changed: false }),
-  };
-  const markerClusterer = new MarkerClusterer({
-    markers,
-    algorithm,
+  afterEach(() => {
+    calculate.mockClear();
+    render.mockClear();
   });
 
-  markerClusterer.getMap = jest.fn().mockImplementation(() => map);
-  markerClusterer.getProjection = jest
-    .fn()
-    .mockImplementation(() => mapCanvasProjection);
-  markerClusterer["reset"] = jest.fn();
-  markerClusterer["renderClusters"] = jest.fn();
-  markerClusterer.render();
+  test("markerClusterer does not render if no map", () => {
+    const calculate = jest.fn();
+    const markerClusterer = new MarkerClusterer({
+      markers: [],
+      algorithm: { calculate },
+    });
+    markerClusterer.getMap = jest.fn().mockImplementation(() => null);
+    markerClusterer.getProjection = jest.fn().mockImplementation(() => null);
 
-  expect(markerClusterer["reset"]).toHaveBeenCalledTimes(0);
-  expect(markerClusterer["renderClusters"]).toHaveBeenCalledTimes(0);
-});
-
-test("markerClusterer reset calls delete and setMap null", () => {
-  const markers: google.maps.Marker[] = [new google.maps.Marker()];
-
-  const markerClusterer = new MarkerClusterer({
-    markers,
+    markerClusterer.render();
+    expect(calculate).toHaveBeenCalledTimes(0);
   });
 
-  const clusters = [new Cluster({ markers })];
-  const deleteSpy = spyOn(clusters[0], "delete");
-  markerClusterer["clusters"] = clusters;
+  test("markerClusterer calls calculate correctly", () => {
+    const mapCanvasProjection = jest.fn();
+    const markers: Marker[] = [];
 
-  markerClusterer["reset"]();
+    const markerClusterer = new MarkerClusterer({
+      markers,
+      algorithm,
+    });
 
-  expect(markers[0].setMap).toHaveBeenCalledWith(null);
-  expect(deleteSpy).toHaveBeenCalledTimes(1);
-});
+    markerClusterer.getMap = jest.fn().mockImplementation(() => map);
+    markerClusterer.getProjection = jest
+      .fn()
+      .mockImplementation(() => mapCanvasProjection);
+    markerClusterer["reset"] = jest.fn();
+    markerClusterer["renderClusters"] = jest.fn();
+    markerClusterer.render();
 
-test("markerClusterer renderClusters bypasses renderer if just one", () => {
-  const markers: google.maps.Marker[] = [new google.maps.Marker()];
-
-  const markerClusterer = new MarkerClusterer({
-    markers,
+    expect(calculate).toBeCalledWith({ map, markers, mapCanvasProjection });
+    expect(markerClusterer["reset"]).toHaveBeenCalledTimes(1);
+    expect(markerClusterer["renderClusters"]).toHaveBeenCalledTimes(1);
   });
 
-  markerClusterer.getMap = jest.fn().mockImplementation(() => map);
+  test("markerClusterer does not reset and renderClusters if no change", () => {
+    const mapCanvasProjection = jest.fn();
+    const markers: Marker[] = [];
+    const algorithm = {
+      calculate: jest.fn().mockReturnValue({ clusters: [], changed: false }),
+    };
+    const markerClusterer = new MarkerClusterer({
+      markers,
+      algorithm,
+    });
 
-  const clusters = [new Cluster({ markers })];
+    markerClusterer.getMap = jest.fn().mockImplementation(() => map);
+    markerClusterer.getProjection = jest
+      .fn()
+      .mockImplementation(() => mapCanvasProjection);
+    markerClusterer["reset"] = jest.fn();
+    markerClusterer["renderClusters"] = jest.fn();
+    markerClusterer.render();
 
-  markerClusterer["clusters"] = clusters;
-  markerClusterer["renderClusters"]();
-
-  expect(clusters[0].marker).toBe(markers[0]);
-  expect(markers[0].setMap).toBeCalledWith(map);
-});
-
-test("markerClusterer renderClusters calls renderer", () => {
-  const markers: google.maps.Marker[] = [
-    new google.maps.Marker(),
-    new google.maps.Marker(),
-  ];
-
-  const markerClusterer = new MarkerClusterer({
-    markers,
-    renderer,
+    expect(markerClusterer["reset"]).toHaveBeenCalledTimes(0);
+    expect(markerClusterer["renderClusters"]).toHaveBeenCalledTimes(0);
   });
 
-  markerClusterer.getMap = jest.fn().mockImplementation(() => map);
+  test("markerClusterer reset calls delete and setMap null", () => {
+    const markers: Marker[] = [marker];
+    const markerClusterer = new MarkerClusterer({
+      markers,
+    });
+    const clusters = [new Cluster({ markers })];
+    const deleteSpy = spyOn(clusters[0], "delete");
+    
+    MarkerUtils.setMap = jest.fn().mockImplementation(() => null);
+    
+    markerClusterer["clusters"] = clusters;
+    markerClusterer["reset"]();
 
-  const clusters = [new Cluster({ markers }), new Cluster({ markers })];
+    expect(MarkerUtils.setMap).toHaveBeenCalledWith(markers[0], null);
+    expect(deleteSpy).toHaveBeenCalledTimes(1);
+  });
 
-  markerClusterer["clusters"] = clusters;
-  markerClusterer["renderClusters"]();
+  test("markerClusterer renderClusters bypasses renderer if just one", () => {
+    const markers: Marker[] = [marker];
 
-  clusters.forEach((cluster) => {
-    expect(cluster.marker.setMap).toBeCalledWith(map);
-    expect(cluster.marker.addListener).toHaveBeenCalledWith(
-      "click",
-      expect.any(Function)
+    const markerClusterer = new MarkerClusterer({
+      markers,
+    });
+
+    markerClusterer.getMap = jest.fn().mockImplementation(() => map);
+
+    const clusters = [new Cluster({ markers })];
+
+    markerClusterer["clusters"] = clusters;
+    markerClusterer["renderClusters"]();
+
+    expect(clusters[0].marker).toBe(markers[0]);
+    expect(MarkerUtils.setMap).toBeCalledWith(markers[0], map);
+  });
+
+  test("markerClusterer renderClusters calls renderer", () => {
+    const markers: Marker[] = [
+      marker
+    ];
+
+    const markerClusterer = new MarkerClusterer({
+      markers,
+      renderer,
+    });
+
+    markerClusterer.getMap = jest.fn().mockImplementation(() => map);
+
+    const clusters = [new Cluster({ markers }), new Cluster({ markers })];
+
+    markerClusterer["clusters"] = clusters;
+    markerClusterer["renderClusters"]();
+
+    clusters.forEach((cluster) => {
+      expect(MarkerUtils.setMap).toBeCalledWith(cluster.marker, map);
+      expect(cluster.marker.addListener).toHaveBeenCalledWith(
+        "click",
+        expect.any(Function)
+      );
+    });
+
+    expect(renderer.render).toBeCalledWith(clusters[0], expect.any(ClusterStats));
+  });
+
+  test("markerClusterer renderClusters does not set click handler", () => {
+    const markers: Marker[] = [
+      marker
+    ];
+
+    const markerClusterer = new MarkerClusterer({
+      markers,
+      onClusterClick: null,
+    });
+
+    markerClusterer.getMap = jest.fn().mockImplementation(() => map);
+
+    const clusters = [new Cluster({ markers }), new Cluster({ markers })];
+
+    markerClusterer["clusters"] = clusters;
+    markerClusterer["renderClusters"]();
+
+    clusters.forEach((cluster) => {
+      expect(cluster.marker.addListener).toBeCalledTimes(0);
+    });
+  });
+
+  test("markerClusterer onAdd calls render and sets listener", () => {
+    const markerClusterer = new MarkerClusterer({
+      markers: [],
+    });
+
+    markerClusterer.getMap = jest.fn().mockImplementation(() => map);
+    markerClusterer.render = jest.fn();
+
+    markerClusterer.onAdd();
+
+    expect(map.addListener).toBeCalledWith("idle", expect.any(Function));
+    expect(markerClusterer.render).toBeCalledTimes(1);
+  });
+
+  test("markerClusterer onRemove calls reset and removes listener", () => {
+    const markerClusterer = new MarkerClusterer({
+      markers: [],
+    });
+
+    markerClusterer.getMap = jest.fn().mockImplementation(() => map);
+    markerClusterer["reset"] = jest.fn();
+
+    markerClusterer.onRemove();
+
+    expect(markerClusterer["reset"]).toBeCalledTimes(1);
+    expect(markerClusterer["idleListener"]).toBeUndefined();
+  });
+
+  test("markerClusterer addMarker", () => {
+    const markerClusterer = new MarkerClusterer({
+      markers: [],
+    });
+
+    markerClusterer.render = jest.fn();
+
+    markerClusterer.addMarker(marker);
+    expect(markerClusterer.render).toBeCalledTimes(1);
+    expect(markerClusterer["markers"]).toHaveLength(1);
+  });
+
+  test("markerClusterer addMarker does not add duplicate", () => {
+    const markerClusterer = new MarkerClusterer({
+      markers: [],
+    });
+
+    const newMarker = marker;
+
+    markerClusterer.addMarker(newMarker, true);
+    markerClusterer.addMarker(newMarker, true);
+    expect(markerClusterer["markers"]).toHaveLength(1);
+  });
+
+  test("markerClusterer addMarkers", () => {
+    const markerClusterer = new MarkerClusterer({
+      markers: [],
+    });
+
+    markerClusterer.render = jest.fn();
+
+    markerClusterer.addMarkers([
+      marker,
+      new google.maps.Marker(),
+      new google.maps.marker.AdvancedMarkerView()
+    ]);
+    expect(markerClusterer.render).toBeCalledTimes(1);
+    expect(markerClusterer["markers"]).toHaveLength(3);
+
+    markerClusterer.addMarkers([
+      new google.maps.Marker(),
+      new google.maps.marker.AdvancedMarkerView()
+    ],
+      true
     );
+    expect(markerClusterer.render).toBeCalledTimes(1);
   });
 
-  expect(renderer.render).toBeCalledWith(clusters[0], expect.any(ClusterStats));
-});
+  test("markerClusterer removeMarker if present", () => {
+    const markers = [marker];
+    const markerClusterer = new MarkerClusterer({
+      markers,
+    });
 
-test("markerClusterer renderClusters does not set click handler", () => {
-  const markers: google.maps.Marker[] = [
-    new google.maps.Marker(),
-    new google.maps.Marker(),
-  ];
+    markerClusterer.render = jest.fn();
 
-  const markerClusterer = new MarkerClusterer({
-    markers,
-    onClusterClick: null,
+    expect(markerClusterer.removeMarker(markers[0])).toBe(true);
+    expect(markerClusterer.render).toBeCalledTimes(1);
+    expect(markerClusterer["markers"]).toHaveLength(0);
   });
 
-  markerClusterer.getMap = jest.fn().mockImplementation(() => map);
+  test("markerClusterer removeMarker if absent", () => {
+    const markers = [marker];
+    const markerClusterer = new MarkerClusterer({
+      markers,
+    });
 
-  const clusters = [new Cluster({ markers }), new Cluster({ markers })];
+    markerClusterer.render = jest.fn();
 
-  markerClusterer["clusters"] = clusters;
-  markerClusterer["renderClusters"]();
-
-  clusters.forEach((cluster) => {
-    expect(cluster.marker.addListener).toBeCalledTimes(0);
-  });
-});
-
-test("markerClusterer onAdd calls render and sets listener", () => {
-  const markerClusterer = new MarkerClusterer({
-    markers: [],
+    expect(markerClusterer.removeMarker(new google.maps.Marker())).toBe(false);
+    expect(markerClusterer.removeMarker(new google.maps.marker.AdvancedMarkerView())).toBe(false);
+    expect(markerClusterer.render).toBeCalledTimes(0);
+    expect(markerClusterer["markers"]).toHaveLength(1);
   });
 
-  markerClusterer.getMap = jest.fn().mockImplementation(() => map);
-  markerClusterer.render = jest.fn();
+  test("markerClusterer removeMarkers if present", () => {
+    const markers = [marker];
+    const markerClusterer = new MarkerClusterer({
+      markers,
+    });
 
-  markerClusterer.onAdd();
+    markerClusterer.render = jest.fn();
 
-  expect(map.addListener).toBeCalledWith("idle", expect.any(Function));
-  expect(markerClusterer.render).toBeCalledTimes(1);
-});
-
-test("markerClusterer onRemove calls reset and removes listener", () => {
-  const markerClusterer = new MarkerClusterer({
-    markers: [],
+    expect(markerClusterer.removeMarkers(markers)).toBe(true);
+    expect(markerClusterer.render).toBeCalledTimes(1);
+    expect(markerClusterer["markers"]).toHaveLength(0);
   });
 
-  markerClusterer.getMap = jest.fn().mockImplementation(() => map);
-  markerClusterer["reset"] = jest.fn();
+  test("markerClusterer removeMarkers if absent", () => {
+    const markers = [marker];
+    const markerClusterer = new MarkerClusterer({
+      markers,
+    });
 
-  markerClusterer.onRemove();
+    markerClusterer.render = jest.fn();
 
-  expect(markerClusterer["reset"]).toBeCalledTimes(1);
-  expect(markerClusterer["idleListener"]).toBeUndefined();
-});
-
-test("markerClusterer addMarker", () => {
-  const markerClusterer = new MarkerClusterer({
-    markers: [],
+    expect(markerClusterer.removeMarkers([new google.maps.Marker()])).toBe(false);
+    expect(markerClusterer.removeMarkers([new google.maps.marker.AdvancedMarkerView()])).toBe(false);
+    expect(markerClusterer.render).toBeCalledTimes(0);
+    expect(markerClusterer["markers"]).toHaveLength(1);
   });
 
-  markerClusterer.render = jest.fn();
+  test("markerClusterer removeMarkers if some absent", () => {
+    const markers = [marker];
+    const markerClusterer = new MarkerClusterer({
+      markers,
+    });
 
-  markerClusterer.addMarker(new google.maps.Marker());
-  expect(markerClusterer.render).toBeCalledTimes(1);
-  expect(markerClusterer["markers"]).toHaveLength(1);
-});
+    markerClusterer.render = jest.fn();
 
-test("markerClusterer addMarker does not add duplicate", () => {
-  const markerClusterer = new MarkerClusterer({
-    markers: [],
+    expect(
+      markerClusterer.removeMarkers([
+        new google.maps.Marker(),
+        ...markers,
+        new google.maps.marker.AdvancedMarkerView(),
+      ])
+    ).toBe(true);
+    expect(markerClusterer.render).toBeCalledTimes(1);
+    expect(markerClusterer["markers"]).toHaveLength(0);
   });
 
-  const marker = new google.maps.Marker();
+  test("markerClusterer clearMarkers", () => {
+    const markers = [marker];
+    const markerClusterer = new MarkerClusterer({
+      markers,
+    });
 
-  markerClusterer.addMarker(marker, true);
-  markerClusterer.addMarker(marker, true);
-  expect(markerClusterer["markers"]).toHaveLength(1);
-});
+    markerClusterer.render = jest.fn();
 
-test("markerClusterer addMarkers", () => {
-  const markerClusterer = new MarkerClusterer({
-    markers: [],
+    markerClusterer.clearMarkers();
+    expect(markerClusterer.render).toBeCalledTimes(1);
+    expect(markerClusterer["markers"]).toHaveLength(0);
+
+    markerClusterer.clearMarkers(true);
+    expect(markerClusterer.render).toBeCalledTimes(1);
+    expect(markerClusterer["markers"]).toHaveLength(0);
   });
 
-  markerClusterer.render = jest.fn();
+  test("default click handler fitBounds", () => {
+    const cluster = new Cluster({
+      markers: [],
+      position: new google.maps.LatLng(0, 0),
+    });
+    const bounds = new google.maps.LatLngBounds();
 
-  markerClusterer.addMarkers([
-    new google.maps.Marker(),
-    new google.maps.Marker(),
-  ]);
-  expect(markerClusterer.render).toBeCalledTimes(1);
-  expect(markerClusterer["markers"]).toHaveLength(2);
+    jest.spyOn(cluster, "bounds", "get").mockImplementation(() => bounds);
 
-  markerClusterer.addMarkers(
-    [new google.maps.Marker(), new google.maps.Marker()],
-    true
-  );
-  expect(markerClusterer.render).toBeCalledTimes(1);
-});
+    defaultOnClusterClickHandler({} as google.maps.MapMouseEvent, cluster, map);
 
-test("markerClusterer removeMarker if present", () => {
-  const markers = [new google.maps.Marker()];
-  const markerClusterer = new MarkerClusterer({
-    markers,
+    expect(map.fitBounds).toBeCalledWith(bounds);
   });
 
-  markerClusterer.render = jest.fn();
+  test("markerClusterer calls setMap from constructor", () => {
+    MarkerClusterer.prototype.setMap = jest.fn();
+    new MarkerClusterer({
+      map,
+    });
 
-  expect(markerClusterer.removeMarker(markers[0])).toBe(true);
-  expect(markerClusterer.render).toBeCalledTimes(1);
-  expect(markerClusterer["markers"]).toHaveLength(0);
-});
-
-test("markerClusterer removeMarker if absent", () => {
-  const markers = [new google.maps.Marker()];
-  const markerClusterer = new MarkerClusterer({
-    markers,
+    expect(MarkerClusterer.prototype.setMap).toBeCalledWith(map);
   });
-
-  markerClusterer.render = jest.fn();
-
-  expect(markerClusterer.removeMarker(new google.maps.Marker())).toBe(false);
-  expect(markerClusterer.render).toBeCalledTimes(0);
-  expect(markerClusterer["markers"]).toHaveLength(1);
-});
-
-test("markerClusterer removeMarkers if present", () => {
-  const markers = [new google.maps.Marker()];
-  const markerClusterer = new MarkerClusterer({
-    markers,
-  });
-
-  markerClusterer.render = jest.fn();
-
-  expect(markerClusterer.removeMarkers(markers)).toBe(true);
-  expect(markerClusterer.render).toBeCalledTimes(1);
-  expect(markerClusterer["markers"]).toHaveLength(0);
-});
-
-test("markerClusterer removeMarkers if absent", () => {
-  const markers = [new google.maps.Marker()];
-  const markerClusterer = new MarkerClusterer({
-    markers,
-  });
-
-  markerClusterer.render = jest.fn();
-
-  expect(markerClusterer.removeMarkers([new google.maps.Marker()])).toBe(false);
-  expect(markerClusterer.render).toBeCalledTimes(0);
-  expect(markerClusterer["markers"]).toHaveLength(1);
-});
-
-test("markerClusterer removeMarkers if some absent", () => {
-  const markers = [new google.maps.Marker()];
-  const markerClusterer = new MarkerClusterer({
-    markers,
-  });
-
-  markerClusterer.render = jest.fn();
-
-  expect(
-    markerClusterer.removeMarkers([
-      new google.maps.Marker(),
-      ...markers,
-      new google.maps.Marker(),
-    ])
-  ).toBe(true);
-  expect(markerClusterer.render).toBeCalledTimes(1);
-  expect(markerClusterer["markers"]).toHaveLength(0);
-});
-
-test("markerClusterer clearMarkers", () => {
-  const markers = [new google.maps.Marker()];
-  const markerClusterer = new MarkerClusterer({
-    markers,
-  });
-
-  markerClusterer.render = jest.fn();
-
-  markerClusterer.clearMarkers();
-  expect(markerClusterer.render).toBeCalledTimes(1);
-  expect(markerClusterer["markers"]).toHaveLength(0);
-
-  markerClusterer.clearMarkers(true);
-  expect(markerClusterer.render).toBeCalledTimes(1);
-  expect(markerClusterer["markers"]).toHaveLength(0);
-});
-
-test("default click handler fitBounds", () => {
-  const cluster = new Cluster({
-    markers: [],
-    position: new google.maps.LatLng(0, 0),
-  });
-  const bounds = new google.maps.LatLngBounds();
-
-  jest.spyOn(cluster, "bounds", "get").mockImplementation(() => bounds);
-
-  defaultOnClusterClickHandler({} as google.maps.MapMouseEvent, cluster, map);
-
-  expect(map.fitBounds).toBeCalledWith(bounds);
-});
-
-test("markerClusterer calls setMap from constructor", () => {
-  MarkerClusterer.prototype.setMap = jest.fn();
-  new MarkerClusterer({
-    map,
-  });
-
-  expect(MarkerClusterer.prototype.setMap).toBeCalledWith(map);
 });

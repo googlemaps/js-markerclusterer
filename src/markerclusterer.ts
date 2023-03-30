@@ -26,7 +26,7 @@ export type onClusterClickHandler = (
   map: google.maps.Map
 ) => void;
 export interface MarkerClustererOptions {
-  markers?: google.maps.Marker[];
+  markers?: Marker[];
   /**
    * An algorithm to cluster markers. Default is {@link SuperClusterAlgorithm}. Must
    * provide a `calculate` method accepting {@link AlgorithmInput} and returning
@@ -162,9 +162,6 @@ export class MarkerClusterer extends OverlayViewSafe {
   /**
    * Recalculates and draws all the marker clusters.
    */
-
-  //WHY DO YOU CHANGE? Initial cluster load preserves animation, but subsequent calls don't
-  //That means it's not because of the marker instance being passed through supercluster
   public render(): void {
     const map = this.map;
     if (map instanceof google.maps.Map && this.map.getProjection()) {
