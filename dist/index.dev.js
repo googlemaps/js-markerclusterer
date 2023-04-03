@@ -3885,13 +3885,13 @@ var markerClusterer = (function (exports) {
         if (map instanceof google.maps.Map && this.getProjection()) {
           google.maps.event.trigger(this, exports.MarkerClustererEvents.CLUSTERING_BEGIN, this);
 
-          var _this$algorithm$calcu = this.algorithm.calculate({
+          var _this$algorithm$calcu2 = this.algorithm.calculate({
             markers: this.markers,
             map: map,
             mapCanvasProjection: this.getProjection()
           }),
-              clusters = _this$algorithm$calcu.clusters,
-              changed = _this$algorithm$calcu.changed; // allow algorithms to return flag on whether the clusters/markers have changed
+              clusters = _this$algorithm$calcu2.clusters,
+              changed = _this$algorithm$calcu2.changed; // allow algorithms to return flag on whether the clusters/markers have changed
 
 
           if (changed || changed == undefined) {
