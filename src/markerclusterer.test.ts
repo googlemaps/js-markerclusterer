@@ -27,7 +27,7 @@ import { MarkerUtils } from "./marker-utils";
 initialize();
 let markers = [new google.maps.Marker, new google.maps.marker.AdvancedMarkerView];
 
-describe.each(markers)('should work with legacy and Advanced Markers', (marker) => {
+describe.each(markers)('MarkerClusterer works with legacy and Advanced Markers', (marker) => {
   const calculate = jest.fn().mockReturnValue({ clusters: [] });
   const algorithm = { calculate };
 
@@ -195,7 +195,6 @@ describe.each(markers)('should work with legacy and Advanced Markers', (marker) 
 
     markerClusterer.getMap = jest.fn().mockImplementation(() => map);
     markerClusterer.render = jest.fn();
-
     markerClusterer.onAdd();
 
     expect(map.addListener).toBeCalledWith("idle", expect.any(Function));

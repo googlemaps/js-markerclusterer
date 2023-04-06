@@ -32,7 +32,8 @@
     "lint": "eslint .",
     "prepare": "rm -rf dist && rollup -c",
     "test": "jest --passWithNoTests src/*",
-    "test:e2e": "jest --passWithNoTests e2e/*"
+    "test:e2e": "jest --passWithNoTests e2e/*",
+    "test:all": "jest"
   },
   "dependencies": {
     "fast-deep-equal": "^3.1.3",

@@ -163,7 +163,7 @@ export class MarkerClusterer extends OverlayViewSafe {
    * Recalculates and draws all the marker clusters.
    */
   public render(): void {
-    const map = this.map;
+    const map = this.getMap();
     if (map instanceof google.maps.Map && this.map.getProjection()) {
       google.maps.event.trigger(
         this,
@@ -198,7 +198,7 @@ export class MarkerClusterer extends OverlayViewSafe {
   }
 
   public onAdd(): void {
-    this.idleListener = this.map.addListener(
+    this.idleListener = this.getMap().addListener(
       "idle",
       this.render.bind(this)
     );
@@ -219,7 +219,7 @@ export class MarkerClusterer extends OverlayViewSafe {
   protected renderClusters(): void {
     // generate stats to pass to renderers
     const stats = new ClusterStats(this.markers, this.clusters);
-    const map = this.map;
+    const map = this.getMap() as google.maps.Map;
 
     this.clusters.forEach((cluster) => {
       if (cluster.markers.length === 1) {

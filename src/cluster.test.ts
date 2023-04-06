@@ -21,7 +21,7 @@ import { MarkerUtils } from "./marker-utils";
 initialize();
 let markers = [new google.maps.Marker, new google.maps.marker.AdvancedMarkerView];
 
-describe.each(markers)('should work with legacy and Advanced Markers', (marker) => {
+describe.each(markers)('Cluster works with legacy and Advanced Markers', (marker) => {
   test("bounds should be undefined if no markers or position", () => {
     const cluster = new Cluster({ markers: [] });
     expect(cluster.bounds).toBeUndefined();
@@ -53,7 +53,7 @@ describe.each(markers)('should work with legacy and Advanced Markers', (marker) 
   test("delete if marker set", () => {
     const cluster = new Cluster({ markers: [marker] });
     MarkerUtils.getVisible = jest.fn().mockReturnValue(true);
-    cluster.marker = new google.maps.Marker();
+    cluster.marker = marker;
     expect(cluster.count).toBe(1);
     cluster.delete();
     expect(cluster.count).toBe(0);

@@ -104,7 +104,7 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
       coordinates: [lng, lat],
     },
     properties,
-  }: ClusterFeature<{ marker: google.maps.Marker }>): Cluster {
+  }: ClusterFeature<{ marker: Marker }>): Cluster {
     if (properties.cluster) {
       return new Cluster({
         markers: this.superCluster
@@ -117,7 +117,7 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
 
       return new Cluster({
         markers: [marker],
-        position: marker.getPosition(),
+        position: MarkerUtils.getPosition(marker),
       });
     }
   }
