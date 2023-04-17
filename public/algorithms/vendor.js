@@ -25,6 +25,10 @@ function __rest(s, e) {
     return t;
 }
 
+function getDefaultExportFromCjs (x) {
+	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
+}
+
 // do not edit .js files directly - edit src/index.jst
 
 
@@ -69,6 +73,8 @@ var fastDeepEqual$1 = function equal(a, b) {
   // true if both NaN, false otherwise
   return a!==a && b!==b;
 };
+
+var equal = /*@__PURE__*/getDefaultExportFromCjs(fastDeepEqual$1);
 
 function sortKD(ids, coords, nodeSize, left, right, depth) {
     if (right - left <= nodeSize) return;
@@ -986,4 +992,4 @@ class Loader {
     }
 }
 
-export { Loader as L, Supercluster as S, __rest as _, fastDeepEqual$1 as f };
+export { Loader as L, Supercluster as S, __rest as _, equal as e };

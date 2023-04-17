@@ -176,6 +176,10 @@ var markerClusterer = (function (exports) {
 
   var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
+  function getDefaultExportFromCjs (x) {
+  	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
+  }
+
   var check = function (it) {
     return it && it.Math == Math && it;
   }; // https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
@@ -447,11 +451,7 @@ var markerClusterer = (function (exports) {
     throw $TypeError$9("Can't convert object to primitive value");
   };
 
-  var sharedExports = {};
-  var shared$3 = {
-    get exports(){ return sharedExports; },
-    set exports(v){ sharedExports = v; },
-  };
+  var shared$3 = {exports: {}};
 
   var isPure = false;
 
@@ -489,6 +489,7 @@ var markerClusterer = (function (exports) {
     license: 'https://github.com/zloirock/core-js/blob/v3.30.0/LICENSE',
     source: 'https://github.com/zloirock/core-js'
   });
+  var sharedExports = shared$3.exports;
 
   var requireObjectCoercible$2 = requireObjectCoercible$4;
   var $Object$1 = Object; // `ToObject` abstract operation
@@ -699,11 +700,7 @@ var markerClusterer = (function (exports) {
     return object;
   };
 
-  var makeBuiltInExports = {};
-  var makeBuiltIn$2 = {
-    get exports(){ return makeBuiltInExports; },
-    set exports(v){ makeBuiltInExports = v; },
-  };
+  var makeBuiltIn$2 = {exports: {}};
 
   var DESCRIPTORS$5 = descriptors;
   var hasOwn$5 = hasOwnProperty_1;
@@ -901,6 +898,7 @@ var markerClusterer = (function (exports) {
   Function.prototype.toString = makeBuiltIn$1(function toString() {
     return isCallable$6(this) && getInternalState(this).source || inspectSource$1(this);
   }, 'toString');
+  var makeBuiltInExports = makeBuiltIn$2.exports;
 
   var isCallable$5 = isCallable$e;
   var definePropertyModule$3 = objectDefineProperty;
@@ -2007,6 +2005,8 @@ var markerClusterer = (function (exports) {
     return a !== a && b !== b;
   };
 
+  var equal = /*@__PURE__*/getDefaultExportFromCjs(fastDeepEqual);
+
   /**
    * The default Grid algorithm historically used in Google Maps marker
    * clustering.
@@ -2053,7 +2053,7 @@ var markerClusterer = (function (exports) {
         var changed = false;
 
         if (this.state.zoom > this.maxZoom && state.zoom > this.maxZoom) ; else {
-          changed = !fastDeepEqual(this.state, state);
+          changed = !equal(this.state, state);
         }
 
         this.state = state;
@@ -2901,7 +2901,7 @@ var markerClusterer = (function (exports) {
       value: function calculate(input) {
         var changed = false;
 
-        if (!fastDeepEqual(input.markers, this.markers)) {
+        if (!equal(input.markers, this.markers)) {
           changed = true; // TODO use proxy to avoid copy?
 
           this.markers = _toConsumableArray(input.markers);
@@ -2926,7 +2926,7 @@ var markerClusterer = (function (exports) {
 
         if (!changed) {
           if (this.state.zoom > this.maxZoom && state.zoom > this.maxZoom) ; else {
-            changed = changed || !fastDeepEqual(this.state, state);
+            changed = changed || !equal(this.state, state);
           }
         }
 

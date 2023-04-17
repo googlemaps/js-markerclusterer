@@ -1,4 +1,4 @@
-import { _ as __rest, f as fastDeepEqual, S as Supercluster, L as Loader } from './vendor.js';
+import { _ as __rest, e as equal, S as Supercluster, L as Loader } from './vendor.js';
 
 /**
  * Copyright 2021 Google LLC
@@ -252,7 +252,7 @@ class GridAlgorithm extends AbstractViewportAlgorithm {
         let changed = false;
         if (this.state.zoom > this.maxZoom && state.zoom > this.maxZoom) ;
         else {
-            changed = !fastDeepEqual(this.state, state);
+            changed = !equal(this.state, state);
         }
         this.state = state;
         if (map.getZoom() >= this.maxZoom) {
@@ -365,7 +365,7 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
     }
     calculate(input) {
         let changed = false;
-        if (!fastDeepEqual(input.markers, this.markers)) {
+        if (!equal(input.markers, this.markers)) {
             changed = true;
             // TODO use proxy to avoid copy?
             this.markers = [...input.markers];
@@ -388,7 +388,7 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
         if (!changed) {
             if (this.state.zoom > this.maxZoom && state.zoom > this.maxZoom) ;
             else {
-                changed = changed || !fastDeepEqual(this.state, state);
+                changed = changed || !equal(this.state, state);
             }
         }
         this.state = state;
