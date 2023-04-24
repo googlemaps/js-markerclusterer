@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /// <reference types="google.maps" />
-import { Algorithm } from "./algorithms";
+import { Algorithm, AlgorithmOptions } from "./algorithms";
 import { Renderer } from "./renderer";
 import { Cluster } from "./cluster";
 import { OverlayViewSafe } from "./overlay-view-safe";
@@ -27,6 +27,7 @@ export interface MarkerClustererOptions {
      * an array of {@link Cluster}.
      */
     algorithm?: Algorithm;
+    algorithmOptions?: AlgorithmOptions;
     map?: google.maps.Map | null;
     /**
      * An object that converts a {@link Cluster} into a `google.maps.Marker`.
@@ -57,9 +58,8 @@ export declare class MarkerClusterer extends OverlayViewSafe {
     protected renderer: Renderer;
     /** @see {@link MarkerClustererOptions.map} */
     protected map: google.maps.Map | null;
-    /** @see {@link MarkerClustererOptions.maxZoom} */
     protected idleListener: google.maps.MapsEventListener;
-    constructor({ map, markers, algorithm, renderer, onClusterClick, }: MarkerClustererOptions);
+    constructor({ map, markers, algorithmOptions, algorithm, renderer, onClusterClick, }: MarkerClustererOptions);
     addMarker(marker: google.maps.Marker, noDraw?: boolean): void;
     addMarkers(markers: google.maps.Marker[], noDraw?: boolean): void;
     removeMarker(marker: google.maps.Marker, noDraw?: boolean): boolean;

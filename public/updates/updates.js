@@ -394,7 +394,7 @@ const defaultOnClusterClickHandler = (_, cluster, map) => {
  *
  */
 class MarkerClusterer extends OverlayViewSafe {
-    constructor({ map, markers = [], algorithm = new SuperClusterAlgorithm({}), renderer = new DefaultRenderer(), onClusterClick = defaultOnClusterClickHandler, }) {
+    constructor({ map, markers = [], algorithmOptions = {}, algorithm = new SuperClusterAlgorithm(algorithmOptions), renderer = new DefaultRenderer(), onClusterClick = defaultOnClusterClickHandler, }) {
         super();
         this.markers = [...markers];
         this.clusters = [];
