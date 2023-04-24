@@ -18,7 +18,7 @@ import { Algorithm, SuperClusterAlgorithm } from "./algorithms";
 import { ClusterStats, DefaultRenderer, Renderer } from "./renderer";
 import { Cluster } from "./cluster";
 import { OverlayViewSafe } from "./overlay-view-safe";
-import { MarkerUtils } from "./marker-utils"
+import { MarkerUtils } from "./marker-utils";
 
 export type onClusterClickHandler = (
   event: google.maps.MapMouseEvent,
@@ -134,10 +134,7 @@ export class MarkerClusterer extends OverlayViewSafe {
     return true;
   }
 
-  public removeMarkers(
-    markers: Marker[],
-    noDraw?: boolean
-  ): boolean {
+  public removeMarkers(markers: Marker[], noDraw?: boolean): boolean {
     let removed = false;
 
     markers.forEach((marker) => {
@@ -170,13 +167,15 @@ export class MarkerClusterer extends OverlayViewSafe {
         MarkerClustererEvents.CLUSTERING_BEGIN,
         this
       );
-      this.markers.forEach(marker => {
-        marker.addListener('animation_changed', () => {console.log('animation_changed')})
-      })
+      this.markers.forEach((marker) => {
+        marker.addListener("animation_changed", () => {
+          console.log("animation_changed");
+        });
+      });
       const { clusters, changed } = this.algorithm.calculate({
         markers: this.markers,
         map,
-        mapCanvasProjection: this.getProjection()
+        mapCanvasProjection: this.getProjection(),
       });
 
       // allow algorithms to return flag on whether the clusters/markers have changed

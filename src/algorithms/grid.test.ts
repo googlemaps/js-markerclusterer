@@ -16,99 +16,103 @@
 
 import { GridAlgorithm } from "./grid";
 import { initialize, MapCanvasProjection } from "@googlemaps/jest-mocks";
-import { MarkerUtils } from "../marker-utils";
 
 initialize();
-let markers = [new google.maps.Marker, new google.maps.marker.AdvancedMarkerView];
+const markers = [
+  new google.maps.Marker(),
+  new google.maps.marker.AdvancedMarkerView(),
+];
 
-describe.each(markers)('Grid works with legacy and Advanced Markers', (marker) => {
+describe.each(markers)(
+  "Grid works with legacy and Advanced Markers",
+  (marker) => {
+    let map: google.maps.Map;
 
-  let map: google.maps.Map;
-
-  beforeEach(() => {
-    map = new google.maps.Map(document.createElement("div"));
-  });
-
-  test("calculate should return changed: true for first call when zoom > max zoom", () => {
-    const mapCanvasProjection = new MapCanvasProjection();
-    const markers: Marker[] = [marker];
-
-    const grid = new GridAlgorithm({ maxZoom: 16 });
-    grid["noop"] = jest.fn();
-    grid["cluster"] = jest.fn();
-
-    map.getZoom = jest.fn().mockReturnValue(15);
-
-    grid.calculate({
-      markers,
-      map,
-      mapCanvasProjection,
+    beforeEach(() => {
+      map = new google.maps.Map(document.createElement("div"));
     });
 
-    map.getZoom = jest.fn().mockReturnValue(17);
+    test("calculate should return changed: true for first call when zoom > max zoom", () => {
+      const mapCanvasProjection = new MapCanvasProjection();
+      const markers: Marker[] = [marker];
 
-    const { changed } = grid.calculate({
-      markers,
-      map,
-      mapCanvasProjection,
+      const grid = new GridAlgorithm({ maxZoom: 16 });
+      grid["noop"] = jest.fn();
+      grid["cluster"] = jest.fn();
+
+      map.getZoom = jest.fn().mockReturnValue(15);
+
+      grid.calculate({
+        markers,
+        map,
+        mapCanvasProjection,
+      });
+
+      map.getZoom = jest.fn().mockReturnValue(17);
+
+      const { changed } = grid.calculate({
+        markers,
+        map,
+        mapCanvasProjection,
+      });
+
+      expect(changed).toBe(true);
     });
 
-    expect(changed).toBe(true);
-  });
+    test("calculate should return changed: false for next calls above max zoom", () => {
+      const mapCanvasProjection =
+        jest.fn() as unknown as google.maps.MapCanvasProjection;
+      const markers: Marker[] = [marker];
 
-  test("calculate should return changed: false for next calls above max zoom", () => {
-    const mapCanvasProjection =
-      jest.fn() as unknown as google.maps.MapCanvasProjection;
-    const markers: Marker[] = [marker];
+      const grid = new GridAlgorithm({ maxZoom: 16 });
+      grid["noop"] = jest.fn();
 
-    const grid = new GridAlgorithm({ maxZoom: 16 });
-    grid["noop"] = jest.fn();
+      map.getZoom = jest.fn().mockReturnValue(16);
 
-    map.getZoom = jest.fn().mockReturnValue(16);
+      let result = grid.calculate({
+        markers,
+        map,
+        mapCanvasProjection,
+      });
 
-    let result = grid.calculate({
-      markers,
-      map,
-      mapCanvasProjection,
+      expect(result.changed).toBe(true);
+
+      result = grid.calculate({
+        markers,
+        map,
+        mapCanvasProjection,
+      });
+
+      expect(result.changed).toBe(false);
     });
 
-    expect(result.changed).toBe(true);
+    test("calculate should return changed: false for next calls above max zoom, even if zoom changed", () => {
+      const mapCanvasProjection =
+        jest.fn() as unknown as google.maps.MapCanvasProjection;
+      const markers: Marker[] = [marker];
 
-    result = grid.calculate({
-      markers,
-      map,
-      mapCanvasProjection,
+      const grid = new GridAlgorithm({ maxZoom: 16 });
+      grid["noop"] = jest.fn();
+
+      map.getZoom = jest.fn().mockReturnValue(17);
+
+      let result = grid.calculate({
+        markers,
+        map,
+        mapCanvasProjection,
+      });
+
+      expect(result.changed).toBe(true);
+
+      map.getZoom = jest.fn().mockReturnValue(18);
+
+      result = grid.calculate({
+        markers,
+        map,
+        mapCanvasProjection,
+      });
+
+      expect(result.changed).toBe(false);
     });
-
-    expect(result.changed).toBe(false);
-  });
-
-  test("calculate should return changed: false for next calls above max zoom, even if zoom changed", () => {
-    const mapCanvasProjection =
-      jest.fn() as unknown as google.maps.MapCanvasProjection;
-    const markers: Marker[] = [marker];
-
-    const grid = new GridAlgorithm({ maxZoom: 16 });
-    grid["noop"] = jest.fn();
-
-    map.getZoom = jest.fn().mockReturnValue(17);
-
-    let result = grid.calculate({
-      markers,
-      map,
-      mapCanvasProjection,
-    });
-
-    expect(result.changed).toBe(true);
-
-    map.getZoom = jest.fn().mockReturnValue(18);
-
-    result = grid.calculate({
-      markers,
-      map,
-      mapCanvasProjection,
-    });
-
-    expect(result.changed).toBe(false);
-  });
-});
+  }
+);

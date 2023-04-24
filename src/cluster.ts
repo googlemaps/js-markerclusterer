@@ -56,8 +56,7 @@ export class Cluster {
    * Get the count of **visible** markers.
    */
   public get count(): number {
-    return this.markers.filter((m: Marker) => MarkerUtils.getVisible(m))
-      .length;
+    return this.markers.filter((m: Marker) => MarkerUtils.getVisible(m)).length;
   }
 
   /**
