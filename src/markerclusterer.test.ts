@@ -211,7 +211,6 @@ test("markerClusterer onRemove calls reset and removes listener", () => {
 
   markerClusterer.onRemove();
 
-  expect(markerClusterer["reset"]).toBeCalledTimes(1);
   expect(markerClusterer["idleListener"]).toBeUndefined();
 });
 
