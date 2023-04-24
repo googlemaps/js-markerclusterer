@@ -16,7 +16,7 @@
 
 import { AbstractAlgorithm, AlgorithmInput, AlgorithmOutput } from "./core";
 import SuperCluster, { ClusterFeature } from "supercluster";
-
+import { MarkerUtils } from "../marker-utils";
 import { Cluster } from "../cluster";
 import equal from "fast-deep-equal";
 
@@ -34,7 +34,7 @@ export type SuperClusterOptions = SuperCluster.Options<
  */
 export class SuperClusterAlgorithm extends AbstractAlgorithm {
   protected superCluster: SuperCluster;
-  protected markers: google.maps.Marker[];
+  protected markers: Marker[];
   protected clusters: Cluster[];
   protected state: { zoom: number };
 
@@ -63,14 +63,13 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
           geometry: {
             type: "Point" as const,
             coordinates: [
-              marker.getPosition().lng(),
-              marker.getPosition().lat(),
+              MarkerUtils.getPosition(marker).lng(),
+              MarkerUtils.getPosition(marker).lat(),
             ],
           },
           properties: { marker },
         };
       });
-
       this.superCluster.load(points);
     }
 
@@ -104,7 +103,7 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
       coordinates: [lng, lat],
     },
     properties,
-  }: ClusterFeature<{ marker: google.maps.Marker }>): Cluster {
+  }: ClusterFeature<{ marker: Marker }>): Cluster {
     if (properties.cluster) {
       return new Cluster({
         markers: this.superCluster
@@ -117,7 +116,7 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
 
       return new Cluster({
         markers: [marker],
-        position: marker.getPosition(),
+        position: MarkerUtils.getPosition(marker),
       });
     }
   }

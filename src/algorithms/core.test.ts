@@ -17,13 +17,18 @@
 import { initialize } from "@googlemaps/jest-mocks";
 import { noop } from "./core";
 
-beforeEach(() => {
-  initialize();
-});
+initialize();
+const markerClasses = [
+  google.maps.Marker,
+  google.maps.marker.AdvancedMarkerView,
+];
 
-test("noop should return equivalent number of clusters", () => {
-  expect(noop([]).length).toBe(0);
-  expect(
-    noop([new google.maps.Marker({}), new google.maps.Marker({})]).length
-  ).toBe(2);
-});
+describe.each(markerClasses)(
+  "Core works with legacy and Advanced Markers",
+  (markerClass) => {
+    test("noop should return equivalent number of clusters", () => {
+      expect(noop([]).length).toBe(0);
+      expect(noop([new markerClass({}), new markerClass({})]).length).toBe(2);
+    });
+  }
+);
