@@ -37,10 +37,13 @@ describe.each(markerClasses)(
       expect((marker as google.maps.Marker).setMap).toHaveBeenCalled;
     });
 
-    test("get the marker position and returns a LatLng", () => {
+    test("gets the marker position and returns a LatLng", () => {
       // test markers created with LatLng and LatLngLiteral
-      [new google.maps.LatLng(0, 0), { lat: 0, lng: 0 }].forEach((position) => {
+      [new google.maps.LatLng(1, 1), { lat: 1, lng: 1 }].forEach((position) => {
         const marker = new markerClass({ position: position });
+        if (markerClass === google.maps.marker.AdvancedMarkerView) {
+          (marker as google.maps.marker.AdvancedMarkerView).position = position;
+        }
         expect(MarkerUtils.getPosition(marker)).toBeInstanceOf(
           google.maps.LatLng
         );
