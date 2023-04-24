@@ -164,7 +164,7 @@ export class MarkerClusterer extends OverlayViewSafe {
    */
   public render(): void {
     const map = this.getMap();
-    if (map instanceof google.maps.Map && this.map.getProjection()) {
+    if (map instanceof google.maps.Map && map.getProjection()) {
       google.maps.event.trigger(
         this,
         MarkerClustererEvents.CLUSTERING_BEGIN,
@@ -183,7 +183,6 @@ export class MarkerClusterer extends OverlayViewSafe {
       if (changed || changed == undefined) {
         // reset visibility of markers and clusters
         this.reset();
-
         // store new clusters
         this.clusters = clusters;
 
@@ -220,13 +219,11 @@ export class MarkerClusterer extends OverlayViewSafe {
     // generate stats to pass to renderers
     const stats = new ClusterStats(this.markers, this.clusters);
     const map = this.getMap() as google.maps.Map;
-
     this.clusters.forEach((cluster) => {
       if (cluster.markers.length === 1) {
         cluster.marker = cluster.markers[0];
       } else {
         cluster.marker = this.renderer.render(cluster, stats, map);
-
         if (this.onClusterClick) {
           cluster.marker.addListener(
             "click",
@@ -242,7 +239,6 @@ export class MarkerClusterer extends OverlayViewSafe {
           );
         }
       }
-
       MarkerUtils.setMap(cluster.marker, map);
     });
   }

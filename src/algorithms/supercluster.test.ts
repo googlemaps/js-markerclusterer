@@ -17,8 +17,6 @@
 import { SuperClusterAlgorithm } from "./supercluster";
 import { initialize } from "@googlemaps/jest-mocks";
 
-import { MarkerUtils } from "../marker-utils";
-
 initialize();
 let markerClasses = [google.maps.Marker, google.maps.marker.AdvancedMarkerView];
 

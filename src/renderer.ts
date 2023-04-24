@@ -33,7 +33,6 @@ export class ClusterStats {
 
   constructor(markers: Marker[], clusters: Cluster[]) {
     this.markers = { sum: markers.length };
-
     const clusterMarkerCounts = clusters.map((a) => a.count);
     const clusterMarkerSum = clusterMarkerCounts.reduce((a, b) => a + b, 0);
 
@@ -113,7 +112,7 @@ export class DefaultRenderer implements Renderer {
     const color =
       count > Math.max(10, stats.clusters.markers.mean) ? "#ff0000" : "#0000ff";
 
-    // create svg url with fill color
+      // create svg url with fill color
     const svg = `<svg fill="${color}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
                   <circle cx="120" cy="120" opacity=".6" r="70" />
                   <circle cx="120" cy="120" opacity=".3" r="90" />
@@ -123,7 +122,7 @@ export class DefaultRenderer implements Renderer {
     const title: string = `Cluster of ${count} markers`,
     // adjust zIndex to be above other markers
     zIndex: number = Number(google.maps.Marker.MAX_ZINDEX) + count;
-    
+
     if (google.maps.marker && map.getMapCapabilities().isAdvancedMarkersAvailable) {
       // create cluster SVG element
       const div = document.createElement('div');

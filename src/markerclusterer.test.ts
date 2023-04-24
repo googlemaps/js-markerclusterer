@@ -21,17 +21,17 @@ import {
   defaultOnClusterClickHandler,
 } from ".";
 
-import { initialize } from "@googlemaps/jest-mocks";
+import { initialize, Marker as MarkerMock } from "@googlemaps/jest-mocks";
 import { MarkerUtils } from "./marker-utils";
 
 initialize();
-let markers = [new google.maps.Marker, new google.maps.marker.AdvancedMarkerView];
+let markerClasses = [google.maps.Marker, google.maps.marker.AdvancedMarkerView];
 
-describe.each(markers)('MarkerClusterer works with legacy and Advanced Markers', (marker) => {
+describe.each(markerClasses)('MarkerClusterer works with legacy and Advanced Markers', (markerClass) => {
   const calculate = jest.fn().mockReturnValue({ clusters: [] });
   const algorithm = { calculate };
 
-  const render = jest.fn().mockImplementation(() => marker);
+  const render = jest.fn().mockImplementation(() => new markerClass());
   const renderer = { render };
 
   let map: google.maps.Map;
@@ -104,7 +104,7 @@ describe.each(markers)('MarkerClusterer works with legacy and Advanced Markers',
   });
 
   test("markerClusterer reset calls delete and setMap null", () => {
-    const markers: Marker[] = [marker];
+    const markers: Marker[] = [new markerClass()];
     const markerClusterer = new MarkerClusterer({
       markers,
     });
@@ -121,7 +121,7 @@ describe.each(markers)('MarkerClusterer works with legacy and Advanced Markers',
   });
 
   test("markerClusterer renderClusters bypasses renderer if just one", () => {
-    const markers: Marker[] = [marker];
+    const markers: Marker[] = [new markerClass()];
 
     const markerClusterer = new MarkerClusterer({
       markers,
@@ -140,7 +140,8 @@ describe.each(markers)('MarkerClusterer works with legacy and Advanced Markers',
 
   test("markerClusterer renderClusters calls renderer", () => {
     const markers: Marker[] = [
-      marker
+      new markerClass(),
+      new markerClass()
     ];
 
     const markerClusterer = new MarkerClusterer({
@@ -148,6 +149,7 @@ describe.each(markers)('MarkerClusterer works with legacy and Advanced Markers',
       renderer,
     });
 
+    MarkerUtils.setMap = jest.fn();
     markerClusterer.getMap = jest.fn().mockImplementation(() => map);
 
     const clusters = [new Cluster({ markers }), new Cluster({ markers })];
@@ -163,12 +165,12 @@ describe.each(markers)('MarkerClusterer works with legacy and Advanced Markers',
       );
     });
 
-    expect(renderer.render).toBeCalledWith(clusters[0], expect.any(ClusterStats));
+    expect(renderer.render).toBeCalledWith(clusters[0], expect.any(ClusterStats), map);
   });
 
   test("markerClusterer renderClusters does not set click handler", () => {
     const markers: Marker[] = [
-      marker
+      new markerClass()
     ];
 
     const markerClusterer = new MarkerClusterer({
@@ -222,7 +224,7 @@ describe.each(markers)('MarkerClusterer works with legacy and Advanced Markers',
 
     markerClusterer.render = jest.fn();
 
-    markerClusterer.addMarker(marker);
+    markerClusterer.addMarker(new markerClass());
     expect(markerClusterer.render).toBeCalledTimes(1);
     expect(markerClusterer["markers"]).toHaveLength(1);
   });
@@ -232,10 +234,10 @@ describe.each(markers)('MarkerClusterer works with legacy and Advanced Markers',
       markers: [],
     });
 
-    const newMarker = marker;
+    const marker = new markerClass();
 
-    markerClusterer.addMarker(newMarker, true);
-    markerClusterer.addMarker(newMarker, true);
+    markerClusterer.addMarker(marker, true);
+    markerClusterer.addMarker(marker, true);
     expect(markerClusterer["markers"]).toHaveLength(1);
   });
 
@@ -247,12 +249,11 @@ describe.each(markers)('MarkerClusterer works with legacy and Advanced Markers',
     markerClusterer.render = jest.fn();
 
     markerClusterer.addMarkers([
-      marker,
-      new google.maps.Marker(),
-      new google.maps.marker.AdvancedMarkerView()
+      new markerClass(),
+      new markerClass()
     ]);
     expect(markerClusterer.render).toBeCalledTimes(1);
-    expect(markerClusterer["markers"]).toHaveLength(3);
+    expect(markerClusterer["markers"]).toHaveLength(2);
 
     markerClusterer.addMarkers([
       new google.maps.Marker(),
@@ -264,7 +265,7 @@ describe.each(markers)('MarkerClusterer works with legacy and Advanced Markers',
   });
 
   test("markerClusterer removeMarker if present", () => {
-    const markers = [marker];
+    const markers = [new markerClass()];
     const markerClusterer = new MarkerClusterer({
       markers,
     });
@@ -277,7 +278,7 @@ describe.each(markers)('MarkerClusterer works with legacy and Advanced Markers',
   });
 
   test("markerClusterer removeMarker if absent", () => {
-    const markers = [marker];
+    const markers = [new markerClass()];
     const markerClusterer = new MarkerClusterer({
       markers,
     });
@@ -291,7 +292,7 @@ describe.each(markers)('MarkerClusterer works with legacy and Advanced Markers',
   });
 
   test("markerClusterer removeMarkers if present", () => {
-    const markers = [marker];
+    const markers = [new markerClass()];
     const markerClusterer = new MarkerClusterer({
       markers,
     });
@@ -304,7 +305,7 @@ describe.each(markers)('MarkerClusterer works with legacy and Advanced Markers',
   });
 
   test("markerClusterer removeMarkers if absent", () => {
-    const markers = [marker];
+    const markers = [new markerClass()];
     const markerClusterer = new MarkerClusterer({
       markers,
     });
@@ -318,7 +319,7 @@ describe.each(markers)('MarkerClusterer works with legacy and Advanced Markers',
   });
 
   test("markerClusterer removeMarkers if some absent", () => {
-    const markers = [marker];
+    const markers = [new markerClass()];
     const markerClusterer = new MarkerClusterer({
       markers,
     });
@@ -337,7 +338,7 @@ describe.each(markers)('MarkerClusterer works with legacy and Advanced Markers',
   });
 
   test("markerClusterer clearMarkers", () => {
-    const markers = [marker];
+    const markers = [new markerClass()];
     const markerClusterer = new MarkerClusterer({
       markers,
     });

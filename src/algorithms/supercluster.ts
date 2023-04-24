@@ -70,7 +70,6 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
           properties: { marker },
         };
       });
-
       this.superCluster.load(points);
     }
 
