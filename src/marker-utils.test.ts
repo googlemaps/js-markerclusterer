@@ -20,7 +20,7 @@ import { initialize } from "@googlemaps/jest-mocks";
 initialize();
 const markerClasses = [
   google.maps.Marker,
-  google.maps.marker.AdvancedMarkerView,
+  google.maps.marker.AdvancedMarkerElement,
 ];
 
 describe.each(markerClasses)(
@@ -34,7 +34,7 @@ describe.each(markerClasses)(
 
     test("identifies AdvancedMarker instances", () => {
       const isAdvancedMarker = MarkerUtils.isAdvancedMarker(new markerClass());
-      if (markerClass === google.maps.marker.AdvancedMarkerView) {
+      if (markerClass === google.maps.marker.AdvancedMarkerElement) {
         expect(isAdvancedMarker).toBeTruthy;
         return;
       }
@@ -44,10 +44,10 @@ describe.each(markerClasses)(
     test("sets the map", () => {
       const marker = new markerClass();
       MarkerUtils.setMap(marker, map);
-      if (markerClass === google.maps.marker.AdvancedMarkerView) {
-        expect((marker as google.maps.marker.AdvancedMarkerView).map).toEqual(
-          map
-        );
+      if (markerClass === google.maps.marker.AdvancedMarkerElement) {
+        expect(
+          (marker as google.maps.marker.AdvancedMarkerElement).map
+        ).toEqual(map);
         return;
       }
       expect((marker as google.maps.Marker).setMap).toHaveBeenCalled;
@@ -57,8 +57,9 @@ describe.each(markerClasses)(
       // test markers created with LatLng and LatLngLiteral
       [new google.maps.LatLng(1, 1), { lat: 1, lng: 1 }].forEach((position) => {
         const marker = new markerClass({ position: position });
-        if (markerClass === google.maps.marker.AdvancedMarkerView) {
-          (marker as google.maps.marker.AdvancedMarkerView).position = position;
+        if (markerClass === google.maps.marker.AdvancedMarkerElement) {
+          (marker as google.maps.marker.AdvancedMarkerElement).position =
+            position;
         }
         expect(MarkerUtils.getPosition(marker)).toBeInstanceOf(
           google.maps.LatLng

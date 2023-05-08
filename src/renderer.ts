@@ -148,14 +148,14 @@ export class DefaultRenderer implements Renderer {
       label.appendChild(document.createTextNode(`${count}`));
       svgEl.appendChild(label);
 
-      const clusterOptions: google.maps.marker.AdvancedMarkerViewOptions = {
+      const clusterOptions: google.maps.marker.AdvancedMarkerElementOptions = {
         map,
         position,
         zIndex,
         title,
         content: div.firstElementChild,
       };
-      return new google.maps.marker.AdvancedMarkerView(clusterOptions);
+      return new google.maps.marker.AdvancedMarkerElement(clusterOptions);
     }
 
     const clusterOptions: google.maps.MarkerOptions = {
