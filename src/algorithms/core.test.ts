@@ -20,7 +20,7 @@ import { noop } from "./core";
 initialize();
 const markerClasses = [
   google.maps.Marker,
-  google.maps.marker.AdvancedMarkerView,
+  google.maps.marker.AdvancedMarkerElement,
 ];
 
 describe.each(markerClasses)(

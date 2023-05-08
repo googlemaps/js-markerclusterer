@@ -21,7 +21,7 @@
 
 export class MarkerUtils {
   public static isAdvancedMarker(marker: Marker): boolean {
-    if (marker instanceof google.maps.marker.AdvancedMarkerView) {
+    if (marker instanceof google.maps.marker.AdvancedMarkerElement) {
       return true;
     }
     return false;
@@ -29,7 +29,7 @@ export class MarkerUtils {
 
   public static setMap(marker: Marker, map: google.maps.Map | null) {
     if (this.isAdvancedMarker(marker)) {
-      (marker as google.maps.marker.AdvancedMarkerView).map = map;
+      (marker as google.maps.marker.AdvancedMarkerElement).map = map;
       return;
     }
     (marker as google.maps.Marker).setMap(map);
@@ -38,7 +38,7 @@ export class MarkerUtils {
   public static getPosition(marker: Marker): google.maps.LatLng {
     // SuperClusterAlgorithm.calculate expects a LatLng instance so we fake it for Adv Markers
     if (this.isAdvancedMarker(marker)) {
-      marker = marker as google.maps.marker.AdvancedMarkerView;
+      marker = marker as google.maps.marker.AdvancedMarkerElement;
       if (marker.position) {
         if (marker.position instanceof google.maps.LatLng) {
           return marker.position;

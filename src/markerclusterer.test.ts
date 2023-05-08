@@ -27,7 +27,7 @@ import { MarkerUtils } from "./marker-utils";
 initialize();
 const markerClasses = [
   google.maps.Marker,
-  google.maps.marker.AdvancedMarkerView,
+  google.maps.marker.AdvancedMarkerElement,
 ];
 
 describe.each(markerClasses)(
@@ -257,7 +257,7 @@ describe.each(markerClasses)(
       expect(markerClusterer["markers"]).toHaveLength(2);
 
       markerClusterer.addMarkers(
-        [new google.maps.Marker(), new google.maps.marker.AdvancedMarkerView()],
+        [new google.maps.Marker(), new google.maps.marker.AdvancedMarkerElement()],
         true
       );
       expect(markerClusterer.render).toBeCalledTimes(1);
@@ -289,7 +289,7 @@ describe.each(markerClasses)(
       );
       expect(
         markerClusterer.removeMarker(
-          new google.maps.marker.AdvancedMarkerView()
+          new google.maps.marker.AdvancedMarkerElement()
         )
       ).toBe(false);
       expect(markerClusterer.render).toBeCalledTimes(0);
@@ -322,7 +322,7 @@ describe.each(markerClasses)(
       );
       expect(
         markerClusterer.removeMarkers([
-          new google.maps.marker.AdvancedMarkerView(),
+          new google.maps.marker.AdvancedMarkerElement(),
         ])
       ).toBe(false);
       expect(markerClusterer.render).toBeCalledTimes(0);
@@ -341,7 +341,7 @@ describe.each(markerClasses)(
         markerClusterer.removeMarkers([
           new google.maps.Marker(),
           ...markers,
-          new google.maps.marker.AdvancedMarkerView(),
+          new google.maps.marker.AdvancedMarkerElement(),
         ])
       ).toBe(true);
       expect(markerClusterer.render).toBeCalledTimes(1);

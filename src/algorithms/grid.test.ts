@@ -20,7 +20,7 @@ import { initialize, MapCanvasProjection } from "@googlemaps/jest-mocks";
 initialize();
 const markers = [
   new google.maps.Marker(),
-  new google.maps.marker.AdvancedMarkerView(),
+  new google.maps.marker.AdvancedMarkerElement(),
 ];
 
 describe.each(markers)(
