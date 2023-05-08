@@ -45,9 +45,9 @@ describe.each(markerClasses)(
       const marker = new markerClass();
       MarkerUtils.setMap(marker, map);
       if (markerClass === google.maps.marker.AdvancedMarkerElement) {
-        expect((marker as google.maps.marker.AdvancedMarkerElement).map).toEqual(
-          map
-        );
+        expect(
+          (marker as google.maps.marker.AdvancedMarkerElement).map
+        ).toEqual(map);
         return;
       }
       expect((marker as google.maps.Marker).setMap).toHaveBeenCalled;
@@ -58,7 +58,8 @@ describe.each(markerClasses)(
       [new google.maps.LatLng(1, 1), { lat: 1, lng: 1 }].forEach((position) => {
         const marker = new markerClass({ position: position });
         if (markerClass === google.maps.marker.AdvancedMarkerElement) {
-          (marker as google.maps.marker.AdvancedMarkerElement).position = position;
+          (marker as google.maps.marker.AdvancedMarkerElement).position =
+            position;
         }
         expect(MarkerUtils.getPosition(marker)).toBeInstanceOf(
           google.maps.LatLng

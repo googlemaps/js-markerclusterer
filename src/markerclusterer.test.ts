@@ -257,7 +257,10 @@ describe.each(markerClasses)(
       expect(markerClusterer["markers"]).toHaveLength(2);
 
       markerClusterer.addMarkers(
-        [new google.maps.Marker(), new google.maps.marker.AdvancedMarkerElement()],
+        [
+          new google.maps.Marker(),
+          new google.maps.marker.AdvancedMarkerElement(),
+        ],
         true
       );
       expect(markerClusterer.render).toBeCalledTimes(1);
