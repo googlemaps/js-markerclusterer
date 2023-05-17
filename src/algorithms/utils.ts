@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
+import { MarkerUtils } from "../marker-utils";
+
 export const filterMarkersToPaddedViewport = (
   map: google.maps.Map,
   mapCanvasProjection: google.maps.MapCanvasProjection,
-  markers: google.maps.Marker[],
+  markers: Marker[],
   viewportPadding: number
-): google.maps.Marker[] => {
+): Marker[] => {
   const extendedMapBounds = extendBoundsToPaddedViewport(
     map.getBounds(),
     mapCanvasProjection,
     viewportPadding
   );
   return markers.filter((marker) =>
-    extendedMapBounds.contains(marker.getPosition())
+    extendedMapBounds.contains(MarkerUtils.getPosition(marker))
   );
 };
 
