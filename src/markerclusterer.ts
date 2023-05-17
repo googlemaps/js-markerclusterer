@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import { Algorithm, AlgorithmOptions, SuperClusterAlgorithm } from "./algorithms";
+import {
+  Algorithm,
+  AlgorithmOptions,
+  SuperClusterAlgorithm,
+} from "./algorithms";
 import { ClusterStats, DefaultRenderer, Renderer } from "./renderer";
 import { Cluster } from "./cluster";
 import { OverlayViewSafe } from "./overlay-view-safe";
@@ -33,7 +37,7 @@ export interface MarkerClustererOptions {
    * an array of {@link Cluster}.
    */
   algorithm?: Algorithm;
-  algorithmOptions?: AlgorithmOptions,
+  algorithmOptions?: AlgorithmOptions;
   map?: google.maps.Map | null;
   /**
    * An object that converts a {@link Cluster} into a `google.maps.Marker`.
