@@ -29,6 +29,71 @@ function __rest(s, e) {
 }
 
 /**
+ * Copyright 2023 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * util class that creates a common set of convenience functions to wrap
+ * shared behavior of Advanced Markers and Markers.
+ */
+class MarkerUtils {
+    static isAdvancedMarker(marker) {
+        if (marker instanceof google.maps.marker.AdvancedMarkerElement) {
+            return true;
+        }
+        return false;
+    }
+    static setMap(marker, map) {
+        if (this.isAdvancedMarker(marker)) {
+            marker.map = map;
+            return;
+        }
+        marker.setMap(map);
+    }
+    static getPosition(marker) {
+        // SuperClusterAlgorithm.calculate expects a LatLng instance so we fake it for Adv Markers
+        if (this.isAdvancedMarker(marker)) {
+            marker = marker;
+            if (marker.position) {
+                if (marker.position instanceof google.maps.LatLng) {
+                    return marker.position;
+                }
+                // since we can't cast to LatLngLiteral for reasons =(
+                if (marker.position.lat && marker.position.lng) {
+                    return new google.maps.LatLng(marker.position.lat, marker.position.lng);
+                }
+            }
+            return new google.maps.LatLng(null);
+        }
+        return marker.getPosition();
+    }
+    static getVisible(marker) {
+        if (this.isAdvancedMarker(marker)) {
+            /**
+             * Always return true for Advanced Markers because the clusterer
+             * uses getVisible as a way to count legacy markers not as an actual
+             * indicator of visibility for some reason. Even when markers are hidden
+             * Marker.getVisible returns `true` and this is used to set the marker count
+             * on the cluster. See the behavior of Cluster.count
+             */
+            return true;
+        }
+        return marker.getVisible();
+    }
+}
+
+/**
  * Copyright 2021 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -60,7 +125,7 @@ class Cluster {
             return undefined;
         }
         return this.markers.reduce((bounds, marker) => {
-            return bounds.extend(marker.getPosition());
+            return bounds.extend(MarkerUtils.getPosition(marker));
         }, new google.maps.LatLngBounds(this._position, this._position));
     }
     get position() {
@@ -70,8 +135,7 @@ class Cluster {
      * Get the count of **visible** markers.
      */
     get count() {
-        return this.markers.filter((m) => m.getVisible())
-            .length;
+        return this.markers.filter((m) => MarkerUtils.getVisible(m)).length;
     }
     /**
      * Add a marker to the cluster.
@@ -84,7 +148,7 @@ class Cluster {
      */
     delete() {
         if (this.marker) {
-            this.marker.setMap(null);
+            MarkerUtils.setMap(this.marker, null);
             delete this.marker;
         }
         this.markers.length = 0;
@@ -108,7 +172,7 @@ class Cluster {
  */
 const filterMarkersToPaddedViewport = (map, mapCanvasProjection, markers, viewportPadding) => {
     const extendedMapBounds = extendBoundsToPaddedViewport(map.getBounds(), mapCanvasProjection, viewportPadding);
-    return markers.filter((marker) => extendedMapBounds.contains(marker.getPosition()));
+    return markers.filter((marker) => extendedMapBounds.contains(MarkerUtils.getPosition(marker)));
 };
 /**
  * Extends a bounds by a number of pixels in each direction.
@@ -238,7 +302,7 @@ class AbstractViewportAlgorithm extends AbstractAlgorithm {
  */
 const noop = (markers) => {
     const clusters = markers.map((marker) => new Cluster({
-        position: marker.getPosition(),
+        position: MarkerUtils.getPosition(marker),
         markers: [marker],
     }));
     return clusters;
@@ -313,14 +377,14 @@ class GridAlgorithm extends AbstractViewportAlgorithm {
         let cluster = null;
         for (let i = 0; i < this.clusters.length; i++) {
             const candidate = this.clusters[i];
-            const distance = distanceBetweenPoints(candidate.bounds.getCenter().toJSON(), marker.getPosition().toJSON());
+            const distance = distanceBetweenPoints(candidate.bounds.getCenter().toJSON(), MarkerUtils.getPosition(marker).toJSON());
             if (distance < maxDistance) {
                 maxDistance = distance;
                 cluster = candidate;
             }
         }
         if (cluster &&
-            extendBoundsToPaddedViewport(cluster.bounds, projection, this.gridSize).contains(marker.getPosition())) {
+            extendBoundsToPaddedViewport(cluster.bounds, projection, this.gridSize).contains(MarkerUtils.getPosition(marker))) {
             cluster.push(marker);
         }
         else {
@@ -403,8 +467,8 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
                     geometry: {
                         type: "Point",
                         coordinates: [
-                            marker.getPosition().lng(),
-                            marker.getPosition().lat(),
+                            MarkerUtils.getPosition(marker).lng(),
+                            MarkerUtils.getPosition(marker).lat(),
                         ],
                     },
                     properties: { marker },
@@ -443,7 +507,7 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
             const marker = properties.marker;
             return new Cluster({
                 markers: [marker],
-                position: marker.getPosition(),
+                position: MarkerUtils.getPosition(marker),
             });
         }
     }
@@ -522,21 +586,51 @@ class DefaultRenderer {
      * });
      * ```
      */
-    render({ count, position }, stats) {
+    render({ count, position }, stats, map) {
         // change color if this cluster has more markers than the mean cluster
         const color = count > Math.max(10, stats.clusters.markers.mean) ? "#ff0000" : "#0000ff";
         // create svg url with fill color
-        const svg = window.btoa(`
-  <svg fill="${color}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
-    <circle cx="120" cy="120" opacity=".6" r="70" />
-    <circle cx="120" cy="120" opacity=".3" r="90" />
-    <circle cx="120" cy="120" opacity=".2" r="110" />
-  </svg>`);
-        // create marker using svg icon
-        return new google.maps.Marker({
+        const svg = `<svg fill="${color}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+                  <circle cx="120" cy="120" opacity=".6" r="70" />
+                  <circle cx="120" cy="120" opacity=".3" r="90" />
+                  <circle cx="120" cy="120" opacity=".2" r="110" />
+                </svg>`;
+        const title = `Cluster of ${count} markers`, 
+        // adjust zIndex to be above other markers
+        zIndex = Number(google.maps.Marker.MAX_ZINDEX) + count;
+        if (google.maps.marker &&
+            map.getMapCapabilities().isAdvancedMarkersAvailable) {
+            // create cluster SVG element
+            const div = document.createElement("div");
+            div.innerHTML = svg;
+            const svgEl = div.firstElementChild;
+            svgEl.setAttribute("width", "50");
+            svgEl.setAttribute("height", "50");
+            // create and append marker label to SVG
+            const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            label.setAttribute("x", "50%");
+            label.setAttribute("y", "50%");
+            label.setAttribute("style", "fill: #FFF");
+            label.setAttribute("text-anchor", "middle");
+            label.setAttribute("font-size", "50");
+            label.setAttribute("dominant-baseline", "middle");
+            label.appendChild(document.createTextNode(`${count}`));
+            svgEl.appendChild(label);
+            const clusterOptions = {
+                map,
+                position,
+                zIndex,
+                title,
+                content: div.firstElementChild,
+            };
+            return new google.maps.marker.AdvancedMarkerElement(clusterOptions);
+        }
+        const clusterOptions = {
             position,
+            zIndex,
+            title,
             icon: {
-                url: `data:image/svg+xml;base64,${svg}`,
+                url: `data:image/svg+xml;base64,${window.btoa(svg)}`,
                 scaledSize: new google.maps.Size(45, 45),
             },
             label: {
@@ -544,10 +638,8 @@ class DefaultRenderer {
                 color: "rgba(255,255,255,0.9)",
                 fontSize: "12px",
             },
-            title: `Cluster of ${count} markers`,
-            // adjust zIndex to be above other markers
-            zIndex: Number(google.maps.Marker.MAX_ZINDEX) + count,
-        });
+        };
+        return new google.maps.Marker(clusterOptions);
     }
 }
 
@@ -659,7 +751,7 @@ class MarkerClusterer extends OverlayViewSafe {
             // Marker is not in our list of markers, so do nothing:
             return false;
         }
-        marker.setMap(null);
+        MarkerUtils.setMap(marker, null);
         this.markers.splice(index, 1); // Remove the marker from the list of managed markers
         if (!noDraw) {
             this.render();
@@ -687,8 +779,13 @@ class MarkerClusterer extends OverlayViewSafe {
      */
     render() {
         const map = this.getMap();
-        if (map instanceof google.maps.Map && this.getProjection()) {
+        if (map instanceof google.maps.Map && map.getProjection()) {
             google.maps.event.trigger(this, MarkerClustererEvents.CLUSTERING_BEGIN, this);
+            this.markers.forEach((marker) => {
+                marker.addListener("animation_changed", () => {
+                    console.log("animation_changed");
+                });
+            });
             const { clusters, changed } = this.algorithm.calculate({
                 markers: this.markers,
                 map,
@@ -714,7 +811,7 @@ class MarkerClusterer extends OverlayViewSafe {
         this.reset();
     }
     reset() {
-        this.markers.forEach((marker) => marker.setMap(null));
+        this.markers.forEach((marker) => MarkerUtils.setMap(marker, null));
         this.clusters.forEach((cluster) => cluster.delete());
         this.clusters = [];
     }
@@ -727,7 +824,7 @@ class MarkerClusterer extends OverlayViewSafe {
                 cluster.marker = cluster.markers[0];
             }
             else {
-                cluster.marker = this.renderer.render(cluster, stats);
+                cluster.marker = this.renderer.render(cluster, stats, map);
                 if (this.onClusterClick) {
                     cluster.marker.addListener("click", 
                     /* istanbul ignore next */
@@ -737,7 +834,7 @@ class MarkerClusterer extends OverlayViewSafe {
                     });
                 }
             }
-            cluster.marker.setMap(map);
+            MarkerUtils.setMap(cluster.marker, map);
         });
     }
 }

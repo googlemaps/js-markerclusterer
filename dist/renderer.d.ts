@@ -31,7 +31,7 @@ export declare class ClusterStats {
             max: number;
         };
     };
-    constructor(markers: google.maps.Marker[], clusters: Cluster[]);
+    constructor(markers: Marker[], clusters: Cluster[]);
 }
 export interface Renderer {
     /**
@@ -46,7 +46,7 @@ export interface Renderer {
      * });
      * ```
      */
-    render(cluster: Cluster, stats: ClusterStats): google.maps.Marker;
+    render(cluster: Cluster, stats: ClusterStats, map: google.maps.Map): Marker;
 }
 export declare class DefaultRenderer implements Renderer {
     /**
@@ -87,5 +87,5 @@ export declare class DefaultRenderer implements Renderer {
      * });
      * ```
      */
-    render({ count, position }: Cluster, stats: ClusterStats): google.maps.Marker;
+    render({ count, position }: Cluster, stats: ClusterStats, map: google.maps.Map): Marker;
 }

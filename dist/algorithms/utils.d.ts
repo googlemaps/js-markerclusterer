@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /// <reference types="google.maps" />
-export declare const filterMarkersToPaddedViewport: (map: google.maps.Map, mapCanvasProjection: google.maps.MapCanvasProjection, markers: google.maps.Marker[], viewportPadding: number) => google.maps.Marker[];
+export declare const filterMarkersToPaddedViewport: (map: google.maps.Map, mapCanvasProjection: google.maps.MapCanvasProjection, markers: Marker[], viewportPadding: number) => Marker[];
 /**
  * Extends a bounds by a number of pixels in each direction.
  */

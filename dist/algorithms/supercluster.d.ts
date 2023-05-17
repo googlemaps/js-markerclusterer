@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/// <reference types="google.maps" />
 import { AbstractAlgorithm, AlgorithmInput, AlgorithmOutput } from "./core";
 import SuperCluster, { ClusterFeature } from "supercluster";
 import { Cluster } from "../cluster";
@@ -29,7 +28,7 @@ export type SuperClusterOptions = SuperCluster.Options<{
  */
 export declare class SuperClusterAlgorithm extends AbstractAlgorithm {
     protected superCluster: SuperCluster;
-    protected markers: google.maps.Marker[];
+    protected markers: Marker[];
     protected clusters: Cluster[];
     protected state: {
         zoom: number;
@@ -38,6 +37,6 @@ export declare class SuperClusterAlgorithm extends AbstractAlgorithm {
     calculate(input: AlgorithmInput): AlgorithmOutput;
     cluster({ map }: AlgorithmInput): Cluster[];
     protected transformCluster({ geometry: { coordinates: [lng, lat], }, properties, }: ClusterFeature<{
-        marker: google.maps.Marker;
+        marker: Marker;
     }>): Cluster;
 }

@@ -20,7 +20,7 @@ import { Cluster } from "./cluster";
 import { OverlayViewSafe } from "./overlay-view-safe";
 export type onClusterClickHandler = (event: google.maps.MapMouseEvent, cluster: Cluster, map: google.maps.Map) => void;
 export interface MarkerClustererOptions {
-    markers?: google.maps.Marker[];
+    markers?: Marker[];
     /**
      * An algorithm to cluster markers. Default is {@link SuperClusterAlgorithm}. Must
      * provide a `calculate` method accepting {@link AlgorithmInput} and returning
@@ -53,17 +53,17 @@ export declare class MarkerClusterer extends OverlayViewSafe {
     /** @see {@link MarkerClustererOptions.algorithm} */
     protected algorithm: Algorithm;
     protected clusters: Cluster[];
-    protected markers: google.maps.Marker[];
+    protected markers: Marker[];
     /** @see {@link MarkerClustererOptions.renderer} */
     protected renderer: Renderer;
     /** @see {@link MarkerClustererOptions.map} */
     protected map: google.maps.Map | null;
     protected idleListener: google.maps.MapsEventListener;
     constructor({ map, markers, algorithmOptions, algorithm, renderer, onClusterClick, }: MarkerClustererOptions);
-    addMarker(marker: google.maps.Marker, noDraw?: boolean): void;
-    addMarkers(markers: google.maps.Marker[], noDraw?: boolean): void;
-    removeMarker(marker: google.maps.Marker, noDraw?: boolean): boolean;
-    removeMarkers(markers: google.maps.Marker[], noDraw?: boolean): boolean;
+    addMarker(marker: Marker, noDraw?: boolean): void;
+    addMarkers(markers: Marker[], noDraw?: boolean): void;
+    removeMarker(marker: Marker, noDraw?: boolean): boolean;
+    removeMarkers(markers: Marker[], noDraw?: boolean): boolean;
     clearMarkers(noDraw?: boolean): void;
     /**
      * Recalculates and draws all the marker clusters.

@@ -26,7 +26,7 @@ export interface AlgorithmInput {
      * There are some specific edge cases to be aware of including the following:
      * * Markers that are not visible.
      */
-    markers: google.maps.Marker[];
+    markers: Marker[];
     /**
      * The `mapCanvasProjection` enables easy conversion from lat/lng to pixel.
      *
@@ -109,4 +109,4 @@ export declare abstract class AbstractViewportAlgorithm extends AbstractAlgorith
 /**
  * @hidden
  */
-export declare const noop: (markers: google.maps.Marker[]) => Cluster[];
+export declare const noop: (markers: Marker[]) => Cluster[];

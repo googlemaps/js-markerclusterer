@@ -16,11 +16,11 @@
 /// <reference types="google.maps" />
 export interface ClusterOptions {
     position?: google.maps.LatLng | google.maps.LatLngLiteral;
-    markers?: google.maps.Marker[];
+    markers?: Marker[];
 }
 export declare class Cluster {
-    marker: google.maps.Marker;
-    readonly markers?: google.maps.Marker[];
+    marker: Marker;
+    readonly markers?: Marker[];
     protected _position: google.maps.LatLng;
     constructor({ markers, position }: ClusterOptions);
     get bounds(): google.maps.LatLngBounds | undefined;
@@ -32,7 +32,7 @@ export declare class Cluster {
     /**
      * Add a marker to the cluster.
      */
-    push(marker: google.maps.Marker): void;
+    push(marker: Marker): void;
     /**
      * Cleanup references and remove marker from map.
      */
