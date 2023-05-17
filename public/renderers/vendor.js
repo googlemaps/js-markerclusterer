@@ -76,18 +76,259 @@ var fastDeepEqual$1 = function equal(a, b) {
 
 var equal = /*@__PURE__*/getDefaultExportFromCjs(fastDeepEqual$1);
 
-function sortKD(ids, coords, nodeSize, left, right, depth) {
-    if (right - left <= nodeSize) return;
+const ARRAY_TYPES = [
+    Int8Array, Uint8Array, Uint8ClampedArray, Int16Array, Uint16Array,
+    Int32Array, Uint32Array, Float32Array, Float64Array
+];
 
-    const m = (left + right) >> 1;
+/** @typedef {Int8ArrayConstructor | Uint8ArrayConstructor | Uint8ClampedArrayConstructor | Int16ArrayConstructor | Uint16ArrayConstructor | Int32ArrayConstructor | Uint32ArrayConstructor | Float32ArrayConstructor | Float64ArrayConstructor} TypedArrayConstructor */
 
-    select(ids, coords, m, left, right, depth % 2);
+const VERSION = 1; // serialized format version
+const HEADER_SIZE = 8;
 
-    sortKD(ids, coords, nodeSize, left, m - 1, depth + 1);
-    sortKD(ids, coords, nodeSize, m + 1, right, depth + 1);
+class KDBush {
+
+    /**
+     * Creates an index from raw `ArrayBuffer` data.
+     * @param {ArrayBuffer} data
+     */
+    static from(data) {
+        if (!(data instanceof ArrayBuffer)) {
+            throw new Error('Data must be an instance of ArrayBuffer.');
+        }
+        const [magic, versionAndType] = new Uint8Array(data, 0, 2);
+        if (magic !== 0xdb) {
+            throw new Error('Data does not appear to be in a KDBush format.');
+        }
+        const version = versionAndType >> 4;
+        if (version !== VERSION) {
+            throw new Error(`Got v${version} data when expected v${VERSION}.`);
+        }
+        const ArrayType = ARRAY_TYPES[versionAndType & 0x0f];
+        if (!ArrayType) {
+            throw new Error('Unrecognized array type.');
+        }
+        const [nodeSize] = new Uint16Array(data, 2, 1);
+        const [numItems] = new Uint32Array(data, 4, 1);
+
+        return new KDBush(numItems, nodeSize, ArrayType, data);
+    }
+
+    /**
+     * Creates an index that will hold a given number of items.
+     * @param {number} numItems
+     * @param {number} [nodeSize=64] Size of the KD-tree node (64 by default).
+     * @param {TypedArrayConstructor} [ArrayType=Float64Array] The array type used for coordinates storage (`Float64Array` by default).
+     * @param {ArrayBuffer} [data] (For internal use only)
+     */
+    constructor(numItems, nodeSize = 64, ArrayType = Float64Array, data) {
+        if (isNaN(numItems) || numItems < 0) throw new Error(`Unpexpected numItems value: ${numItems}.`);
+
+        this.numItems = +numItems;
+        this.nodeSize = Math.min(Math.max(+nodeSize, 2), 65535);
+        this.ArrayType = ArrayType;
+        this.IndexArrayType = numItems < 65536 ? Uint16Array : Uint32Array;
+
+        const arrayTypeIndex = ARRAY_TYPES.indexOf(this.ArrayType);
+        const coordsByteSize = numItems * 2 * this.ArrayType.BYTES_PER_ELEMENT;
+        const idsByteSize = numItems * this.IndexArrayType.BYTES_PER_ELEMENT;
+        const padCoords = (8 - idsByteSize % 8) % 8;
+
+        if (arrayTypeIndex < 0) {
+            throw new Error(`Unexpected typed array class: ${ArrayType}.`);
+        }
+
+        if (data && (data instanceof ArrayBuffer)) { // reconstruct an index from a buffer
+            this.data = data;
+            this.ids = new this.IndexArrayType(this.data, HEADER_SIZE, numItems);
+            this.coords = new this.ArrayType(this.data, HEADER_SIZE + idsByteSize + padCoords, numItems * 2);
+            this._pos = numItems * 2;
+            this._finished = true;
+        } else { // initialize a new index
+            this.data = new ArrayBuffer(HEADER_SIZE + coordsByteSize + idsByteSize + padCoords);
+            this.ids = new this.IndexArrayType(this.data, HEADER_SIZE, numItems);
+            this.coords = new this.ArrayType(this.data, HEADER_SIZE + idsByteSize + padCoords, numItems * 2);
+            this._pos = 0;
+            this._finished = false;
+
+            // set header
+            new Uint8Array(this.data, 0, 2).set([0xdb, (VERSION << 4) + arrayTypeIndex]);
+            new Uint16Array(this.data, 2, 1)[0] = nodeSize;
+            new Uint32Array(this.data, 4, 1)[0] = numItems;
+        }
+    }
+
+    /**
+     * Add a point to the index.
+     * @param {number} x
+     * @param {number} y
+     * @returns {number} An incremental index associated with the added item (starting from `0`).
+     */
+    add(x, y) {
+        const index = this._pos >> 1;
+        this.ids[index] = index;
+        this.coords[this._pos++] = x;
+        this.coords[this._pos++] = y;
+        return index;
+    }
+
+    /**
+     * Perform indexing of the added points.
+     */
+    finish() {
+        const numAdded = this._pos >> 1;
+        if (numAdded !== this.numItems) {
+            throw new Error(`Added ${numAdded} items when expected ${this.numItems}.`);
+        }
+        // kd-sort both arrays for efficient search
+        sort(this.ids, this.coords, this.nodeSize, 0, this.numItems - 1, 0);
+
+        this._finished = true;
+        return this;
+    }
+
+    /**
+     * Search the index for items within a given bounding box.
+     * @param {number} minX
+     * @param {number} minY
+     * @param {number} maxX
+     * @param {number} maxY
+     * @returns {number[]} An array of indices correponding to the found items.
+     */
+    range(minX, minY, maxX, maxY) {
+        if (!this._finished) throw new Error('Data not yet indexed - call index.finish().');
+
+        const {ids, coords, nodeSize} = this;
+        const stack = [0, ids.length - 1, 0];
+        const result = [];
+
+        // recursively search for items in range in the kd-sorted arrays
+        while (stack.length) {
+            const axis = stack.pop() || 0;
+            const right = stack.pop() || 0;
+            const left = stack.pop() || 0;
+
+            // if we reached "tree node", search linearly
+            if (right - left <= nodeSize) {
+                for (let i = left; i <= right; i++) {
+                    const x = coords[2 * i];
+                    const y = coords[2 * i + 1];
+                    if (x >= minX && x <= maxX && y >= minY && y <= maxY) result.push(ids[i]);
+                }
+                continue;
+            }
+
+            // otherwise find the middle index
+            const m = (left + right) >> 1;
+
+            // include the middle item if it's in range
+            const x = coords[2 * m];
+            const y = coords[2 * m + 1];
+            if (x >= minX && x <= maxX && y >= minY && y <= maxY) result.push(ids[m]);
+
+            // queue search in halves that intersect the query
+            if (axis === 0 ? minX <= x : minY <= y) {
+                stack.push(left);
+                stack.push(m - 1);
+                stack.push(1 - axis);
+            }
+            if (axis === 0 ? maxX >= x : maxY >= y) {
+                stack.push(m + 1);
+                stack.push(right);
+                stack.push(1 - axis);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Search the index for items within a given radius.
+     * @param {number} qx
+     * @param {number} qy
+     * @param {number} r Query radius.
+     * @returns {number[]} An array of indices correponding to the found items.
+     */
+    within(qx, qy, r) {
+        if (!this._finished) throw new Error('Data not yet indexed - call index.finish().');
+
+        const {ids, coords, nodeSize} = this;
+        const stack = [0, ids.length - 1, 0];
+        const result = [];
+        const r2 = r * r;
+
+        // recursively search for items within radius in the kd-sorted arrays
+        while (stack.length) {
+            const axis = stack.pop() || 0;
+            const right = stack.pop() || 0;
+            const left = stack.pop() || 0;
+
+            // if we reached "tree node", search linearly
+            if (right - left <= nodeSize) {
+                for (let i = left; i <= right; i++) {
+                    if (sqDist(coords[2 * i], coords[2 * i + 1], qx, qy) <= r2) result.push(ids[i]);
+                }
+                continue;
+            }
+
+            // otherwise find the middle index
+            const m = (left + right) >> 1;
+
+            // include the middle item if it's in range
+            const x = coords[2 * m];
+            const y = coords[2 * m + 1];
+            if (sqDist(x, y, qx, qy) <= r2) result.push(ids[m]);
+
+            // queue search in halves that intersect the query
+            if (axis === 0 ? qx - r <= x : qy - r <= y) {
+                stack.push(left);
+                stack.push(m - 1);
+                stack.push(1 - axis);
+            }
+            if (axis === 0 ? qx + r >= x : qy + r >= y) {
+                stack.push(m + 1);
+                stack.push(right);
+                stack.push(1 - axis);
+            }
+        }
+
+        return result;
+    }
 }
 
-function select(ids, coords, k, left, right, inc) {
+/**
+ * @param {Uint16Array | Uint32Array} ids
+ * @param {InstanceType<TypedArrayConstructor>} coords
+ * @param {number} nodeSize
+ * @param {number} left
+ * @param {number} right
+ * @param {number} axis
+ */
+function sort(ids, coords, nodeSize, left, right, axis) {
+    if (right - left <= nodeSize) return;
+
+    const m = (left + right) >> 1; // middle index
+
+    // sort ids and coords around the middle index so that the halves lie
+    // either left/right or top/bottom correspondingly (taking turns)
+    select(ids, coords, m, left, right, axis);
+
+    // recursively kd-sort first half and second half on the opposite axis
+    sort(ids, coords, nodeSize, left, m - 1, 1 - axis);
+    sort(ids, coords, nodeSize, m + 1, right, 1 - axis);
+}
+
+/**
+ * Custom Floyd-Rivest selection algorithm: sort ids and coords so that
+ * [left..k-1] items are smaller than k-th item (on either x or y axis)
+ * @param {Uint16Array | Uint32Array} ids
+ * @param {InstanceType<TypedArrayConstructor>} coords
+ * @param {number} k
+ * @param {number} left
+ * @param {number} right
+ * @param {number} axis
+ */
+function select(ids, coords, k, left, right, axis) {
 
     while (right > left) {
         if (right - left > 600) {
@@ -98,25 +339,25 @@ function select(ids, coords, k, left, right, inc) {
             const sd = 0.5 * Math.sqrt(z * s * (n - s) / n) * (m - n / 2 < 0 ? -1 : 1);
             const newLeft = Math.max(left, Math.floor(k - m * s / n + sd));
             const newRight = Math.min(right, Math.floor(k + (n - m) * s / n + sd));
-            select(ids, coords, k, newLeft, newRight, inc);
+            select(ids, coords, k, newLeft, newRight, axis);
         }
 
-        const t = coords[2 * k + inc];
+        const t = coords[2 * k + axis];
         let i = left;
         let j = right;
 
         swapItem(ids, coords, left, k);
-        if (coords[2 * right + inc] > t) swapItem(ids, coords, left, right);
+        if (coords[2 * right + axis] > t) swapItem(ids, coords, left, right);
 
         while (i < j) {
             swapItem(ids, coords, i, j);
             i++;
             j--;
-            while (coords[2 * i + inc] < t) i++;
-            while (coords[2 * j + inc] > t) j--;
+            while (coords[2 * i + axis] < t) i++;
+            while (coords[2 * j + axis] > t) j--;
         }
 
-        if (coords[2 * left + inc] === t) swapItem(ids, coords, left, j);
+        if (coords[2 * left + axis] === t) swapItem(ids, coords, left, j);
         else {
             j++;
             swapItem(ids, coords, j, right);
@@ -127,137 +368,39 @@ function select(ids, coords, k, left, right, inc) {
     }
 }
 
+/**
+ * @param {Uint16Array | Uint32Array} ids
+ * @param {InstanceType<TypedArrayConstructor>} coords
+ * @param {number} i
+ * @param {number} j
+ */
 function swapItem(ids, coords, i, j) {
     swap(ids, i, j);
     swap(coords, 2 * i, 2 * j);
     swap(coords, 2 * i + 1, 2 * j + 1);
 }
 
+/**
+ * @param {InstanceType<TypedArrayConstructor>} arr
+ * @param {number} i
+ * @param {number} j
+ */
 function swap(arr, i, j) {
     const tmp = arr[i];
     arr[i] = arr[j];
     arr[j] = tmp;
 }
 
-function range(ids, coords, minX, minY, maxX, maxY, nodeSize) {
-    const stack = [0, ids.length - 1, 0];
-    const result = [];
-    let x, y;
-
-    while (stack.length) {
-        const axis = stack.pop();
-        const right = stack.pop();
-        const left = stack.pop();
-
-        if (right - left <= nodeSize) {
-            for (let i = left; i <= right; i++) {
-                x = coords[2 * i];
-                y = coords[2 * i + 1];
-                if (x >= minX && x <= maxX && y >= minY && y <= maxY) result.push(ids[i]);
-            }
-            continue;
-        }
-
-        const m = Math.floor((left + right) / 2);
-
-        x = coords[2 * m];
-        y = coords[2 * m + 1];
-
-        if (x >= minX && x <= maxX && y >= minY && y <= maxY) result.push(ids[m]);
-
-        const nextAxis = (axis + 1) % 2;
-
-        if (axis === 0 ? minX <= x : minY <= y) {
-            stack.push(left);
-            stack.push(m - 1);
-            stack.push(nextAxis);
-        }
-        if (axis === 0 ? maxX >= x : maxY >= y) {
-            stack.push(m + 1);
-            stack.push(right);
-            stack.push(nextAxis);
-        }
-    }
-
-    return result;
-}
-
-function within(ids, coords, qx, qy, r, nodeSize) {
-    const stack = [0, ids.length - 1, 0];
-    const result = [];
-    const r2 = r * r;
-
-    while (stack.length) {
-        const axis = stack.pop();
-        const right = stack.pop();
-        const left = stack.pop();
-
-        if (right - left <= nodeSize) {
-            for (let i = left; i <= right; i++) {
-                if (sqDist(coords[2 * i], coords[2 * i + 1], qx, qy) <= r2) result.push(ids[i]);
-            }
-            continue;
-        }
-
-        const m = Math.floor((left + right) / 2);
-
-        const x = coords[2 * m];
-        const y = coords[2 * m + 1];
-
-        if (sqDist(x, y, qx, qy) <= r2) result.push(ids[m]);
-
-        const nextAxis = (axis + 1) % 2;
-
-        if (axis === 0 ? qx - r <= x : qy - r <= y) {
-            stack.push(left);
-            stack.push(m - 1);
-            stack.push(nextAxis);
-        }
-        if (axis === 0 ? qx + r >= x : qy + r >= y) {
-            stack.push(m + 1);
-            stack.push(right);
-            stack.push(nextAxis);
-        }
-    }
-
-    return result;
-}
-
+/**
+ * @param {number} ax
+ * @param {number} ay
+ * @param {number} bx
+ * @param {number} by
+ */
 function sqDist(ax, ay, bx, by) {
     const dx = ax - bx;
     const dy = ay - by;
     return dx * dx + dy * dy;
-}
-
-const defaultGetX = p => p[0];
-const defaultGetY = p => p[1];
-
-class KDBush {
-    constructor(points, getX = defaultGetX, getY = defaultGetY, nodeSize = 64, ArrayType = Float64Array) {
-        this.nodeSize = nodeSize;
-        this.points = points;
-
-        const IndexArrayType = points.length < 65536 ? Uint16Array : Uint32Array;
-
-        const ids = this.ids = new IndexArrayType(points.length);
-        const coords = this.coords = new ArrayType(points.length * 2);
-
-        for (let i = 0; i < points.length; i++) {
-            ids[i] = i;
-            coords[2 * i] = getX(points[i]);
-            coords[2 * i + 1] = getY(points[i]);
-        }
-
-        sortKD(ids, coords, nodeSize, 0, ids.length - 1, 0);
-    }
-
-    range(minX, minY, maxX, maxY) {
-        return range(this.ids, this.coords, minX, minY, maxX, maxY, this.nodeSize);
-    }
-
-    within(x, y, r) {
-        return within(this.ids, this.coords, x, y, r, this.nodeSize);
-    }
 }
 
 const defaultOptions = {
@@ -281,14 +424,22 @@ const defaultOptions = {
 
 const fround = Math.fround || (tmp => ((x) => { tmp[0] = +x; return tmp[0]; }))(new Float32Array(1));
 
+const OFFSET_ZOOM = 2;
+const OFFSET_ID = 3;
+const OFFSET_PARENT = 4;
+const OFFSET_NUM = 5;
+const OFFSET_PROP = 6;
+
 class Supercluster {
     constructor(options) {
-        this.options = extend$1(Object.create(defaultOptions), options);
+        this.options = Object.assign(Object.create(defaultOptions), options);
         this.trees = new Array(this.options.maxZoom + 1);
+        this.stride = this.options.reduce ? 7 : 6;
+        this.clusterProps = [];
     }
 
     load(points) {
-        const {log, minZoom, maxZoom, nodeSize} = this.options;
+        const {log, minZoom, maxZoom} = this.options;
 
         if (log) console.time('total time');
 
@@ -298,12 +449,26 @@ class Supercluster {
         this.points = points;
 
         // generate a cluster object for each point and index input points into a KD-tree
-        let clusters = [];
+        const data = [];
+
         for (let i = 0; i < points.length; i++) {
-            if (!points[i].geometry) continue;
-            clusters.push(createPointCluster(points[i], i));
+            const p = points[i];
+            if (!p.geometry) continue;
+
+            const [lng, lat] = p.geometry.coordinates;
+            const x = fround(lngX(lng));
+            const y = fround(latY(lat));
+            // store internal point/cluster data in flat numeric arrays for performance
+            data.push(
+                x, y, // projected point coordinates
+                Infinity, // the last zoom the point was processed at
+                i, // index of the source feature in the original input array
+                -1, // parent cluster id
+                1 // number of points in a cluster
+            );
+            if (this.options.reduce) data.push(0); // noop
         }
-        this.trees[maxZoom + 1] = new KDBush(clusters, getX, getY, nodeSize, Float32Array);
+        let tree = this.trees[maxZoom + 1] = this._createTree(data);
 
         if (log) console.timeEnd(timerId);
 
@@ -313,10 +478,9 @@ class Supercluster {
             const now = +Date.now();
 
             // create a new set of clusters for the zoom and index them with a KD-tree
-            clusters = this._cluster(clusters, z);
-            this.trees[z] = new KDBush(clusters, getX, getY, nodeSize, Float32Array);
+            tree = this.trees[z] = this._createTree(this._cluster(tree, z));
 
-            if (log) console.log('z%d: %d clusters in %dms', z, clusters.length, +Date.now() - now);
+            if (log) console.log('z%d: %d clusters in %dms', z, tree.numItems, +Date.now() - now);
         }
 
         if (log) console.timeEnd('total time');
@@ -341,10 +505,11 @@ class Supercluster {
 
         const tree = this.trees[this._limitZoom(zoom)];
         const ids = tree.range(lngX(minLng), latY(maxLat), lngX(maxLng), latY(minLat));
+        const data = tree.data;
         const clusters = [];
         for (const id of ids) {
-            const c = tree.points[id];
-            clusters.push(c.numPoints ? getClusterJSON(c) : this.points[c.index]);
+            const k = this.stride * id;
+            clusters.push(data[k + OFFSET_NUM] > 1 ? getClusterJSON(data, k, this.clusterProps) : this.points[data[k + OFFSET_ID]]);
         }
         return clusters;
     }
@@ -354,19 +519,21 @@ class Supercluster {
         const originZoom = this._getOriginZoom(clusterId);
         const errorMsg = 'No cluster with the specified id.';
 
-        const index = this.trees[originZoom];
-        if (!index) throw new Error(errorMsg);
+        const tree = this.trees[originZoom];
+        if (!tree) throw new Error(errorMsg);
 
-        const origin = index.points[originId];
-        if (!origin) throw new Error(errorMsg);
+        const data = tree.data;
+        if (originId * this.stride >= data.length) throw new Error(errorMsg);
 
         const r = this.options.radius / (this.options.extent * Math.pow(2, originZoom - 1));
-        const ids = index.within(origin.x, origin.y, r);
+        const x = data[originId * this.stride];
+        const y = data[originId * this.stride + 1];
+        const ids = tree.within(x, y, r);
         const children = [];
         for (const id of ids) {
-            const c = index.points[id];
-            if (c.parentId === clusterId) {
-                children.push(c.numPoints ? getClusterJSON(c) : this.points[c.index]);
+            const k = id * this.stride;
+            if (data[k + OFFSET_PARENT] === clusterId) {
+                children.push(data[k + OFFSET_NUM] > 1 ? getClusterJSON(data, k, this.clusterProps) : this.points[data[k + OFFSET_ID]]);
             }
         }
 
@@ -399,17 +566,17 @@ class Supercluster {
 
         this._addTileFeatures(
             tree.range((x - p) / z2, top, (x + 1 + p) / z2, bottom),
-            tree.points, x, y, z2, tile);
+            tree.data, x, y, z2, tile);
 
         if (x === 0) {
             this._addTileFeatures(
                 tree.range(1 - p / z2, top, 1, bottom),
-                tree.points, z2, y, z2, tile);
+                tree.data, z2, y, z2, tile);
         }
         if (x === z2 - 1) {
             this._addTileFeatures(
                 tree.range(0, top, p / z2, bottom),
-                tree.points, -1, y, z2, tile);
+                tree.data, -1, y, z2, tile);
         }
 
         return tile.features.length ? tile : null;
@@ -454,21 +621,30 @@ class Supercluster {
         return skipped;
     }
 
-    _addTileFeatures(ids, points, x, y, z2, tile) {
+    _createTree(data) {
+        const tree = new KDBush(data.length / this.stride | 0, this.options.nodeSize, Float32Array);
+        for (let i = 0; i < data.length; i += this.stride) tree.add(data[i], data[i + 1]);
+        tree.finish();
+        tree.data = data;
+        return tree;
+    }
+
+    _addTileFeatures(ids, data, x, y, z2, tile) {
         for (const i of ids) {
-            const c = points[i];
-            const isCluster = c.numPoints;
+            const k = i * this.stride;
+            const isCluster = data[k + OFFSET_NUM] > 1;
 
             let tags, px, py;
             if (isCluster) {
-                tags = getClusterProperties(c);
-                px = c.x;
-                py = c.y;
+                tags = getClusterProperties(data, k, this.clusterProps);
+                px = data[k];
+                py = data[k + 1];
             } else {
-                const p = this.points[c.index];
+                const p = this.points[data[k + OFFSET_ID]];
                 tags = p.properties;
-                px = lngX(p.geometry.coordinates[0]);
-                py = latY(p.geometry.coordinates[1]);
+                const [lng, lat] = p.geometry.coordinates;
+                px = lngX(lng);
+                py = latY(lat);
             }
 
             const f = {
@@ -482,14 +658,12 @@ class Supercluster {
 
             // assign id
             let id;
-            if (isCluster) {
-                id = c.id;
-            } else if (this.options.generateId) {
-                // optionally generate id
-                id = c.index;
-            } else if (this.points[c.index].id) {
+            if (isCluster || this.options.generateId) {
+                // optionally generate id for points
+                id = data[k + OFFSET_ID];
+            } else {
                 // keep id if already assigned
-                id = this.points[c.index].id;
+                id = this.points[data[k + OFFSET_ID]].id;
             }
 
             if (id !== undefined) f.id = id;
@@ -502,78 +676,86 @@ class Supercluster {
         return Math.max(this.options.minZoom, Math.min(Math.floor(+z), this.options.maxZoom + 1));
     }
 
-    _cluster(points, zoom) {
-        const clusters = [];
+    _cluster(tree, zoom) {
         const {radius, extent, reduce, minPoints} = this.options;
         const r = radius / (extent * Math.pow(2, zoom));
+        const data = tree.data;
+        const nextData = [];
+        const stride = this.stride;
 
         // loop through each point
-        for (let i = 0; i < points.length; i++) {
-            const p = points[i];
+        for (let i = 0; i < data.length; i += stride) {
             // if we've already visited the point at this zoom level, skip it
-            if (p.zoom <= zoom) continue;
-            p.zoom = zoom;
+            if (data[i + OFFSET_ZOOM] <= zoom) continue;
+            data[i + OFFSET_ZOOM] = zoom;
 
             // find all nearby points
-            const tree = this.trees[zoom + 1];
-            const neighborIds = tree.within(p.x, p.y, r);
+            const x = data[i];
+            const y = data[i + 1];
+            const neighborIds = tree.within(data[i], data[i + 1], r);
 
-            const numPointsOrigin = p.numPoints || 1;
+            const numPointsOrigin = data[i + OFFSET_NUM];
             let numPoints = numPointsOrigin;
 
             // count the number of points in a potential cluster
             for (const neighborId of neighborIds) {
-                const b = tree.points[neighborId];
+                const k = neighborId * stride;
                 // filter out neighbors that are already processed
-                if (b.zoom > zoom) numPoints += b.numPoints || 1;
+                if (data[k + OFFSET_ZOOM] > zoom) numPoints += data[k + OFFSET_NUM];
             }
 
             // if there were neighbors to merge, and there are enough points to form a cluster
             if (numPoints > numPointsOrigin && numPoints >= minPoints) {
-                let wx = p.x * numPointsOrigin;
-                let wy = p.y * numPointsOrigin;
+                let wx = x * numPointsOrigin;
+                let wy = y * numPointsOrigin;
 
-                let clusterProperties = reduce && numPointsOrigin > 1 ? this._map(p, true) : null;
+                let clusterProperties;
+                let clusterPropIndex = -1;
 
                 // encode both zoom and point index on which the cluster originated -- offset by total length of features
-                const id = (i << 5) + (zoom + 1) + this.points.length;
+                const id = ((i / stride | 0) << 5) + (zoom + 1) + this.points.length;
 
                 for (const neighborId of neighborIds) {
-                    const b = tree.points[neighborId];
+                    const k = neighborId * stride;
 
-                    if (b.zoom <= zoom) continue;
-                    b.zoom = zoom; // save the zoom (so it doesn't get processed twice)
+                    if (data[k + OFFSET_ZOOM] <= zoom) continue;
+                    data[k + OFFSET_ZOOM] = zoom; // save the zoom (so it doesn't get processed twice)
 
-                    const numPoints2 = b.numPoints || 1;
-                    wx += b.x * numPoints2; // accumulate coordinates for calculating weighted center
-                    wy += b.y * numPoints2;
+                    const numPoints2 = data[k + OFFSET_NUM];
+                    wx += data[k] * numPoints2; // accumulate coordinates for calculating weighted center
+                    wy += data[k + 1] * numPoints2;
 
-                    b.parentId = id;
+                    data[k + OFFSET_PARENT] = id;
 
                     if (reduce) {
-                        if (!clusterProperties) clusterProperties = this._map(p, true);
-                        reduce(clusterProperties, this._map(b));
+                        if (!clusterProperties) {
+                            clusterProperties = this._map(data, i, true);
+                            clusterPropIndex = this.clusterProps.length;
+                            this.clusterProps.push(clusterProperties);
+                        }
+                        reduce(clusterProperties, this._map(data, k));
                     }
                 }
 
-                p.parentId = id;
-                clusters.push(createCluster(wx / numPoints, wy / numPoints, id, numPoints, clusterProperties));
+                data[i + OFFSET_PARENT] = id;
+                nextData.push(wx / numPoints, wy / numPoints, Infinity, id, -1, numPoints);
+                if (reduce) nextData.push(clusterPropIndex);
 
             } else { // left points as unclustered
-                clusters.push(p);
+                for (let j = 0; j < stride; j++) nextData.push(data[i + j]);
 
                 if (numPoints > 1) {
                     for (const neighborId of neighborIds) {
-                        const b = tree.points[neighborId];
-                        if (b.zoom <= zoom) continue;
-                        b.zoom = zoom;
-                        clusters.push(b);
+                        const k = neighborId * stride;
+                        if (data[k + OFFSET_ZOOM] <= zoom) continue;
+                        data[k + OFFSET_ZOOM] = zoom;
+                        for (let j = 0; j < stride; j++) nextData.push(data[k + j]);
                     }
                 }
             }
         }
 
-        return clusters;
+        return nextData;
     }
 
     // get index of the point from which the cluster originated
@@ -586,59 +768,39 @@ class Supercluster {
         return (clusterId - this.points.length) % 32;
     }
 
-    _map(point, clone) {
-        if (point.numPoints) {
-            return clone ? extend$1({}, point.properties) : point.properties;
+    _map(data, i, clone) {
+        if (data[i + OFFSET_NUM] > 1) {
+            const props = this.clusterProps[data[i + OFFSET_PROP]];
+            return clone ? Object.assign({}, props) : props;
         }
-        const original = this.points[point.index].properties;
+        const original = this.points[data[i + OFFSET_ID]].properties;
         const result = this.options.map(original);
-        return clone && result === original ? extend$1({}, result) : result;
+        return clone && result === original ? Object.assign({}, result) : result;
     }
 }
 
-function createCluster(x, y, id, numPoints, properties) {
-    return {
-        x: fround(x), // weighted cluster center; round for consistency with Float32Array index
-        y: fround(y),
-        zoom: Infinity, // the last zoom the cluster was processed at
-        id, // encodes index of the first child of the cluster and its zoom level
-        parentId: -1, // parent cluster id
-        numPoints,
-        properties
-    };
-}
-
-function createPointCluster(p, id) {
-    const [x, y] = p.geometry.coordinates;
-    return {
-        x: fround(lngX(x)), // projected point coordinates
-        y: fround(latY(y)),
-        zoom: Infinity, // the last zoom the point was processed at
-        index: id, // index of the source feature in the original input array,
-        parentId: -1 // parent cluster id
-    };
-}
-
-function getClusterJSON(cluster) {
+function getClusterJSON(data, i, clusterProps) {
     return {
         type: 'Feature',
-        id: cluster.id,
-        properties: getClusterProperties(cluster),
+        id: data[i + OFFSET_ID],
+        properties: getClusterProperties(data, i, clusterProps),
         geometry: {
             type: 'Point',
-            coordinates: [xLng(cluster.x), yLat(cluster.y)]
+            coordinates: [xLng(data[i]), yLat(data[i + 1])]
         }
     };
 }
 
-function getClusterProperties(cluster) {
-    const count = cluster.numPoints;
+function getClusterProperties(data, i, clusterProps) {
+    const count = data[i + OFFSET_NUM];
     const abbrev =
         count >= 10000 ? `${Math.round(count / 1000)  }k` :
         count >= 1000 ? `${Math.round(count / 100) / 10  }k` : count;
-    return extend$1(extend$1({}, cluster.properties), {
+    const propIndex = data[i + OFFSET_PROP];
+    const properties = propIndex === -1 ? {} : Object.assign({}, clusterProps[propIndex]);
+    return Object.assign(properties, {
         cluster: true,
-        cluster_id: cluster.id,
+        cluster_id: data[i + OFFSET_ID],
         point_count: count,
         point_count_abbreviated: abbrev
     });
@@ -661,18 +823,6 @@ function xLng(x) {
 function yLat(y) {
     const y2 = (180 - y * 360) * Math.PI / 180;
     return 360 * Math.atan(Math.exp(y2)) / Math.PI - 90;
-}
-
-function extend$1(dest, src) {
-    for (const id in src) dest[id] = src[id];
-    return dest;
-}
-
-function getX(p) {
-    return p.x;
-}
-function getY(p) {
-    return p.y;
 }
 
 // do not edit .js files directly - edit src/index.jst
