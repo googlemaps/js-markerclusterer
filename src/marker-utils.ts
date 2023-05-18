@@ -21,7 +21,10 @@
 
 export class MarkerUtils {
   public static isAdvancedMarker(marker: Marker): boolean {
-    if (marker instanceof google.maps.marker.AdvancedMarkerElement) {
+    if (
+      google.maps.marker &&
+      marker instanceof google.maps.marker.AdvancedMarkerElement
+    ) {
       return true;
     }
     return false;
