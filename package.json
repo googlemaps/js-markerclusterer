@@ -42,8 +42,8 @@
   "devDependencies": {
     "@babel/preset-env": "^7.11.5",
     "@babel/runtime-corejs3": "^7.11.2",
-    "@googlemaps/js-api-loader": "^1.12.3",
     "@googlemaps/jest-mocks": "^2.19.0",
+    "@googlemaps/js-api-loader": "^1.12.3",
     "@rollup/plugin-babel": "^6.0.0",
     "@rollup/plugin-commonjs": "^24.0.0",
     "@rollup/plugin-html": "^1.0.0",
@@ -51,7 +51,7 @@
     "@rollup/plugin-node-resolve": "^15.0.0",
     "@rollup/plugin-typescript": "^11.0.0",
     "@types/d3-interpolate": "^3.0.1",
-    "@types/google.maps": "^3.44.2",
+    "@types/google.maps": "^3.53.1",
     "@types/jest": "^27.0.1",
     "@types/selenium-webdriver": "^4.0.9",
     "@types/supercluster": "^7.1.0",
