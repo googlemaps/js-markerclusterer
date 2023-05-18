@@ -21,7 +21,8 @@ import { _ as __rest, S as Supercluster, e as equal, i as interpolateRgb, L as L
  */
 class MarkerUtils {
     static isAdvancedMarker(marker) {
-        if (marker instanceof google.maps.marker.AdvancedMarkerElement) {
+        if (google.maps.marker &&
+            marker instanceof google.maps.marker.AdvancedMarkerElement) {
             return true;
         }
         return false;

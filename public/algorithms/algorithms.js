@@ -21,7 +21,8 @@ import { _ as __rest, e as equal, S as Supercluster, L as Loader } from './vendo
  */
 class MarkerUtils {
     static isAdvancedMarker(marker) {
-        if (marker instanceof google.maps.marker.AdvancedMarkerElement) {
+        if (google.maps.marker &&
+            marker instanceof google.maps.marker.AdvancedMarkerElement) {
             return true;
         }
         return false;

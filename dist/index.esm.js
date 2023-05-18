@@ -49,7 +49,8 @@ function __rest(s, e) {
  */
 class MarkerUtils {
     static isAdvancedMarker(marker) {
-        if (marker instanceof google.maps.marker.AdvancedMarkerElement) {
+        if (google.maps.marker &&
+            marker instanceof google.maps.marker.AdvancedMarkerElement) {
             return true;
         }
         return false;
