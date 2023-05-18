@@ -1,6 +1,6 @@
 {
   "name": "@googlemaps/markerclusterer",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Creates and manages per-zoom-level clusters for large amounts of markers.",
   "keywords": [
     "cluster",
