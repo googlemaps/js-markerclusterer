@@ -43,7 +43,7 @@ class SimpleMarker {
  */
 export class SuperClusterAlgorithm extends AbstractAlgorithm {
   protected superCluster: SuperCluster;
-  protected markers: Marker[];
+  protected markers: SimpleMarker[];
   protected clusters: Cluster[];
   protected state: { zoom: number };
 
