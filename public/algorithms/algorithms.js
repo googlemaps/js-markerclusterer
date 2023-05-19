@@ -754,11 +754,6 @@ class MarkerClusterer extends OverlayViewSafe {
         const map = this.getMap();
         if (map instanceof google.maps.Map && map.getProjection()) {
             google.maps.event.trigger(this, MarkerClustererEvents.CLUSTERING_BEGIN, this);
-            this.markers.forEach((marker) => {
-                marker.addListener("animation_changed", () => {
-                    console.log("animation_changed");
-                });
-            });
             const { clusters, changed } = this.algorithm.calculate({
                 markers: this.markers,
                 map,

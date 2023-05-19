@@ -3828,11 +3828,6 @@ var markerClusterer = (function (exports) {
         var map = this.getMap();
         if (map instanceof google.maps.Map && map.getProjection()) {
           google.maps.event.trigger(this, exports.MarkerClustererEvents.CLUSTERING_BEGIN, this);
-          this.markers.forEach(function (marker) {
-            marker.addListener("animation_changed", function () {
-              console.log("animation_changed");
-            });
-          });
           var _this$algorithm$calcu = this.algorithm.calculate({
               markers: this.markers,
               map: map,
