@@ -27,6 +27,15 @@ export type SuperClusterOptions = SuperCluster.Options<
   { [name: string]: any }
 >;
 
+class SimpleMarker {
+  position: google.maps.LatLng | null | undefined;
+  visible: boolean;
+  constructor(marker: google.maps.Marker) {
+      this.position = marker.getPosition();
+      this.visible = marker.getVisible();
+  }
+}
+
 /**
  * A very fast JavaScript algorithm for geospatial point clustering using KD trees.
  *
@@ -51,11 +60,12 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
   }
   public calculate(input: AlgorithmInput): AlgorithmOutput {
     let changed = false;
+    let markersMapped = input.markers.map((m) => new SimpleMarker(m));
 
-    if (!equal(input.markers, this.markers)) {
+    if (!equal(markersMapped, this.markers)) {
       changed = true;
       // TODO use proxy to avoid copy?
-      this.markers = [...input.markers];
+      this.markers = markersMapped;
 
       const points = this.markers.map((marker) => {
         return {
