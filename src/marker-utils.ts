@@ -20,28 +20,26 @@
  */
 
 export class MarkerUtils {
-  public static isAdvancedMarker(marker: Marker): boolean {
-    if (
+  public static isAdvancedMarker(
+    marker: Marker
+  ): marker is google.maps.marker.AdvancedMarkerElement {
+    return (
       google.maps.marker &&
       marker instanceof google.maps.marker.AdvancedMarkerElement
-    ) {
-      return true;
-    }
-    return false;
+    );
   }
 
   public static setMap(marker: Marker, map: google.maps.Map | null) {
     if (this.isAdvancedMarker(marker)) {
-      (marker as google.maps.marker.AdvancedMarkerElement).map = map;
-      return;
+      marker.map = map;
+    } else {
+      (marker as google.maps.Marker).setMap(map);
     }
-    (marker as google.maps.Marker).setMap(map);
   }
 
   public static getPosition(marker: Marker): google.maps.LatLng {
     // SuperClusterAlgorithm.calculate expects a LatLng instance so we fake it for Adv Markers
     if (this.isAdvancedMarker(marker)) {
-      marker = marker as google.maps.marker.AdvancedMarkerElement;
       if (marker.position) {
         if (marker.position instanceof google.maps.LatLng) {
           return marker.position;
