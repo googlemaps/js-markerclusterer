@@ -75,12 +75,14 @@ export abstract class AbstractAlgorithm implements Algorithm {
    * ```typescript
    *  cluster({markers, map}: AlgorithmInput): Cluster[] {
    *    if (shouldBypassClustering(map)) {
-   *      return this.noop({markers, map})
+   *      return this.noop({markers})
    *    }
    * }
    * ```
    */
-  protected noop({ markers }: AlgorithmInput): Cluster[] {
+  protected noop<T extends Pick<AlgorithmInput, "markers">>({
+    markers,
+  }: T): Cluster[] {
     return noop(markers);
   }
   /**
@@ -130,8 +132,6 @@ export abstract class AbstractViewportAlgorithm extends AbstractAlgorithm {
       return {
         clusters: this.noop({
           markers,
-          map,
-          mapCanvasProjection,
         }),
         changed: false,
       };
