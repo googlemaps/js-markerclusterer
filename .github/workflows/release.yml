@@ -49,7 +49,7 @@ jobs:
             @semantic-release/commit-analyzer
             semantic-release-interval
             @semantic-release/release-notes-generator
-            @semantic-release/git
+            @semantic-release/git@9.0.1
             @semantic-release/github
             @semantic-release/npm
             @googlemaps/semantic-release-config
