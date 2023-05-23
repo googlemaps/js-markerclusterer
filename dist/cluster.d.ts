@@ -19,7 +19,7 @@ export interface ClusterOptions {
     markers?: Marker[];
 }
 export declare class Cluster {
-    marker: Marker;
+    marker?: Marker;
     readonly markers?: Marker[];
     protected _position: google.maps.LatLng;
     constructor({ markers, position }: ClusterOptions);

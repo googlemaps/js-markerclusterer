@@ -152,6 +152,57 @@ var markerClusterer = (function (exports) {
   function _nonIterableRest() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
+  function _createForOfIteratorHelper(o, allowArrayLike) {
+    var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"];
+    if (!it) {
+      if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") {
+        if (it) o = it;
+        var i = 0;
+        var F = function () {};
+        return {
+          s: F,
+          n: function () {
+            if (i >= o.length) return {
+              done: true
+            };
+            return {
+              done: false,
+              value: o[i++]
+            };
+          },
+          e: function (e) {
+            throw e;
+          },
+          f: F
+        };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var normalCompletion = true,
+      didErr = false,
+      err;
+    return {
+      s: function () {
+        it = it.call(o);
+      },
+      n: function () {
+        var step = it.next();
+        normalCompletion = step.done;
+        return step;
+      },
+      e: function (e) {
+        didErr = true;
+        err = e;
+      },
+      f: function () {
+        try {
+          if (!normalCompletion && it.return != null) it.return();
+        } finally {
+          if (didErr) throw err;
+        }
+      }
+    };
+  }
   function _toPrimitive(input, hint) {
     if (typeof input !== "object" || input === null) return input;
     var prim = input[Symbol.toPrimitive];
@@ -1410,92 +1461,31 @@ var markerClusterer = (function (exports) {
     return t;
   }
 
-  var aCallable$1 = aCallable$4;
-  var toObject$2 = toObject$5;
-  var IndexedObject$1 = indexedObject;
-  var lengthOfArrayLike$1 = lengthOfArrayLike$4;
-  var $TypeError$5 = TypeError;
-
-  // `Array.prototype.{ reduce, reduceRight }` methods implementation
-  var createMethod$1 = function (IS_RIGHT) {
-    return function (that, callbackfn, argumentsLength, memo) {
-      aCallable$1(callbackfn);
-      var O = toObject$2(that);
-      var self = IndexedObject$1(O);
-      var length = lengthOfArrayLike$1(O);
-      var index = IS_RIGHT ? length - 1 : 0;
-      var i = IS_RIGHT ? -1 : 1;
-      if (argumentsLength < 2) while (true) {
-        if (index in self) {
-          memo = self[index];
-          index += i;
-          break;
-        }
-        index += i;
-        if (IS_RIGHT ? index < 0 : length <= index) {
-          throw $TypeError$5('Reduce of empty array with no initial value');
-        }
-      }
-      for (; IS_RIGHT ? index >= 0 : length > index; index += i) if (index in self) {
-        memo = callbackfn(memo, self[index], index, O);
-      }
-      return memo;
-    };
-  };
-  var arrayReduce = {
-    // `Array.prototype.reduce` method
-    // https://tc39.es/ecma262/#sec-array.prototype.reduce
-    left: createMethod$1(false),
-    // `Array.prototype.reduceRight` method
-    // https://tc39.es/ecma262/#sec-array.prototype.reduceright
-    right: createMethod$1(true)
-  };
-
-  var fails$3 = fails$e;
-  var arrayMethodIsStrict$3 = function (METHOD_NAME, argument) {
-    var method = [][METHOD_NAME];
-    return !!method && fails$3(function () {
-      // eslint-disable-next-line no-useless-call -- required for testing
-      method.call(null, argument || function () {
-        return 1;
-      }, 1);
-    });
-  };
-
-  var classof$3 = classofRaw$2;
-  var engineIsNode = typeof process != 'undefined' && classof$3(process) == 'process';
-
   var $$8 = _export;
-  var $reduce = arrayReduce.left;
-  var arrayMethodIsStrict$2 = arrayMethodIsStrict$3;
-  var CHROME_VERSION = engineV8Version;
-  var IS_NODE = engineIsNode;
+  var $filter = arrayIteration.filter;
+  var arrayMethodHasSpeciesSupport$1 = arrayMethodHasSpeciesSupport$3;
+  var HAS_SPECIES_SUPPORT$1 = arrayMethodHasSpeciesSupport$1('filter');
 
-  // Chrome 80-82 has a critical bug
-  // https://bugs.chromium.org/p/chromium/issues/detail?id=1049982
-  var CHROME_BUG = !IS_NODE && CHROME_VERSION > 79 && CHROME_VERSION < 83;
-  var FORCED$2 = CHROME_BUG || !arrayMethodIsStrict$2('reduce');
-
-  // `Array.prototype.reduce` method
-  // https://tc39.es/ecma262/#sec-array.prototype.reduce
+  // `Array.prototype.filter` method
+  // https://tc39.es/ecma262/#sec-array.prototype.filter
+  // with adding support of @@species
   $$8({
     target: 'Array',
     proto: true,
-    forced: FORCED$2
+    forced: !HAS_SPECIES_SUPPORT$1
   }, {
-    reduce: function reduce(callbackfn /* , initialValue */) {
-      var length = arguments.length;
-      return $reduce(this, callbackfn, length, length > 1 ? arguments[1] : undefined);
+    filter: function filter(callbackfn /* , thisArg */) {
+      return $filter(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
     }
   });
 
   var TO_STRING_TAG_SUPPORT$1 = toStringTagSupport;
-  var classof$2 = classof$5;
+  var classof$3 = classof$5;
 
   // `Object.prototype.toString` method implementation
   // https://tc39.es/ecma262/#sec-object.prototype.tostring
   var objectToString = TO_STRING_TAG_SUPPORT$1 ? {}.toString : function toString() {
-    return '[object ' + classof$2(this) + ']';
+    return '[object ' + classof$3(this) + ']';
   };
 
   var TO_STRING_TAG_SUPPORT = toStringTagSupport;
@@ -1509,24 +1499,6 @@ var markerClusterer = (function (exports) {
       unsafe: true
     });
   }
-
-  var $$7 = _export;
-  var $filter = arrayIteration.filter;
-  var arrayMethodHasSpeciesSupport$1 = arrayMethodHasSpeciesSupport$3;
-  var HAS_SPECIES_SUPPORT$1 = arrayMethodHasSpeciesSupport$1('filter');
-
-  // `Array.prototype.filter` method
-  // https://tc39.es/ecma262/#sec-array.prototype.filter
-  // with adding support of @@species
-  $$7({
-    target: 'Array',
-    proto: true,
-    forced: !HAS_SPECIES_SUPPORT$1
-  }, {
-    filter: function filter(callbackfn /* , thisArg */) {
-      return $filter(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
-    }
-  });
 
   /**
    * Copyright 2023 Google LLC
@@ -1624,11 +1596,22 @@ var markerClusterer = (function (exports) {
       key: "bounds",
       get: function get() {
         if (this.markers.length === 0 && !this._position) {
-          return undefined;
+          return;
         }
-        return this.markers.reduce(function (bounds, marker) {
-          return bounds.extend(MarkerUtils.getPosition(marker));
-        }, new google.maps.LatLngBounds(this._position, this._position));
+        var bounds = new google.maps.LatLngBounds(this._position, this._position);
+        var _iterator = _createForOfIteratorHelper(this.markers),
+          _step;
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+            var marker = _step.value;
+            bounds.extend(MarkerUtils.getPosition(marker));
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+        return bounds;
       }
     }, {
       key: "position",
@@ -1661,7 +1644,7 @@ var markerClusterer = (function (exports) {
       value: function _delete() {
         if (this.marker) {
           MarkerUtils.setMap(this.marker, null);
-          delete this.marker;
+          this.marker = undefined;
         }
         this.markers.length = 0;
       }
@@ -1880,9 +1863,20 @@ var markerClusterer = (function (exports) {
   var DOMTokenListPrototype$1 = classList && classList.constructor && classList.constructor.prototype;
   var domTokenListPrototype = DOMTokenListPrototype$1 === Object.prototype ? undefined : DOMTokenListPrototype$1;
 
+  var fails$3 = fails$e;
+  var arrayMethodIsStrict$3 = function (METHOD_NAME, argument) {
+    var method = [][METHOD_NAME];
+    return !!method && fails$3(function () {
+      // eslint-disable-next-line no-useless-call -- required for testing
+      method.call(null, argument || function () {
+        return 1;
+      }, 1);
+    });
+  };
+
   var $forEach = arrayIteration.forEach;
-  var arrayMethodIsStrict$1 = arrayMethodIsStrict$3;
-  var STRICT_METHOD = arrayMethodIsStrict$1('forEach');
+  var arrayMethodIsStrict$2 = arrayMethodIsStrict$3;
+  var STRICT_METHOD = arrayMethodIsStrict$2('forEach');
 
   // `Array.prototype.forEach` method implementation
   // https://tc39.es/ecma262/#sec-array.prototype.foreach
@@ -1911,12 +1905,12 @@ var markerClusterer = (function (exports) {
   }
   handlePrototype(DOMTokenListPrototype);
 
-  var $$6 = _export;
+  var $$7 = _export;
   var call$1 = functionCall;
 
   // `URL.prototype.toJSON` method
   // https://url.spec.whatwg.org/#dom-url-tojson
-  $$6({
+  $$7({
     target: 'URL',
     proto: true,
     enumerable: true
@@ -2106,8 +2100,8 @@ var markerClusterer = (function (exports) {
   var objectKeys$1 = objectKeys$2;
   var getOwnPropertySymbolsModule = objectGetOwnPropertySymbols;
   var propertyIsEnumerableModule = objectPropertyIsEnumerable;
-  var toObject$1 = toObject$5;
-  var IndexedObject = indexedObject;
+  var toObject$2 = toObject$5;
+  var IndexedObject$1 = indexedObject;
 
   // eslint-disable-next-line es/no-object-assign -- safe
   var $assign = Object.assign;
@@ -2145,13 +2139,13 @@ var markerClusterer = (function (exports) {
     return $assign({}, A)[symbol] != 7 || objectKeys$1($assign({}, B)).join('') != alphabet;
   }) ? function assign(target, source) {
     // eslint-disable-line no-unused-vars -- required for `.length`
-    var T = toObject$1(target);
+    var T = toObject$2(target);
     var argumentsLength = arguments.length;
     var index = 1;
     var getOwnPropertySymbols = getOwnPropertySymbolsModule.f;
     var propertyIsEnumerable = propertyIsEnumerableModule.f;
     while (argumentsLength > index) {
-      var S = IndexedObject(arguments[index++]);
+      var S = IndexedObject$1(arguments[index++]);
       var keys = getOwnPropertySymbols ? concat(objectKeys$1(S), getOwnPropertySymbols(S)) : objectKeys$1(S);
       var length = keys.length;
       var j = 0;
@@ -2164,13 +2158,13 @@ var markerClusterer = (function (exports) {
     return T;
   } : $assign;
 
-  var $$5 = _export;
+  var $$6 = _export;
   var assign = objectAssign;
 
   // `Object.assign` method
   // https://tc39.es/ecma262/#sec-object.assign
   // eslint-disable-next-line es/no-object-assign -- required for testing
-  $$5({
+  $$6({
     target: 'Object',
     stat: true,
     arity: 2,
@@ -3105,7 +3099,7 @@ var markerClusterer = (function (exports) {
     ArrayPrototype[UNSCOPABLES][key] = true;
   };
 
-  var $$4 = _export;
+  var $$5 = _export;
   var $includes = arrayIncludes.includes;
   var fails$1 = fails$e;
   var addToUnscopables = addToUnscopables$1;
@@ -3118,7 +3112,7 @@ var markerClusterer = (function (exports) {
 
   // `Array.prototype.includes` method
   // https://tc39.es/ecma262/#sec-array.prototype.includes
-  $$4({
+  $$5({
     target: 'Array',
     proto: true,
     forced: BROKEN_ON_SPARSE
@@ -3132,7 +3126,7 @@ var markerClusterer = (function (exports) {
   addToUnscopables('includes');
 
   var isObject$1 = isObject$8;
-  var classof$1 = classofRaw$2;
+  var classof$2 = classofRaw$2;
   var wellKnownSymbol$1 = wellKnownSymbol$8;
   var MATCH$1 = wellKnownSymbol$1('match');
 
@@ -3140,22 +3134,22 @@ var markerClusterer = (function (exports) {
   // https://tc39.es/ecma262/#sec-isregexp
   var isRegexp = function (it) {
     var isRegExp;
-    return isObject$1(it) && ((isRegExp = it[MATCH$1]) !== undefined ? !!isRegExp : classof$1(it) == 'RegExp');
+    return isObject$1(it) && ((isRegExp = it[MATCH$1]) !== undefined ? !!isRegExp : classof$2(it) == 'RegExp');
   };
 
   var isRegExp = isRegexp;
-  var $TypeError$4 = TypeError;
+  var $TypeError$5 = TypeError;
   var notARegexp = function (it) {
     if (isRegExp(it)) {
-      throw $TypeError$4("The method doesn't accept regular expressions");
+      throw $TypeError$5("The method doesn't accept regular expressions");
     }
     return it;
   };
 
-  var classof = classof$5;
+  var classof$1 = classof$5;
   var $String$1 = String;
   var toString$2 = function (argument) {
-    if (classof(argument) === 'Symbol') throw TypeError('Cannot convert a Symbol value to a string');
+    if (classof$1(argument) === 'Symbol') throw TypeError('Cannot convert a Symbol value to a string');
     return $String$1(argument);
   };
 
@@ -3174,7 +3168,7 @@ var markerClusterer = (function (exports) {
     return false;
   };
 
-  var $$3 = _export;
+  var $$4 = _export;
   var uncurryThis$5 = functionUncurryThis;
   var notARegExp = notARegexp;
   var requireObjectCoercible$1 = requireObjectCoercible$4;
@@ -3184,7 +3178,7 @@ var markerClusterer = (function (exports) {
 
   // `String.prototype.includes` method
   // https://tc39.es/ecma262/#sec-string.prototype.includes
-  $$3({
+  $$4({
     target: 'String',
     proto: true,
     forced: !correctIsRegExpLogic('includes')
@@ -3195,20 +3189,20 @@ var markerClusterer = (function (exports) {
   });
 
   /* eslint-disable es/no-array-prototype-indexof -- required for testing */
-  var $$2 = _export;
+  var $$3 = _export;
   var uncurryThis$4 = functionUncurryThisClause;
   var $indexOf = arrayIncludes.indexOf;
-  var arrayMethodIsStrict = arrayMethodIsStrict$3;
+  var arrayMethodIsStrict$1 = arrayMethodIsStrict$3;
   var nativeIndexOf = uncurryThis$4([].indexOf);
   var NEGATIVE_ZERO = !!nativeIndexOf && 1 / nativeIndexOf([1], 1, -0) < 0;
-  var FORCED$1 = NEGATIVE_ZERO || !arrayMethodIsStrict('indexOf');
+  var FORCED$2 = NEGATIVE_ZERO || !arrayMethodIsStrict$1('indexOf');
 
   // `Array.prototype.indexOf` method
   // https://tc39.es/ecma262/#sec-array.prototype.indexof
-  $$2({
+  $$3({
     target: 'Array',
     proto: true,
-    forced: FORCED$1
+    forced: FORCED$2
   }, {
     indexOf: function indexOf(searchElement /* , fromIndex = 0 */) {
       var fromIndex = arguments.length > 1 ? arguments[1] : undefined;
@@ -3220,7 +3214,7 @@ var markerClusterer = (function (exports) {
 
   var DESCRIPTORS$1 = descriptors;
   var isArray = isArray$2;
-  var $TypeError$3 = TypeError;
+  var $TypeError$4 = TypeError;
   // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
   var getOwnPropertyDescriptor$1 = Object.getOwnPropertyDescriptor;
 
@@ -3239,18 +3233,18 @@ var markerClusterer = (function (exports) {
   }();
   var arraySetLength = SILENT_ON_NON_WRITABLE_LENGTH_SET ? function (O, length) {
     if (isArray(O) && !getOwnPropertyDescriptor$1(O, 'length').writable) {
-      throw $TypeError$3('Cannot set read only .length');
+      throw $TypeError$4('Cannot set read only .length');
     }
     return O.length = length;
   } : function (O, length) {
     return O.length = length;
   };
 
-  var $TypeError$2 = TypeError;
+  var $TypeError$3 = TypeError;
   var MAX_SAFE_INTEGER = 0x1FFFFFFFFFFFFF; // 2 ** 53 - 1 == 9007199254740991
 
   var doesNotExceedSafeInteger$1 = function (it) {
-    if (it > MAX_SAFE_INTEGER) throw $TypeError$2('Maximum allowed index exceeded');
+    if (it > MAX_SAFE_INTEGER) throw $TypeError$3('Maximum allowed index exceeded');
     return it;
   };
 
@@ -3263,16 +3257,16 @@ var markerClusterer = (function (exports) {
   };
 
   var tryToString = tryToString$2;
-  var $TypeError$1 = TypeError;
+  var $TypeError$2 = TypeError;
   var deletePropertyOrThrow$1 = function (O, P) {
-    if (!delete O[P]) throw $TypeError$1('Cannot delete property ' + tryToString(P) + ' of ' + tryToString(O));
+    if (!delete O[P]) throw $TypeError$2('Cannot delete property ' + tryToString(P) + ' of ' + tryToString(O));
   };
 
-  var $$1 = _export;
-  var toObject = toObject$5;
+  var $$2 = _export;
+  var toObject$1 = toObject$5;
   var toAbsoluteIndex = toAbsoluteIndex$2;
   var toIntegerOrInfinity = toIntegerOrInfinity$3;
-  var lengthOfArrayLike = lengthOfArrayLike$4;
+  var lengthOfArrayLike$1 = lengthOfArrayLike$4;
   var setArrayLength = arraySetLength;
   var doesNotExceedSafeInteger = doesNotExceedSafeInteger$1;
   var arraySpeciesCreate = arraySpeciesCreate$2;
@@ -3286,14 +3280,14 @@ var markerClusterer = (function (exports) {
   // `Array.prototype.splice` method
   // https://tc39.es/ecma262/#sec-array.prototype.splice
   // with adding support of @@species
-  $$1({
+  $$2({
     target: 'Array',
     proto: true,
     forced: !HAS_SPECIES_SUPPORT
   }, {
     splice: function splice(start, deleteCount /* , ...items */) {
-      var O = toObject(this);
-      var len = lengthOfArrayLike(O);
+      var O = toObject$1(this);
+      var len = lengthOfArrayLike$1(O);
       var actualStart = toAbsoluteIndex(start, len);
       var argumentsLength = arguments.length;
       var insertCount, actualDeleteCount, A, k, from, to;
@@ -3332,6 +3326,74 @@ var markerClusterer = (function (exports) {
       }
       setArrayLength(O, len - actualDeleteCount + insertCount);
       return A;
+    }
+  });
+
+  var aCallable$1 = aCallable$4;
+  var toObject = toObject$5;
+  var IndexedObject = indexedObject;
+  var lengthOfArrayLike = lengthOfArrayLike$4;
+  var $TypeError$1 = TypeError;
+
+  // `Array.prototype.{ reduce, reduceRight }` methods implementation
+  var createMethod$1 = function (IS_RIGHT) {
+    return function (that, callbackfn, argumentsLength, memo) {
+      aCallable$1(callbackfn);
+      var O = toObject(that);
+      var self = IndexedObject(O);
+      var length = lengthOfArrayLike(O);
+      var index = IS_RIGHT ? length - 1 : 0;
+      var i = IS_RIGHT ? -1 : 1;
+      if (argumentsLength < 2) while (true) {
+        if (index in self) {
+          memo = self[index];
+          index += i;
+          break;
+        }
+        index += i;
+        if (IS_RIGHT ? index < 0 : length <= index) {
+          throw $TypeError$1('Reduce of empty array with no initial value');
+        }
+      }
+      for (; IS_RIGHT ? index >= 0 : length > index; index += i) if (index in self) {
+        memo = callbackfn(memo, self[index], index, O);
+      }
+      return memo;
+    };
+  };
+  var arrayReduce = {
+    // `Array.prototype.reduce` method
+    // https://tc39.es/ecma262/#sec-array.prototype.reduce
+    left: createMethod$1(false),
+    // `Array.prototype.reduceRight` method
+    // https://tc39.es/ecma262/#sec-array.prototype.reduceright
+    right: createMethod$1(true)
+  };
+
+  var classof = classofRaw$2;
+  var engineIsNode = typeof process != 'undefined' && classof(process) == 'process';
+
+  var $$1 = _export;
+  var $reduce = arrayReduce.left;
+  var arrayMethodIsStrict = arrayMethodIsStrict$3;
+  var CHROME_VERSION = engineV8Version;
+  var IS_NODE = engineIsNode;
+
+  // Chrome 80-82 has a critical bug
+  // https://bugs.chromium.org/p/chromium/issues/detail?id=1049982
+  var CHROME_BUG = !IS_NODE && CHROME_VERSION > 79 && CHROME_VERSION < 83;
+  var FORCED$1 = CHROME_BUG || !arrayMethodIsStrict('reduce');
+
+  // `Array.prototype.reduce` method
+  // https://tc39.es/ecma262/#sec-array.prototype.reduce
+  $$1({
+    target: 'Array',
+    proto: true,
+    forced: FORCED$1
+  }, {
+    reduce: function reduce(callbackfn /* , initialValue */) {
+      var length = arguments.length;
+      return $reduce(this, callbackfn, length, length > 1 ? arguments[1] : undefined);
     }
   });
 

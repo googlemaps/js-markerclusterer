@@ -123,11 +123,13 @@ class Cluster {
     }
     get bounds() {
         if (this.markers.length === 0 && !this._position) {
-            return undefined;
+            return;
         }
-        return this.markers.reduce((bounds, marker) => {
-            return bounds.extend(MarkerUtils.getPosition(marker));
-        }, new google.maps.LatLngBounds(this._position, this._position));
+        const bounds = new google.maps.LatLngBounds(this._position, this._position);
+        for (const marker of this.markers) {
+            bounds.extend(MarkerUtils.getPosition(marker));
+        }
+        return bounds;
     }
     get position() {
         return this._position || this.bounds.getCenter();
@@ -150,7 +152,7 @@ class Cluster {
     delete() {
         if (this.marker) {
             MarkerUtils.setMap(this.marker, null);
-            delete this.marker;
+            this.marker = undefined;
         }
         this.markers.length = 0;
     }
