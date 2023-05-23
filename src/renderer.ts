@@ -15,6 +15,7 @@
  */
 
 import { Cluster } from "./cluster";
+import { Marker } from "./marker-utils";
 
 /**
  * Provides statistics on all clusters in the current render cycle for use in {@link Renderer.render}.

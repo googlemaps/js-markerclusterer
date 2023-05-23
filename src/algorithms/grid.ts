@@ -28,7 +28,7 @@ import {
 
 import { Cluster } from "../cluster";
 import equal from "fast-deep-equal";
-import { MarkerUtils } from "../marker-utils";
+import { MarkerUtils, Marker } from "../marker-utils";
 
 export interface GridOptions extends ViewportAlgorithmOptions {
   gridSize?: number;

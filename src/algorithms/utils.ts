@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { MarkerUtils } from "../marker-utils";
+import { MarkerUtils, Marker } from "../marker-utils";
 
 /**
  * Returns the markers visible in a padded map viewport

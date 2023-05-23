@@ -19,6 +19,10 @@
  * shared behavior of Advanced Markers and Markers.
  */
 
+export type Marker =
+  | google.maps.Marker
+  | google.maps.marker.AdvancedMarkerElement;
+
 export class MarkerUtils {
   public static isAdvancedMarker(
     marker: Marker

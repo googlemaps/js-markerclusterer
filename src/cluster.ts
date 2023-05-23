@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { MarkerUtils } from "./marker-utils";
+import { MarkerUtils, Marker } from "./marker-utils";
 
 export interface ClusterOptions {
   position?: google.maps.LatLng | google.maps.LatLngLiteral;
