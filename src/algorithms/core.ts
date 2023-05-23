@@ -16,7 +16,7 @@
 
 import { Cluster } from "../cluster";
 import { filterMarkersToPaddedViewport } from "./utils";
-import { MarkerUtils } from "../marker-utils";
+import { MarkerUtils, Marker } from "../marker-utils";
 
 export interface AlgorithmInput {
   /**

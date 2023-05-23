@@ -22,7 +22,7 @@ import {
 } from ".";
 
 import { initialize } from "@googlemaps/jest-mocks";
-import { MarkerUtils } from "./marker-utils";
+import { MarkerUtils, Marker } from "./marker-utils";
 
 initialize();
 const markerClasses = [

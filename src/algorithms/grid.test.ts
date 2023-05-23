@@ -16,6 +16,7 @@
 
 import { GridAlgorithm } from "./grid";
 import { initialize, MapCanvasProjection } from "@googlemaps/jest-mocks";
+import { Marker } from "../marker-utils";
 
 initialize();
 const markers = [

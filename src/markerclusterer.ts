@@ -22,7 +22,7 @@ import {
 import { ClusterStats, DefaultRenderer, Renderer } from "./renderer";
 import { Cluster } from "./cluster";
 import { OverlayViewSafe } from "./overlay-view-safe";
-import { MarkerUtils } from "./marker-utils";
+import { MarkerUtils, Marker } from "./marker-utils";
 
 export type onClusterClickHandler = (
   event: google.maps.MapMouseEvent,
