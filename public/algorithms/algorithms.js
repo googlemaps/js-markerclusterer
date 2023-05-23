@@ -228,12 +228,12 @@ class AbstractAlgorithm {
      * ```typescript
      *  cluster({markers, map}: AlgorithmInput): Cluster[] {
      *    if (shouldBypassClustering(map)) {
-     *      return this.noop({markers, map})
+     *      return this.noop({markers})
      *    }
      * }
      * ```
      */
-    noop({ markers }) {
+    noop({ markers, }) {
         return noop(markers);
     }
 }
@@ -255,8 +255,6 @@ class AbstractViewportAlgorithm extends AbstractAlgorithm {
             return {
                 clusters: this.noop({
                     markers,
-                    map,
-                    mapCanvasProjection,
                 }),
                 changed: false,
             };
@@ -324,10 +322,8 @@ class GridAlgorithm extends AbstractViewportAlgorithm {
             return {
                 clusters: this.noop({
                     markers,
-                    map,
-                    mapCanvasProjection,
                 }),
-                changed: changed,
+                changed,
             };
         }
         return {

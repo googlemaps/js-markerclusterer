@@ -1752,7 +1752,7 @@ var markerClusterer = (function (exports) {
      * ```typescript
      *  cluster({markers, map}: AlgorithmInput): Cluster[] {
      *    if (shouldBypassClustering(map)) {
-     *      return this.noop({markers, map})
+     *      return this.noop({markers})
      *    }
      * }
      * ```
@@ -1795,9 +1795,7 @@ var markerClusterer = (function (exports) {
         if (map.getZoom() >= this.maxZoom) {
           return {
             clusters: this.noop({
-              markers: markers,
-              map: map,
-              mapCanvasProjection: mapCanvasProjection
+              markers: markers
             }),
             changed: false
           };
@@ -1990,9 +1988,7 @@ var markerClusterer = (function (exports) {
         if (map.getZoom() >= this.maxZoom) {
           return {
             clusters: this.noop({
-              markers: markers,
-              map: map,
-              mapCanvasProjection: mapCanvasProjection
+              markers: markers
             }),
             changed: changed
           };

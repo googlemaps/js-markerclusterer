@@ -178,12 +178,12 @@ class AbstractAlgorithm {
      * ```typescript
      *  cluster({markers, map}: AlgorithmInput): Cluster[] {
      *    if (shouldBypassClustering(map)) {
-     *      return this.noop({markers, map})
+     *      return this.noop({markers})
      *    }
      * }
      * ```
      */
-    noop({ markers }) {
+    noop({ markers, }) {
         return noop(markers);
     }
 }

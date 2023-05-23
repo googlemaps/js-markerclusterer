@@ -66,12 +66,12 @@ export declare abstract class AbstractAlgorithm implements Algorithm {
      * ```typescript
      *  cluster({markers, map}: AlgorithmInput): Cluster[] {
      *    if (shouldBypassClustering(map)) {
-     *      return this.noop({markers, map})
+     *      return this.noop({markers})
      *    }
      * }
      * ```
      */
-    protected noop({ markers }: AlgorithmInput): Cluster[];
+    protected noop<T extends Pick<AlgorithmInput, "markers">>({ markers, }: T): Cluster[];
     /**
      * Calculates an array of {@link Cluster}. Calculate is separate from
      * {@link cluster} as it does preprocessing on the markers such as filtering
