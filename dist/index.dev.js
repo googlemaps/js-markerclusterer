@@ -1526,26 +1526,22 @@ var markerClusterer = (function (exports) {
     _createClass(MarkerUtils, null, [{
       key: "isAdvancedMarker",
       value: function isAdvancedMarker(marker) {
-        if (google.maps.marker && marker instanceof google.maps.marker.AdvancedMarkerElement) {
-          return true;
-        }
-        return false;
+        return google.maps.marker && marker instanceof google.maps.marker.AdvancedMarkerElement;
       }
     }, {
       key: "setMap",
       value: function setMap(marker, map) {
         if (this.isAdvancedMarker(marker)) {
           marker.map = map;
-          return;
+        } else {
+          marker.setMap(map);
         }
-        marker.setMap(map);
       }
     }, {
       key: "getPosition",
       value: function getPosition(marker) {
         // SuperClusterAlgorithm.calculate expects a LatLng instance so we fake it for Adv Markers
         if (this.isAdvancedMarker(marker)) {
-          marker = marker;
           if (marker.position) {
             if (marker.position instanceof google.maps.LatLng) {
               return marker.position;

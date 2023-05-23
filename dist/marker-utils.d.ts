@@ -19,7 +19,7 @@
  * shared behavior of Advanced Markers and Markers.
  */
 export declare class MarkerUtils {
-    static isAdvancedMarker(marker: Marker): boolean;
+    static isAdvancedMarker(marker: Marker): marker is google.maps.marker.AdvancedMarkerElement;
     static setMap(marker: Marker, map: google.maps.Map | null): void;
     static getPosition(marker: Marker): google.maps.LatLng;
     static getVisible(marker: Marker): boolean;

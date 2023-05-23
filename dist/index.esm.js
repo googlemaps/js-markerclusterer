@@ -49,23 +49,20 @@ function __rest(s, e) {
  */
 class MarkerUtils {
     static isAdvancedMarker(marker) {
-        if (google.maps.marker &&
-            marker instanceof google.maps.marker.AdvancedMarkerElement) {
-            return true;
-        }
-        return false;
+        return (google.maps.marker &&
+            marker instanceof google.maps.marker.AdvancedMarkerElement);
     }
     static setMap(marker, map) {
         if (this.isAdvancedMarker(marker)) {
             marker.map = map;
-            return;
         }
-        marker.setMap(map);
+        else {
+            marker.setMap(map);
+        }
     }
     static getPosition(marker) {
         // SuperClusterAlgorithm.calculate expects a LatLng instance so we fake it for Adv Markers
         if (this.isAdvancedMarker(marker)) {
-            marker = marker;
             if (marker.position) {
                 if (marker.position instanceof google.maps.LatLng) {
                     return marker.position;
