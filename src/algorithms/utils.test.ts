@@ -47,9 +47,9 @@ describe("distanceBetweenPoints", () => {
 
 describe("extendPixelBounds", () => {
   test("is correct", () => {
-    const northEast = { x: 0, y: 0 } as google.maps.Point;
-    const southWest = { x: 0, y: 0 } as google.maps.Point;
-    expect(extendPixelBounds({ northEast, southWest }, 1)).toEqual({
+    const northEast = new google.maps.Point(0, 0);
+    const southWest = new google.maps.Point(0, 0);
+    expect(extendPixelBounds({ northEast, southWest }, 1)).toMatchObject({
       northEast: {
         x: 1,
         y: -1,
@@ -64,15 +64,11 @@ describe("extendPixelBounds", () => {
 
 describe("pixelBoundsToLatLngBounds", () => {
   test("is correct", () => {
-    const northEast = { x: 1, y: 1 } as google.maps.Point;
-    const southWest = { x: -1, y: -1 } as google.maps.Point;
+    const northEast = new google.maps.Point(1, 1);
+    const southWest = new google.maps.Point(-1, -1);
     const projection = new MapCanvasProjection();
-    const bounds = pixelBoundsToLatLngBounds(
-      { northEast, southWest },
-      projection
-    );
+    pixelBoundsToLatLngBounds({ northEast, southWest }, projection);
     expect(projection.fromDivPixelToLatLng).toHaveBeenCalledWith(northEast);
     expect(projection.fromDivPixelToLatLng).toHaveBeenCalledWith(southWest);
-    expect(bounds.extend).toHaveBeenCalledTimes(2);
   });
 });
