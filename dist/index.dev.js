@@ -2898,16 +2898,21 @@ var markerClusterer = (function (exports) {
       key: "calculate",
       value: function calculate(input) {
         var changed = false;
+        var state = {
+          zoom: input.map.getZoom()
+        };
         if (!equal(input.markers, this.markers)) {
           changed = true;
           // TODO use proxy to avoid copy?
           this.markers = _toConsumableArray(input.markers);
           var points = this.markers.map(function (marker) {
+            var position = MarkerUtils.getPosition(marker);
+            var coordinates = [position.lng(), position.lat()];
             return {
               type: "Feature",
               geometry: {
                 type: "Point",
-                coordinates: [MarkerUtils.getPosition(marker).lng(), MarkerUtils.getPosition(marker).lat()]
+                coordinates: coordinates
               },
               properties: {
                 marker: marker
@@ -2916,12 +2921,9 @@ var markerClusterer = (function (exports) {
           });
           this.superCluster.load(points);
         }
-        var state = {
-          zoom: input.map.getZoom()
-        };
         if (!changed) {
-          if (this.state.zoom > this.maxZoom && state.zoom > this.maxZoom) ; else {
-            changed = changed || !equal(this.state, state);
+          if (this.state.zoom <= this.maxZoom || state.zoom <= this.maxZoom) {
+            changed = !equal(this.state, state);
           }
         }
         this.state = state;
@@ -2936,8 +2938,11 @@ var markerClusterer = (function (exports) {
     }, {
       key: "cluster",
       value: function cluster(_ref) {
+        var _this2 = this;
         var map = _ref.map;
-        return this.superCluster.getClusters([-180, -90, 180, 90], Math.round(map.getZoom())).map(this.transformCluster.bind(this));
+        return this.superCluster.getClusters([-180, -90, 180, 90], Math.round(map.getZoom())).map(function (feature) {
+          return _this2.transformCluster(feature);
+        });
       }
     }, {
       key: "transformCluster",
@@ -2951,18 +2956,17 @@ var markerClusterer = (function (exports) {
             markers: this.superCluster.getLeaves(properties.cluster_id, Infinity).map(function (leaf) {
               return leaf.properties.marker;
             }),
-            position: new google.maps.LatLng({
+            position: {
               lat: lat,
               lng: lng
-            })
-          });
-        } else {
-          var marker = properties.marker;
-          return new Cluster({
-            markers: [marker],
-            position: MarkerUtils.getPosition(marker)
+            }
           });
         }
+        var marker = properties.marker;
+        return new Cluster({
+          markers: [marker],
+          position: MarkerUtils.getPosition(marker)
+        });
       }
     }]);
     return SuperClusterAlgorithm;

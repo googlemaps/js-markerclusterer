@@ -206,30 +206,28 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
     }
     calculate(input) {
         let changed = false;
+        const state = { zoom: input.map.getZoom() };
         if (!equal(input.markers, this.markers)) {
             changed = true;
             // TODO use proxy to avoid copy?
             this.markers = [...input.markers];
             const points = this.markers.map((marker) => {
+                const position = MarkerUtils.getPosition(marker);
+                const coordinates = [position.lng(), position.lat()];
                 return {
                     type: "Feature",
                     geometry: {
                         type: "Point",
-                        coordinates: [
-                            MarkerUtils.getPosition(marker).lng(),
-                            MarkerUtils.getPosition(marker).lat(),
-                        ],
+                        coordinates,
                     },
                     properties: { marker },
                 };
             });
             this.superCluster.load(points);
         }
-        const state = { zoom: input.map.getZoom() };
         if (!changed) {
-            if (this.state.zoom > this.maxZoom && state.zoom > this.maxZoom) ;
-            else {
-                changed = changed || !equal(this.state, state);
+            if (this.state.zoom <= this.maxZoom || state.zoom <= this.maxZoom) {
+                changed = !equal(this.state, state);
             }
         }
         this.state = state;
@@ -241,7 +239,7 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
     cluster({ map }) {
         return this.superCluster
             .getClusters([-180, -90, 180, 90], Math.round(map.getZoom()))
-            .map(this.transformCluster.bind(this));
+            .map((feature) => this.transformCluster(feature));
     }
     transformCluster({ geometry: { coordinates: [lng, lat], }, properties, }) {
         if (properties.cluster) {
@@ -249,16 +247,14 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
                 markers: this.superCluster
                     .getLeaves(properties.cluster_id, Infinity)
                     .map((leaf) => leaf.properties.marker),
-                position: new google.maps.LatLng({ lat, lng }),
+                position: { lat, lng },
             });
         }
-        else {
-            const marker = properties.marker;
-            return new Cluster({
-                markers: [marker],
-                position: MarkerUtils.getPosition(marker),
-            });
-        }
+        const marker = properties.marker;
+        return new Cluster({
+            markers: [marker],
+            position: MarkerUtils.getPosition(marker),
+        });
     }
 }
 
