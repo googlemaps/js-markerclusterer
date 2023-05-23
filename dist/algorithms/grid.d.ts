@@ -16,6 +16,7 @@
 /// <reference types="google.maps" />
 import { AbstractViewportAlgorithm, AlgorithmInput, AlgorithmOutput, ViewportAlgorithmOptions } from "./core";
 import { Cluster } from "../cluster";
+import { Marker } from "../marker-utils";
 export interface GridOptions extends ViewportAlgorithmOptions {
     gridSize?: number;
     /**

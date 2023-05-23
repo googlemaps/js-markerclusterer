@@ -18,6 +18,7 @@ import { Algorithm, AlgorithmOptions } from "./algorithms";
 import { Renderer } from "./renderer";
 import { Cluster } from "./cluster";
 import { OverlayViewSafe } from "./overlay-view-safe";
+import { Marker } from "./marker-utils";
 export type onClusterClickHandler = (event: google.maps.MapMouseEvent, cluster: Cluster, map: google.maps.Map) => void;
 export interface MarkerClustererOptions {
     markers?: Marker[];

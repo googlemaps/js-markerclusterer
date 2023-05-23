@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 /// <reference types="google.maps" />
+import { Marker } from "../marker-utils";
 /**
  * Returns the markers visible in a padded map viewport
  *

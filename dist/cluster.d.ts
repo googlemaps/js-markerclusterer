@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 /// <reference types="google.maps" />
+import { Marker } from "./marker-utils";
 export interface ClusterOptions {
     position?: google.maps.LatLng | google.maps.LatLngLiteral;
     markers?: Marker[];
