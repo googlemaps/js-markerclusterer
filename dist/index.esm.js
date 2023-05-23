@@ -171,19 +171,30 @@ class Cluster {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const filterMarkersToPaddedViewport = (map, mapCanvasProjection, markers, viewportPadding) => {
-    const extendedMapBounds = extendBoundsToPaddedViewport(map.getBounds(), mapCanvasProjection, viewportPadding);
+/**
+ * Returns the markers visible in a padded map viewport
+ *
+ * @param map
+ * @param mapCanvasProjection
+ * @param markers The list of marker to filter
+ * @param viewportPaddingPixels The padding in pixel
+ * @returns The list of markers in the padded viewport
+ */
+const filterMarkersToPaddedViewport = (map, mapCanvasProjection, markers, viewportPaddingPixels) => {
+    const extendedMapBounds = extendBoundsToPaddedViewport(map.getBounds(), mapCanvasProjection, viewportPaddingPixels);
     return markers.filter((marker) => extendedMapBounds.contains(MarkerUtils.getPosition(marker)));
 };
 /**
- * Extends a bounds by a number of pixels in each direction.
+ * Extends a bounds by a number of pixels in each direction
  */
-const extendBoundsToPaddedViewport = (bounds, projection, pixels) => {
+const extendBoundsToPaddedViewport = (bounds, projection, numPixels) => {
     const { northEast, southWest } = latLngBoundsToPixelBounds(bounds, projection);
-    const extendedPixelBounds = extendPixelBounds({ northEast, southWest }, pixels);
+    const extendedPixelBounds = extendPixelBounds({ northEast, southWest }, numPixels);
     return pixelBoundsToLatLngBounds(extendedPixelBounds, projection);
 };
 /**
+ * Returns the distance between 2 positions.
+ *
  * @hidden
  */
 const distanceBetweenPoints = (p1, p2) => {
@@ -199,6 +210,8 @@ const distanceBetweenPoints = (p1, p2) => {
     return R * c;
 };
 /**
+ * Converts a LatLng bound to pixels.
+ *
  * @hidden
  */
 const latLngBoundsToPixelBounds = (bounds, projection) => {
@@ -208,23 +221,24 @@ const latLngBoundsToPixelBounds = (bounds, projection) => {
     };
 };
 /**
+ * Extends a pixel bounds by numPixels in all directions.
+ *
  * @hidden
  */
-const extendPixelBounds = ({ northEast, southWest }, pixels) => {
-    northEast.x += pixels;
-    northEast.y -= pixels;
-    southWest.x -= pixels;
-    southWest.y += pixels;
+const extendPixelBounds = ({ northEast, southWest }, numPixels) => {
+    northEast.x += numPixels;
+    northEast.y -= numPixels;
+    southWest.x -= numPixels;
+    southWest.y += numPixels;
     return { northEast, southWest };
 };
 /**
  * @hidden
  */
 const pixelBoundsToLatLngBounds = ({ northEast, southWest }, projection) => {
-    const bounds = new google.maps.LatLngBounds();
-    bounds.extend(projection.fromDivPixelToLatLng(northEast));
-    bounds.extend(projection.fromDivPixelToLatLng(southWest));
-    return bounds;
+    const sw = projection.fromDivPixelToLatLng(southWest);
+    const ne = projection.fromDivPixelToLatLng(northEast);
+    return new google.maps.LatLngBounds(sw, ne);
 };
 
 /**

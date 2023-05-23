@@ -1669,26 +1669,37 @@ var markerClusterer = (function (exports) {
     return Cluster;
   }();
 
-  var filterMarkersToPaddedViewport = function filterMarkersToPaddedViewport(map, mapCanvasProjection, markers, viewportPadding) {
-    var extendedMapBounds = extendBoundsToPaddedViewport(map.getBounds(), mapCanvasProjection, viewportPadding);
+  /**
+   * Returns the markers visible in a padded map viewport
+   *
+   * @param map
+   * @param mapCanvasProjection
+   * @param markers The list of marker to filter
+   * @param viewportPaddingPixels The padding in pixel
+   * @returns The list of markers in the padded viewport
+   */
+  var filterMarkersToPaddedViewport = function filterMarkersToPaddedViewport(map, mapCanvasProjection, markers, viewportPaddingPixels) {
+    var extendedMapBounds = extendBoundsToPaddedViewport(map.getBounds(), mapCanvasProjection, viewportPaddingPixels);
     return markers.filter(function (marker) {
       return extendedMapBounds.contains(MarkerUtils.getPosition(marker));
     });
   };
   /**
-   * Extends a bounds by a number of pixels in each direction.
+   * Extends a bounds by a number of pixels in each direction
    */
-  var extendBoundsToPaddedViewport = function extendBoundsToPaddedViewport(bounds, projection, pixels) {
+  var extendBoundsToPaddedViewport = function extendBoundsToPaddedViewport(bounds, projection, numPixels) {
     var _latLngBoundsToPixelB = latLngBoundsToPixelBounds(bounds, projection),
       northEast = _latLngBoundsToPixelB.northEast,
       southWest = _latLngBoundsToPixelB.southWest;
     var extendedPixelBounds = extendPixelBounds({
       northEast: northEast,
       southWest: southWest
-    }, pixels);
+    }, numPixels);
     return pixelBoundsToLatLngBounds(extendedPixelBounds, projection);
   };
   /**
+   * Returns the distance between 2 positions.
+   *
    * @hidden
    */
   var distanceBetweenPoints = function distanceBetweenPoints(p1, p2) {
@@ -1700,6 +1711,8 @@ var markerClusterer = (function (exports) {
     return R * c;
   };
   /**
+   * Converts a LatLng bound to pixels.
+   *
    * @hidden
    */
   var latLngBoundsToPixelBounds = function latLngBoundsToPixelBounds(bounds, projection) {
@@ -1709,15 +1722,17 @@ var markerClusterer = (function (exports) {
     };
   };
   /**
+   * Extends a pixel bounds by numPixels in all directions.
+   *
    * @hidden
    */
-  var extendPixelBounds = function extendPixelBounds(_ref, pixels) {
+  var extendPixelBounds = function extendPixelBounds(_ref, numPixels) {
     var northEast = _ref.northEast,
       southWest = _ref.southWest;
-    northEast.x += pixels;
-    northEast.y -= pixels;
-    southWest.x -= pixels;
-    southWest.y += pixels;
+    northEast.x += numPixels;
+    northEast.y -= numPixels;
+    southWest.x -= numPixels;
+    southWest.y += numPixels;
     return {
       northEast: northEast,
       southWest: southWest
@@ -1729,10 +1744,9 @@ var markerClusterer = (function (exports) {
   var pixelBoundsToLatLngBounds = function pixelBoundsToLatLngBounds(_ref2, projection) {
     var northEast = _ref2.northEast,
       southWest = _ref2.southWest;
-    var bounds = new google.maps.LatLngBounds();
-    bounds.extend(projection.fromDivPixelToLatLng(northEast));
-    bounds.extend(projection.fromDivPixelToLatLng(southWest));
-    return bounds;
+    var sw = projection.fromDivPixelToLatLng(southWest);
+    var ne = projection.fromDivPixelToLatLng(northEast);
+    return new google.maps.LatLngBounds(sw, ne);
   };
 
   /**

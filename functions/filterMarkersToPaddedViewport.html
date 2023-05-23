@@ -17,8 +17,10 @@
 <h1>Function filterMarkersToPaddedViewport</h1></div>
 <section class="tsd-panel">
 <ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="filterMarkersToPaddedViewport"><span class="tsd-kind-call-signature">filter<wbr/>Markers<wbr/>To<wbr/>Padded<wbr/>Viewport</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">map</span>, <span class="tsd-kind-parameter">mapCanvasProjection</span>, <span class="tsd-kind-parameter">markers</span>, <span class="tsd-kind-parameter">viewportPadding</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Marker</span><span class="tsd-signature-symbol">[]</span><a href="#filterMarkersToPaddedViewport" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" id="icon-anchor-a"></path><path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" id="icon-anchor-b"></path><path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" id="icon-anchor-c"></path></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="filterMarkersToPaddedViewport"><span class="tsd-kind-call-signature">filter<wbr/>Markers<wbr/>To<wbr/>Padded<wbr/>Viewport</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">map</span>, <span class="tsd-kind-parameter">mapCanvasProjection</span>, <span class="tsd-kind-parameter">markers</span>, <span class="tsd-kind-parameter">viewportPaddingPixels</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Marker</span><span class="tsd-signature-symbol">[]</span><a href="#filterMarkersToPaddedViewport" aria-label="Permalink" class="tsd-anchor-icon"><svg class="icon icon-tabler icon-tabler-link" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" id="icon-anchor-a"></path><path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" id="icon-anchor-b"></path><path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" id="icon-anchor-c"></path></svg></a></li>
 <li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Returns the markers visible in a padded map viewport</p>
+</div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
@@ -27,12 +29,17 @@
 <li>
 <h5><span class="tsd-kind-parameter">mapCanvasProjection</span>: <span class="tsd-signature-type ">MapCanvasProjection</span></h5></li>
 <li>
-<h5><span class="tsd-kind-parameter">markers</span>: <span class="tsd-signature-type ">Marker</span><span class="tsd-signature-symbol">[]</span></h5></li>
+<h5><span class="tsd-kind-parameter">markers</span>: <span class="tsd-signature-type ">Marker</span><span class="tsd-signature-symbol">[]</span></h5>
+<div class="tsd-comment tsd-typography"><p>The list of marker to filter</p>
+</div></li>
 <li>
-<h5><span class="tsd-kind-parameter">viewportPadding</span>: <span class="tsd-signature-type">number</span></h5></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Marker</span><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
+<h5><span class="tsd-kind-parameter">viewportPaddingPixels</span>: <span class="tsd-signature-type">number</span></h5>
+<div class="tsd-comment tsd-typography"><p>The padding in pixel</p>
+</div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Marker</span><span class="tsd-signature-symbol">[]</span></h4><p>The list of markers in the padded viewport</p>
+<aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/googlemaps/js-markerclusterer/blob/a2e5d52/src/algorithms/utils.ts#L19">algorithms/utils.ts:19</a></li></ul></aside></li></ul></section></div>
+<li>Defined in <a href="https://github.com/googlemaps/js-markerclusterer/blob/ab713ad/src/algorithms/utils.ts#L28">algorithms/utils.ts:28</a></li></ul></aside></li></ul></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

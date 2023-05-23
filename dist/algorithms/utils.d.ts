@@ -14,12 +14,23 @@
  * limitations under the License.
  */
 /// <reference types="google.maps" />
-export declare const filterMarkersToPaddedViewport: (map: google.maps.Map, mapCanvasProjection: google.maps.MapCanvasProjection, markers: Marker[], viewportPadding: number) => Marker[];
 /**
- * Extends a bounds by a number of pixels in each direction.
+ * Returns the markers visible in a padded map viewport
+ *
+ * @param map
+ * @param mapCanvasProjection
+ * @param markers The list of marker to filter
+ * @param viewportPaddingPixels The padding in pixel
+ * @returns The list of markers in the padded viewport
  */
-export declare const extendBoundsToPaddedViewport: (bounds: google.maps.LatLngBounds, projection: google.maps.MapCanvasProjection, pixels: number) => google.maps.LatLngBounds;
+export declare const filterMarkersToPaddedViewport: (map: google.maps.Map, mapCanvasProjection: google.maps.MapCanvasProjection, markers: Marker[], viewportPaddingPixels: number) => Marker[];
 /**
+ * Extends a bounds by a number of pixels in each direction
+ */
+export declare const extendBoundsToPaddedViewport: (bounds: google.maps.LatLngBounds, projection: google.maps.MapCanvasProjection, numPixels: number) => google.maps.LatLngBounds;
+/**
+ * Returns the distance between 2 positions.
+ *
  * @hidden
  */
 export declare const distanceBetweenPoints: (p1: google.maps.LatLngLiteral, p2: google.maps.LatLngLiteral) => number;
@@ -28,9 +39,11 @@ type PixelBounds = {
     southWest: google.maps.Point;
 };
 /**
+ * Extends a pixel bounds by numPixels in all directions.
+ *
  * @hidden
  */
-export declare const extendPixelBounds: ({ northEast, southWest }: PixelBounds, pixels: number) => PixelBounds;
+export declare const extendPixelBounds: ({ northEast, southWest }: PixelBounds, numPixels: number) => PixelBounds;
 /**
  * @hidden
  */
