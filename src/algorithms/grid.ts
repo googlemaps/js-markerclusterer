@@ -77,10 +77,8 @@ export class GridAlgorithm extends AbstractViewportAlgorithm {
       return {
         clusters: this.noop({
           markers,
-          map,
-          mapCanvasProjection,
         }),
-        changed: changed,
+        changed,
       };
     }
 
