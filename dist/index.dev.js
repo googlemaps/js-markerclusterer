@@ -1681,7 +1681,9 @@ var markerClusterer = (function (exports) {
     var R = 6371; // Radius of the Earth in km
     var dLat = (p2.lat - p1.lat) * Math.PI / 180;
     var dLon = (p2.lng - p1.lng) * Math.PI / 180;
-    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(p1.lat * Math.PI / 180) * Math.cos(p2.lat * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    var sinDLat = Math.sin(dLat / 2);
+    var sinDLon = Math.sin(dLon / 2);
+    var a = sinDLat * sinDLat + Math.cos(p1.lat * Math.PI / 180) * Math.cos(p2.lat * Math.PI / 180) * sinDLon * sinDLon;
     var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   };
