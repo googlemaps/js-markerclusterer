@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
+import { MarkerUtils, Marker } from "./marker-utils";
+
 export interface ClusterOptions {
   position?: google.maps.LatLng | google.maps.LatLngLiteral;
-  markers?: google.maps.Marker[];
+  markers?: Marker[];
 }
 
 export class Cluster {
-  public marker: google.maps.Marker;
-  public readonly markers?: google.maps.Marker[];
+  public marker?: Marker;
+  public readonly markers?: Marker[];
   protected _position: google.maps.LatLng;
 
   constructor({ markers, position }: ClusterOptions) {
@@ -38,12 +40,14 @@ export class Cluster {
 
   public get bounds(): google.maps.LatLngBounds | undefined {
     if (this.markers.length === 0 && !this._position) {
-      return undefined;
+      return;
     }
 
-    return this.markers.reduce((bounds, marker) => {
-      return bounds.extend(marker.getPosition());
-    }, new google.maps.LatLngBounds(this._position, this._position));
+    const bounds = new google.maps.LatLngBounds(this._position, this._position);
+    for (const marker of this.markers) {
+      bounds.extend(MarkerUtils.getPosition(marker));
+    }
+    return bounds;
   }
 
   public get position(): google.maps.LatLng {
@@ -54,14 +58,13 @@ export class Cluster {
    * Get the count of **visible** markers.
    */
   public get count(): number {
-    return this.markers.filter((m: google.maps.Marker) => m.getVisible())
-      .length;
+    return this.markers.filter((m: Marker) => MarkerUtils.getVisible(m)).length;
   }
 
   /**
    * Add a marker to the cluster.
    */
-  public push(marker: google.maps.Marker): void {
+  public push(marker: Marker): void {
     this.markers.push(marker);
   }
 
@@ -70,8 +73,8 @@ export class Cluster {
    */
   public delete(): void {
     if (this.marker) {
-      this.marker.setMap(null);
-      delete this.marker;
+      MarkerUtils.setMap(this.marker, null);
+      this.marker = undefined;
     }
     this.markers.length = 0;
   }

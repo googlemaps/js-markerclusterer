@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-import { Algorithm, SuperClusterAlgorithm } from "./algorithms";
+import {
+  Algorithm,
+  AlgorithmOptions,
+  SuperClusterAlgorithm,
+} from "./algorithms";
 import { ClusterStats, DefaultRenderer, Renderer } from "./renderer";
-
 import { Cluster } from "./cluster";
 import { OverlayViewSafe } from "./overlay-view-safe";
+import { MarkerUtils, Marker } from "./marker-utils";
 
 export type onClusterClickHandler = (
   event: google.maps.MapMouseEvent,
@@ -26,13 +30,14 @@ export type onClusterClickHandler = (
   map: google.maps.Map
 ) => void;
 export interface MarkerClustererOptions {
-  markers?: google.maps.Marker[];
+  markers?: Marker[];
   /**
    * An algorithm to cluster markers. Default is {@link SuperClusterAlgorithm}. Must
    * provide a `calculate` method accepting {@link AlgorithmInput} and returning
    * an array of {@link Cluster}.
    */
   algorithm?: Algorithm;
+  algorithmOptions?: AlgorithmOptions;
   map?: google.maps.Map | null;
   /**
    * An object that converts a {@link Cluster} into a `google.maps.Marker`.
@@ -66,18 +71,18 @@ export class MarkerClusterer extends OverlayViewSafe {
   /** @see {@link MarkerClustererOptions.algorithm} */
   protected algorithm: Algorithm;
   protected clusters: Cluster[];
-  protected markers: google.maps.Marker[];
+  protected markers: Marker[];
   /** @see {@link MarkerClustererOptions.renderer} */
   protected renderer: Renderer;
   /** @see {@link MarkerClustererOptions.map} */
   protected map: google.maps.Map | null;
-  /** @see {@link MarkerClustererOptions.maxZoom} */
   protected idleListener: google.maps.MapsEventListener;
 
   constructor({
     map,
     markers = [],
-    algorithm = new SuperClusterAlgorithm({}),
+    algorithmOptions = {},
+    algorithm = new SuperClusterAlgorithm(algorithmOptions),
     renderer = new DefaultRenderer(),
     onClusterClick = defaultOnClusterClickHandler,
   }: MarkerClustererOptions) {
@@ -95,7 +100,7 @@ export class MarkerClusterer extends OverlayViewSafe {
     }
   }
 
-  public addMarker(marker: google.maps.Marker, noDraw?: boolean): void {
+  public addMarker(marker: Marker, noDraw?: boolean): void {
     if (this.markers.includes(marker)) {
       return;
     }
@@ -106,7 +111,7 @@ export class MarkerClusterer extends OverlayViewSafe {
     }
   }
 
-  public addMarkers(markers: google.maps.Marker[], noDraw?: boolean): void {
+  public addMarkers(markers: Marker[], noDraw?: boolean): void {
     markers.forEach((marker) => {
       this.addMarker(marker, true);
     });
@@ -116,7 +121,7 @@ export class MarkerClusterer extends OverlayViewSafe {
     }
   }
 
-  public removeMarker(marker: google.maps.Marker, noDraw?: boolean): boolean {
+  public removeMarker(marker: Marker, noDraw?: boolean): boolean {
     const index = this.markers.indexOf(marker);
 
     if (index === -1) {
@@ -124,7 +129,7 @@ export class MarkerClusterer extends OverlayViewSafe {
       return false;
     }
 
-    marker.setMap(null);
+    MarkerUtils.setMap(marker, null);
     this.markers.splice(index, 1); // Remove the marker from the list of managed markers
 
     if (!noDraw) {
@@ -134,10 +139,7 @@ export class MarkerClusterer extends OverlayViewSafe {
     return true;
   }
 
-  public removeMarkers(
-    markers: google.maps.Marker[],
-    noDraw?: boolean
-  ): boolean {
+  public removeMarkers(markers: Marker[], noDraw?: boolean): boolean {
     let removed = false;
 
     markers.forEach((marker) => {
@@ -164,7 +166,7 @@ export class MarkerClusterer extends OverlayViewSafe {
    */
   public render(): void {
     const map = this.getMap();
-    if (map instanceof google.maps.Map && this.getProjection()) {
+    if (map instanceof google.maps.Map && map.getProjection()) {
       google.maps.event.trigger(
         this,
         MarkerClustererEvents.CLUSTERING_BEGIN,
@@ -222,7 +224,7 @@ export class MarkerClusterer extends OverlayViewSafe {
   }
 
   protected reset(): void {
-    this.markers.forEach((marker) => marker.setMap(null));
+    this.markers.forEach((marker) => MarkerUtils.setMap(marker, null));
     this.clusters.forEach((cluster) => cluster.delete());
     this.clusters = [];
   }
@@ -231,7 +233,6 @@ export class MarkerClusterer extends OverlayViewSafe {
     // generate stats to pass to renderers
     const stats = new ClusterStats(this.markers, this.clusters);
     const map = this.getMap() as google.maps.Map;
-
     this.clusters.forEach((cluster) => {
       if (cluster.markers.length === 1) {
         cluster.marker = cluster.markers[0];
@@ -240,7 +241,7 @@ export class MarkerClusterer extends OverlayViewSafe {
         // this stops the markers from flickering on each map event.
         cluster.markers.forEach((marker) => marker.setMap(null));
         
-        cluster.marker = this.renderer.render(cluster, stats);
+        cluster.marker = this.renderer.render(cluster, stats, this.map);
 
         if (this.onClusterClick) {
           cluster.marker.addListener(
@@ -257,8 +258,7 @@ export class MarkerClusterer extends OverlayViewSafe {
           );
         }
       }
-
-      cluster.marker.setMap(map);
+      MarkerUtils.setMap(cluster.marker, map);
     });
   }
 }

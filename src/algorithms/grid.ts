@@ -28,6 +28,7 @@ import {
 
 import { Cluster } from "../cluster";
 import equal from "fast-deep-equal";
+import { MarkerUtils, Marker } from "../marker-utils";
 
 export interface GridOptions extends ViewportAlgorithmOptions {
   gridSize?: number;
@@ -76,10 +77,8 @@ export class GridAlgorithm extends AbstractViewportAlgorithm {
       return {
         clusters: this.noop({
           markers,
-          map,
-          mapCanvasProjection,
         }),
-        changed: changed,
+        changed,
       };
     }
 
@@ -111,7 +110,7 @@ export class GridAlgorithm extends AbstractViewportAlgorithm {
   }
 
   protected addToClosestCluster(
-    marker: google.maps.Marker,
+    marker: Marker,
     map: google.maps.Map,
     projection: google.maps.MapCanvasProjection
   ): void {
@@ -122,7 +121,7 @@ export class GridAlgorithm extends AbstractViewportAlgorithm {
       const candidate = this.clusters[i];
       const distance = distanceBetweenPoints(
         candidate.bounds.getCenter().toJSON(),
-        marker.getPosition().toJSON()
+        MarkerUtils.getPosition(marker).toJSON()
       );
 
       if (distance < maxDistance) {
@@ -137,7 +136,7 @@ export class GridAlgorithm extends AbstractViewportAlgorithm {
         cluster.bounds,
         projection,
         this.gridSize
-      ).contains(marker.getPosition())
+      ).contains(MarkerUtils.getPosition(marker))
     ) {
       cluster.push(marker);
     } else {

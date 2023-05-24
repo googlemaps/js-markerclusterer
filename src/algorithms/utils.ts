@@ -14,29 +14,40 @@
  * limitations under the License.
  */
 
+import { MarkerUtils, Marker } from "../marker-utils";
+
+/**
+ * Returns the markers visible in a padded map viewport
+ *
+ * @param map
+ * @param mapCanvasProjection
+ * @param markers The list of marker to filter
+ * @param viewportPaddingPixels The padding in pixel
+ * @returns The list of markers in the padded viewport
+ */
 export const filterMarkersToPaddedViewport = (
   map: google.maps.Map,
   mapCanvasProjection: google.maps.MapCanvasProjection,
-  markers: google.maps.Marker[],
-  viewportPadding: number
-): google.maps.Marker[] => {
+  markers: Marker[],
+  viewportPaddingPixels: number
+): Marker[] => {
   const extendedMapBounds = extendBoundsToPaddedViewport(
     map.getBounds(),
     mapCanvasProjection,
-    viewportPadding
+    viewportPaddingPixels
   );
   return markers.filter((marker) =>
-    extendedMapBounds.contains(marker.getPosition())
+    extendedMapBounds.contains(MarkerUtils.getPosition(marker))
   );
 };
 
 /**
- * Extends a bounds by a number of pixels in each direction.
+ * Extends a bounds by a number of pixels in each direction
  */
 export const extendBoundsToPaddedViewport = (
   bounds: google.maps.LatLngBounds,
   projection: google.maps.MapCanvasProjection,
-  pixels: number
+  numPixels: number
 ): google.maps.LatLngBounds => {
   const { northEast, southWest } = latLngBoundsToPixelBounds(
     bounds,
@@ -44,12 +55,14 @@ export const extendBoundsToPaddedViewport = (
   );
   const extendedPixelBounds = extendPixelBounds(
     { northEast, southWest },
-    pixels
+    numPixels
   );
   return pixelBoundsToLatLngBounds(extendedPixelBounds, projection);
 };
 
 /**
+ * Returns the distance between 2 positions.
+ *
  * @hidden
  */
 export const distanceBetweenPoints = (
@@ -75,6 +88,8 @@ type PixelBounds = {
 };
 
 /**
+ * Converts a LatLng bound to pixels.
+ *
  * @hidden
  */
 const latLngBoundsToPixelBounds = (
@@ -88,17 +103,19 @@ const latLngBoundsToPixelBounds = (
 };
 
 /**
+ * Extends a pixel bounds by numPixels in all directions.
+ *
  * @hidden
  */
 export const extendPixelBounds = (
   { northEast, southWest }: PixelBounds,
-  pixels: number
+  numPixels: number
 ): PixelBounds => {
-  northEast.x += pixels;
-  northEast.y -= pixels;
+  northEast.x += numPixels;
+  northEast.y -= numPixels;
 
-  southWest.x -= pixels;
-  southWest.y += pixels;
+  southWest.x -= numPixels;
+  southWest.y += numPixels;
 
   return { northEast, southWest };
 };
@@ -110,8 +127,7 @@ export const pixelBoundsToLatLngBounds = (
   { northEast, southWest }: PixelBounds,
   projection: google.maps.MapCanvasProjection
 ): google.maps.LatLngBounds => {
-  const bounds = new google.maps.LatLngBounds();
-  bounds.extend(projection.fromDivPixelToLatLng(northEast));
-  bounds.extend(projection.fromDivPixelToLatLng(southWest));
-  return bounds;
+  const sw = projection.fromDivPixelToLatLng(southWest);
+  const ne = projection.fromDivPixelToLatLng(northEast);
+  return new google.maps.LatLngBounds(sw, ne);
 };

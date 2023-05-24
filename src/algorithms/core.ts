@@ -16,6 +16,7 @@
 
 import { Cluster } from "../cluster";
 import { filterMarkersToPaddedViewport } from "./utils";
+import { MarkerUtils, Marker } from "../marker-utils";
 
 export interface AlgorithmInput {
   /**
@@ -28,7 +29,7 @@ export interface AlgorithmInput {
    * There are some specific edge cases to be aware of including the following:
    * * Markers that are not visible.
    */
-  markers: google.maps.Marker[];
+  markers: Marker[];
   /**
    * The `mapCanvasProjection` enables easy conversion from lat/lng to pixel.
    *
@@ -74,12 +75,14 @@ export abstract class AbstractAlgorithm implements Algorithm {
    * ```typescript
    *  cluster({markers, map}: AlgorithmInput): Cluster[] {
    *    if (shouldBypassClustering(map)) {
-   *      return this.noop({markers, map})
+   *      return this.noop({markers})
    *    }
    * }
    * ```
    */
-  protected noop({ markers }: AlgorithmInput): Cluster[] {
+  protected noop<T extends Pick<AlgorithmInput, "markers">>({
+    markers,
+  }: T): Cluster[] {
     return noop(markers);
   }
   /**
@@ -129,8 +132,6 @@ export abstract class AbstractViewportAlgorithm extends AbstractAlgorithm {
       return {
         clusters: this.noop({
           markers,
-          map,
-          mapCanvasProjection,
         }),
         changed: false,
       };
@@ -155,11 +156,11 @@ export abstract class AbstractViewportAlgorithm extends AbstractAlgorithm {
 /**
  * @hidden
  */
-export const noop = (markers: google.maps.Marker[]): Cluster[] => {
+export const noop = (markers: Marker[]): Cluster[] => {
   const clusters = markers.map(
     (marker) =>
       new Cluster({
-        position: marker.getPosition(),
+        position: MarkerUtils.getPosition(marker),
         markers: [marker],
       })
   );

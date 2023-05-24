@@ -15,6 +15,7 @@
  */
 
 import { Cluster } from "./cluster";
+import { Marker } from "./marker-utils";
 
 /**
  * Provides statistics on all clusters in the current render cycle for use in {@link Renderer.render}.
@@ -31,9 +32,8 @@ export class ClusterStats {
     };
   };
 
-  constructor(markers: google.maps.Marker[], clusters: Cluster[]) {
+  constructor(markers: Marker[], clusters: Cluster[]) {
     this.markers = { sum: markers.length };
-
     const clusterMarkerCounts = clusters.map((a) => a.count);
     const clusterMarkerSum = clusterMarkerCounts.reduce((a, b) => a + b, 0);
 
@@ -62,7 +62,7 @@ export interface Renderer {
    * });
    * ```
    */
-  render(cluster: Cluster, stats: ClusterStats): google.maps.Marker;
+  render(cluster: Cluster, stats: ClusterStats, map: google.maps.Map): Marker;
 }
 
 export class DefaultRenderer implements Renderer {
@@ -106,25 +106,65 @@ export class DefaultRenderer implements Renderer {
    */
   public render(
     { count, position }: Cluster,
-    stats: ClusterStats
-  ): google.maps.Marker {
+    stats: ClusterStats,
+    map: google.maps.Map
+  ): Marker {
     // change color if this cluster has more markers than the mean cluster
     const color =
       count > Math.max(10, stats.clusters.markers.mean) ? "#ff0000" : "#0000ff";
 
     // create svg url with fill color
-    const svg = window.btoa(`
-  <svg fill="${color}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
-    <circle cx="120" cy="120" opacity=".6" r="70" />
-    <circle cx="120" cy="120" opacity=".3" r="90" />
-    <circle cx="120" cy="120" opacity=".2" r="110" />
-  </svg>`);
+    const svg = `<svg fill="${color}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+                  <circle cx="120" cy="120" opacity=".6" r="70" />
+                  <circle cx="120" cy="120" opacity=".3" r="90" />
+                  <circle cx="120" cy="120" opacity=".2" r="110" />
+                </svg>`;
 
-    // create marker using svg icon
-    return new google.maps.Marker({
+    const title = `Cluster of ${count} markers`,
+      // adjust zIndex to be above other markers
+      zIndex: number = Number(google.maps.Marker.MAX_ZINDEX) + count;
+
+    if (
+      google.maps.marker &&
+      map.getMapCapabilities().isAdvancedMarkersAvailable
+    ) {
+      // create cluster SVG element
+      const div = document.createElement("div");
+      div.innerHTML = svg;
+      const svgEl = div.firstElementChild;
+      svgEl.setAttribute("width", "50");
+      svgEl.setAttribute("height", "50");
+
+      // create and append marker label to SVG
+      const label = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "text"
+      );
+      label.setAttribute("x", "50%");
+      label.setAttribute("y", "50%");
+      label.setAttribute("style", "fill: #FFF");
+      label.setAttribute("text-anchor", "middle");
+      label.setAttribute("font-size", "50");
+      label.setAttribute("dominant-baseline", "middle");
+      label.appendChild(document.createTextNode(`${count}`));
+      svgEl.appendChild(label);
+
+      const clusterOptions: google.maps.marker.AdvancedMarkerElementOptions = {
+        map,
+        position,
+        zIndex,
+        title,
+        content: div.firstElementChild,
+      };
+      return new google.maps.marker.AdvancedMarkerElement(clusterOptions);
+    }
+
+    const clusterOptions: google.maps.MarkerOptions = {
       position,
+      zIndex,
+      title,
       icon: {
-        url: `data:image/svg+xml;base64,${svg}`,
+        url: `data:image/svg+xml;base64,${window.btoa(svg)}`,
         scaledSize: new google.maps.Size(45, 45),
       },
       label: {
@@ -132,9 +172,7 @@ export class DefaultRenderer implements Renderer {
         color: "rgba(255,255,255,0.9)",
         fontSize: "12px",
       },
-      title: `Cluster of ${count} markers`,
-      // adjust zIndex to be above other markers
-      zIndex: Number(google.maps.Marker.MAX_ZINDEX) + count,
-    });
+    };
+    return new google.maps.Marker(clusterOptions);
   }
 }

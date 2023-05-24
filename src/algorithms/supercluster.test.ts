@@ -16,153 +16,154 @@
 
 import { SuperClusterAlgorithm } from "./supercluster";
 import { initialize } from "@googlemaps/jest-mocks";
+import { Marker } from "../marker-utils";
 
-let map: google.maps.Map;
+initialize();
+const markerClasses = [
+  google.maps.Marker,
+  google.maps.marker.AdvancedMarkerElement,
+];
 
-beforeEach(() => {
-  initialize();
+describe.each(markerClasses)(
+  "SuperCluster works with legacy and Advanced Markers",
+  (markerClass) => {
+    let map: google.maps.Map;
 
-  map = new google.maps.Map(document.createElement("div"));
-});
+    beforeEach(() => {
+      map = new google.maps.Map(document.createElement("div"));
+    });
 
-test("should only call load if markers change", () => {
-  const mapCanvasProjection =
-    jest.fn() as unknown as google.maps.MapCanvasProjection;
-  const markers: google.maps.Marker[] = [new google.maps.Marker()];
+    test("should only call load if markers change", () => {
+      const mapCanvasProjection =
+        jest.fn() as unknown as google.maps.MapCanvasProjection;
+      const markers: Marker[] = [new markerClass()];
 
-  const superCluster = new SuperClusterAlgorithm({});
-  superCluster["superCluster"].load = jest.fn();
-  superCluster.cluster = jest.fn();
+      const superCluster = new SuperClusterAlgorithm({});
+      superCluster["superCluster"].load = jest.fn();
+      superCluster.cluster = jest.fn();
 
-  superCluster.calculate({ markers, map, mapCanvasProjection });
-  superCluster.calculate({ markers, map, mapCanvasProjection });
-  expect(superCluster["superCluster"].load).toHaveBeenCalledTimes(1);
-  expect(superCluster["superCluster"].load).toHaveBeenCalledWith([
-    {
-      type: "Feature",
-      geometry: { coordinates: [0, 0], type: "Point" },
-      properties: { marker: markers[0] },
-    },
-  ]);
-});
+      superCluster.calculate({ markers, map, mapCanvasProjection });
+      superCluster.calculate({ markers, map, mapCanvasProjection });
+      expect(superCluster["superCluster"].load).toHaveBeenCalledTimes(1);
+      expect(superCluster["superCluster"].load).toHaveBeenCalledWith([
+        {
+          type: "Feature",
+          geometry: { coordinates: [0, 0], type: "Point" },
+          properties: { marker: markers[0] },
+        },
+      ]);
+    });
 
-test("should cluster markers", () => {
-  const mapCanvasProjection =
-    jest.fn() as unknown as google.maps.MapCanvasProjection;
-  const markers: google.maps.Marker[] = [
-    new google.maps.Marker(),
-    new google.maps.Marker(),
-  ];
+    test("should cluster markers", () => {
+      const mapCanvasProjection =
+        jest.fn() as unknown as google.maps.MapCanvasProjection;
+      const markers: Marker[] = [new markerClass(), new markerClass()];
 
-  const superCluster = new SuperClusterAlgorithm({});
-  map.getZoom = jest.fn().mockReturnValue(0);
-  map.getBounds = jest.fn().mockReturnValue({
-    toJSON: () => ({
-      west: -180,
-      south: -90,
-      east: 180,
-      north: 90,
-    }),
-  });
-  const { clusters } = superCluster.calculate({
-    markers,
-    map,
-    mapCanvasProjection,
-  });
+      const superCluster = new SuperClusterAlgorithm({});
+      map.getZoom = jest.fn().mockReturnValue(0);
+      map.getBounds = jest.fn().mockReturnValue({
+        toJSON: () => ({
+          west: -180,
+          south: -90,
+          east: 180,
+          north: 90,
+        }),
+      });
+      const { clusters } = superCluster.calculate({
+        markers,
+        map,
+        mapCanvasProjection,
+      });
 
-  expect(clusters).toHaveLength(1);
-});
+      expect(clusters).toHaveLength(1);
+    });
 
-test("should transform to Cluster with single marker if not cluster", () => {
-  const superCluster = new SuperClusterAlgorithm({});
-  const marker = new google.maps.Marker();
+    test("should transform to Cluster with single marker if not cluster", () => {
+      const superCluster = new SuperClusterAlgorithm({});
+      const marker: Marker = new markerClass();
 
-  const cluster = superCluster["transformCluster"]({
-    type: "Feature",
-    geometry: { coordinates: [0, 0], type: "Point" },
-    properties: {
-      marker,
-      cluster: null,
-      cluster_id: null,
-      point_count: 1,
-      point_count_abbreviated: 1,
-    },
-  });
-  expect(cluster.markers.length).toEqual(1);
-  expect(cluster.markers[0]).toBe(marker);
-});
+      const cluster = superCluster["transformCluster"]({
+        type: "Feature",
+        geometry: { coordinates: [0, 0], type: "Point" },
+        properties: {
+          marker,
+          cluster: null,
+          cluster_id: null,
+          point_count: 1,
+          point_count_abbreviated: 1,
+        },
+      });
+      expect(cluster.markers.length).toEqual(1);
+      expect(cluster.markers[0]).toBe(marker);
+    });
 
-test("should not cluster if zoom didn't change", () => {
-  const mapCanvasProjection =
-    jest.fn() as unknown as google.maps.MapCanvasProjection;
-  const markers: google.maps.Marker[] = [
-    new google.maps.Marker(),
-    new google.maps.Marker(),
-  ];
+    test("should not cluster if zoom didn't change", () => {
+      const mapCanvasProjection =
+        jest.fn() as unknown as google.maps.MapCanvasProjection;
+      const markers: Marker[] = [new markerClass(), new markerClass()];
 
-  const superCluster = new SuperClusterAlgorithm({});
-  superCluster["markers"] = markers;
-  superCluster["state"] = { zoom: 12 };
-  superCluster.cluster = jest.fn().mockReturnValue([]);
-  superCluster["clusters"] = [];
+      const superCluster = new SuperClusterAlgorithm({});
+      superCluster["markers"] = markers;
+      superCluster["state"] = { zoom: 12 };
+      superCluster.cluster = jest.fn().mockReturnValue([]);
+      superCluster["clusters"] = [];
 
-  map.getZoom = jest.fn().mockReturnValue(superCluster["state"].zoom);
+      map.getZoom = jest.fn().mockReturnValue(superCluster["state"].zoom);
 
-  const { clusters, changed } = superCluster.calculate({
-    markers,
-    map,
-    mapCanvasProjection,
-  });
+      const { clusters, changed } = superCluster.calculate({
+        markers,
+        map,
+        mapCanvasProjection,
+      });
 
-  expect(changed).toBeFalsy();
-  expect(clusters).toBe(superCluster["clusters"]);
-});
+      expect(changed).toBeFalsy();
+      expect(clusters).toBe(superCluster["clusters"]);
+    });
 
-test("should not cluster if zoom beyond maxZoom", () => {
-  const mapCanvasProjection =
-    jest.fn() as unknown as google.maps.MapCanvasProjection;
-  const markers: google.maps.Marker[] = [
-    new google.maps.Marker(),
-    new google.maps.Marker(),
-  ];
+    test("should not cluster if zoom beyond maxZoom", () => {
+      const mapCanvasProjection =
+        jest.fn() as unknown as google.maps.MapCanvasProjection;
+      const markers: Marker[] = [new markerClass(), new markerClass()];
 
-  const superCluster = new SuperClusterAlgorithm({});
-  superCluster["markers"] = markers;
-  superCluster["state"] = { zoom: 20 };
-  superCluster.cluster = jest.fn().mockReturnValue([]);
-  superCluster["clusters"] = [];
+      const superCluster = new SuperClusterAlgorithm({});
+      superCluster["markers"] = markers;
+      superCluster["state"] = { zoom: 20 };
+      superCluster.cluster = jest.fn().mockReturnValue([]);
+      superCluster["clusters"] = [];
 
-  map.getZoom = jest.fn().mockReturnValue(superCluster["state"].zoom + 1);
+      map.getZoom = jest.fn().mockReturnValue(superCluster["state"].zoom + 1);
 
-  const { clusters, changed } = superCluster.calculate({
-    markers,
-    map,
-    mapCanvasProjection,
-  });
+      const { clusters, changed } = superCluster.calculate({
+        markers,
+        map,
+        mapCanvasProjection,
+      });
 
-  expect(changed).toBeFalsy();
-  expect(clusters).toBe(superCluster["clusters"]);
-});
+      expect(changed).toBeFalsy();
+      expect(clusters).toBe(superCluster["clusters"]);
+    });
 
-test("should round fractional zoom", () => {
-  const mapCanvasProjection =
-    jest.fn() as unknown as google.maps.MapCanvasProjection;
-  const markers: google.maps.Marker[] = [];
+    test("should round fractional zoom", () => {
+      const mapCanvasProjection =
+        jest.fn() as unknown as google.maps.MapCanvasProjection;
+      const markers: Marker[] = [];
 
-  const superCluster = new SuperClusterAlgorithm({});
-  superCluster["superCluster"].getClusters = jest.fn().mockReturnValue([]);
+      const superCluster = new SuperClusterAlgorithm({});
+      superCluster["superCluster"].getClusters = jest.fn().mockReturnValue([]);
 
-  map.getZoom = jest.fn().mockReturnValue(1.534);
-  superCluster.cluster({ map, mapCanvasProjection, markers });
-  expect(superCluster["superCluster"].getClusters).toHaveBeenCalledWith(
-    [-180, -90, 180, 90],
-    2
-  );
+      map.getZoom = jest.fn().mockReturnValue(1.534);
+      superCluster.cluster({ map, mapCanvasProjection, markers });
+      expect(superCluster["superCluster"].getClusters).toHaveBeenCalledWith(
+        [-180, -90, 180, 90],
+        2
+      );
 
-  map.getZoom = jest.fn().mockReturnValue(3.234);
-  superCluster.cluster({ map, mapCanvasProjection, markers });
-  expect(superCluster["superCluster"].getClusters).toHaveBeenCalledWith(
-    [-180, -90, 180, 90],
-    3
-  );
-});
+      map.getZoom = jest.fn().mockReturnValue(3.234);
+      superCluster.cluster({ map, mapCanvasProjection, markers });
+      expect(superCluster["superCluster"].getClusters).toHaveBeenCalledWith(
+        [-180, -90, 180, 90],
+        3
+      );
+    });
+  }
+);
