@@ -248,20 +248,20 @@ describe.each(markerClasses)(
     test("markerClusterer does not recreate marker when unaffected", () => {
       const unaffectedMarkerPosition = {
         lat: 0,
-        lng: 0
+        lng: 0,
       };
-      
+
       const unaffectedMarker = new markerClass({
-        position: unaffectedMarkerPosition
+        position: unaffectedMarkerPosition,
       });
-      
+
       const newMarkerPosition = {
         lat: 10,
-        lng: 10
+        lng: 10,
       };
 
       const newMarker = new markerClass({
-        position: newMarkerPosition
+        position: newMarkerPosition,
       });
 
       map.setCenter({ lat: 0, lng: 0 });
@@ -269,22 +269,27 @@ describe.each(markerClasses)(
 
       const markerClusterer = new MarkerClusterer({
         renderer,
-        algorithm
+        algorithm,
       });
 
       MarkerUtils.setMap = jest.fn();
       markerClusterer.getMap = jest.fn().mockImplementation(() => map);
-      markerClusterer.getProjection = jest.fn().mockImplementation(() => map.getProjection());
+      markerClusterer.getProjection = jest
+        .fn()
+        .mockImplementation(() => map.getProjection());
 
       markerClusterer.addMarker(unaffectedMarker);
-      
+
       jest.spyOn(algorithm, "calculate").mockImplementationOnce(() => {
         return {
           changed: true,
           clusters: [
-            new Cluster({ markers: [ markerClusterer["markers"][0] ], position: unaffectedMarkerPosition })
-          ]
-        }
+            new Cluster({
+              markers: [markerClusterer["markers"][0]],
+              position: unaffectedMarkerPosition,
+            }),
+          ],
+        };
       });
 
       markerClusterer.addMarker(newMarker);
@@ -293,15 +298,21 @@ describe.each(markerClasses)(
         return {
           changed: true,
           clusters: [
-            new Cluster({ markers: [ markerClusterer["markers"][0] ], position: unaffectedMarkerPosition }),
-            new Cluster({ markers: [ markerClusterer["markers"][1] ], position: newMarkerPosition })
-          ]
-        }
+            new Cluster({
+              markers: [markerClusterer["markers"][0]],
+              position: unaffectedMarkerPosition,
+            }),
+            new Cluster({
+              markers: [markerClusterer["markers"][1]],
+              position: newMarkerPosition,
+            }),
+          ],
+        };
       });
 
       jest.spyOn(MarkerUtils, "setMap").mockClear();
       jest.spyOn(MarkerUtils, "getPosition").mockClear();
-      
+
       markerClusterer.render();
 
       expect(markerClusterer["markers"]).toHaveLength(2);
