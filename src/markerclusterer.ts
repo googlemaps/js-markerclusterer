@@ -197,7 +197,7 @@ export class MarkerClusterer extends OverlayViewSafe {
             lat: cluster.position.lat(),
             lng: cluster.position.lng(),
           };
-          
+
           const duplicateCluster = records.get(clusterKey);
 
           if (duplicateCluster) {
