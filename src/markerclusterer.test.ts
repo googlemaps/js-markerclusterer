@@ -76,12 +76,12 @@ describe.each(markerClasses)(
       markerClusterer.getProjection = jest
         .fn()
         .mockImplementation(() => mapCanvasProjection);
-      markerClusterer["reset"] = jest.fn();
+      markerClusterer["resetClusters"] = jest.fn();
       markerClusterer["renderClusters"] = jest.fn();
       markerClusterer.render();
 
       expect(calculate).toBeCalledWith({ map, markers, mapCanvasProjection });
-      expect(markerClusterer["reset"]).toHaveBeenCalledTimes(1);
+      expect(markerClusterer["resetClusters"]).toHaveBeenCalledTimes(1);
       expect(markerClusterer["renderClusters"]).toHaveBeenCalledTimes(1);
     });
 
@@ -100,11 +100,11 @@ describe.each(markerClasses)(
       markerClusterer.getProjection = jest
         .fn()
         .mockImplementation(() => mapCanvasProjection);
-      markerClusterer["reset"] = jest.fn();
+      markerClusterer["resetClusters"] = jest.fn();
       markerClusterer["renderClusters"] = jest.fn();
       markerClusterer.render();
 
-      expect(markerClusterer["reset"]).toHaveBeenCalledTimes(0);
+      expect(markerClusterer["resetClusters"]).toHaveBeenCalledTimes(0);
       expect(markerClusterer["renderClusters"]).toHaveBeenCalledTimes(0);
     });
 
@@ -246,29 +246,71 @@ describe.each(markerClasses)(
     });
 
     test("markerClusterer does not recreate marker when unaffected", () => {
-      const markerClusterer = new MarkerClusterer({
-        markers: [],
-      });
-
-      const unaffectedMarker = new markerClass({
-        position: {
-          lat: 0,
-          lng: 0
-        }
-      });
-
-      markerClusterer.addMarker(unaffectedMarker, false);
+      const unaffectedMarkerPosition = {
+        lat: 0,
+        lng: 0
+      };
       
+      const unaffectedMarker = new markerClass({
+        position: unaffectedMarkerPosition
+      });
+      
+      const newMarkerPosition = {
+        lat: 10,
+        lng: 10
+      };
+
       const newMarker = new markerClass({
-        position: {
-          lat: 180,
-          lng: 180
+        position: newMarkerPosition
+      });
+
+      map.setCenter({ lat: 0, lng: 0 });
+      map.setZoom(10);
+
+      const markerClusterer = new MarkerClusterer({
+        renderer,
+        algorithm
+      });
+
+      MarkerUtils.setMap = jest.fn();
+      markerClusterer.getMap = jest.fn().mockImplementation(() => map);
+      markerClusterer.getProjection = jest.fn().mockImplementation(() => map.getProjection());
+
+      markerClusterer.addMarker(unaffectedMarker);
+      
+      jest.spyOn(algorithm, "calculate").mockImplementationOnce(() => {
+        return {
+          changed: true,
+          clusters: [
+            new Cluster({ markers: [ markerClusterer["markers"][0] ], position: unaffectedMarkerPosition })
+          ]
         }
       });
 
-      markerClusterer.addMarker(newMarker, false);
+      markerClusterer.addMarker(newMarker);
 
-      expect(MarkerUtils.setMap).toHaveBeenCalledTimes(2);
+      jest.spyOn(algorithm, "calculate").mockImplementationOnce(() => {
+        return {
+          changed: true,
+          clusters: [
+            new Cluster({ markers: [ markerClusterer["markers"][0] ], position: unaffectedMarkerPosition }),
+            new Cluster({ markers: [ markerClusterer["markers"][1] ], position: newMarkerPosition })
+          ]
+        }
+      });
+
+      jest.spyOn(MarkerUtils, "setMap").mockClear();
+      jest.spyOn(MarkerUtils, "getPosition").mockClear();
+      
+      markerClusterer.render();
+
+      expect(markerClusterer["markers"]).toHaveLength(2);
+      expect(markerClusterer["clusters"]).toHaveLength(2);
+      expect(MarkerUtils.getPosition).toHaveBeenCalledTimes(2);
+
+      // cluster.delete calls it once (therefore 2 times clusters = 2)
+      // and renderClusters should only call it once (for the new cluster)
+      expect(MarkerUtils.setMap).toHaveBeenCalledTimes(3);
     });
 
     test("markerClusterer addMarkers", () => {

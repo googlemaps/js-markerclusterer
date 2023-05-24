@@ -195,7 +195,7 @@ export class MarkerClusterer extends OverlayViewSafe {
         });
 
         // reset visibility of markers and clusters
-        this.clusters.forEach((cluster) => cluster.delete());
+        this.resetClusters();
 
         // store new clusters
         this.clusters = clusters;
@@ -229,6 +229,10 @@ export class MarkerClusterer extends OverlayViewSafe {
     this.clusters = [];
   }
 
+  protected resetClusters(): void {
+    this.clusters.forEach((cluster) => cluster.delete());
+  }
+
   protected renderClusters(): void {
     // generate stats to pass to renderers
     const stats = new ClusterStats(this.markers, this.clusters);
@@ -241,7 +245,7 @@ export class MarkerClusterer extends OverlayViewSafe {
         // this stops the markers from flickering on each map event.
         cluster.markers.forEach((marker) => MarkerUtils.setMap(marker, null));
         
-        cluster.marker = this.renderer.render(cluster, stats, this.map);
+        cluster.marker = this.renderer.render(cluster, stats, map);
 
         if (this.onClusterClick) {
           cluster.marker.addListener(
