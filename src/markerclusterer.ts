@@ -180,23 +180,20 @@ export class MarkerClusterer extends OverlayViewSafe {
 
       // allow algorithms to return flag on whether the clusters/markers have changed
       if (changed || changed == undefined) {
-        const records = new Map<{ lat: number; lng: number }, Cluster>();
+        const records = new Map<string, Cluster>();
 
         this.clusters.forEach(
           (cluster) =>
             cluster.marker &&
             records.set(
-              { lat: cluster.position.lat(), lng: cluster.position.lng() },
+              `${cluster.position.lat()}x${cluster.position.lng()}`,
               cluster
             )
         );
 
         clusters.forEach((cluster, index) => {
           // if there's clusters that has been "processed" (Cluster.marker is set), then reuse it instead of reprocessing it
-          const clusterKey = {
-            lat: cluster.position.lat(),
-            lng: cluster.position.lng(),
-          };
+          const clusterKey = `${cluster.position.lat()}x${cluster.position.lng()}`;
 
           const duplicateCluster = records.get(clusterKey);
 
