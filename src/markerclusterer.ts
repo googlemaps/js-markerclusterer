@@ -182,11 +182,13 @@ export class MarkerClusterer extends OverlayViewSafe {
       if (changed || changed == undefined) {
         const records = new Map<string, Cluster>();
 
-        this.clusters.forEach((cluster) =>
-          records.set(
-            `${cluster.position.lat()}x${cluster.position.lng()}`,
-            cluster
-          )
+        this.clusters.forEach(
+          (cluster) =>
+            cluster.marker &&
+            records.set(
+              `${cluster.position.lat()}x${cluster.position.lng()}`,
+              cluster
+            )
         );
 
         clusters.forEach((cluster, index) => {
