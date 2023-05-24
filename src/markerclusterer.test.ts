@@ -245,6 +245,32 @@ describe.each(markerClasses)(
       expect(markerClusterer["markers"]).toHaveLength(1);
     });
 
+    test("markerClusterer does not recreate marker when unaffected", () => {
+      const markerClusterer = new MarkerClusterer({
+        markers: [],
+      });
+
+      const unaffectedMarker = new markerClass({
+        position: {
+          lat: 0,
+          lng: 0
+        }
+      });
+
+      markerClusterer.addMarker(unaffectedMarker, false);
+      
+      const newMarker = new markerClass({
+        position: {
+          lat: 180,
+          lng: 180
+        }
+      });
+
+      markerClusterer.addMarker(newMarker, false);
+
+      expect(MarkerUtils.setMap).toHaveBeenCalledTimes(2);
+    });
+
     test("markerClusterer addMarkers", () => {
       const markerClusterer = new MarkerClusterer({
         markers: [],
