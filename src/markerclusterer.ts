@@ -182,7 +182,7 @@ export class MarkerClusterer extends OverlayViewSafe {
       if (changed || changed == undefined) {
         clusters.forEach((cluster, index) => {
           // if there's clusters that has been "processed" (Cluster.marker is set), then reuse it instead of reprocessing it
-          const duplicate = this.clusters.findIndex((old) => old.marker && old.marker.getPosition().equals(cluster.position));
+          const duplicate = this.clusters.findIndex((old) => old.marker && MarkerUtils.getPosition(old.marker).equals(cluster.position));
 
           if(duplicate !== -1) {
             // we'll reset the Cluster.markers here and only add the existing item
@@ -239,7 +239,7 @@ export class MarkerClusterer extends OverlayViewSafe {
       } else {
         // we disable the markers here only when we're re-processing the cluster marker
         // this stops the markers from flickering on each map event.
-        cluster.markers.forEach((marker) => marker.setMap(null));
+        cluster.markers.forEach((marker) => MarkerUtils.setMap(marker, null));
         
         cluster.marker = this.renderer.render(cluster, stats, this.map);
 
