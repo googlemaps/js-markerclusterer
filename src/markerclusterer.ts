@@ -193,10 +193,12 @@ export class MarkerClusterer extends OverlayViewSafe {
 
         clusters.forEach((cluster, index) => {
           // if there's clusters that has been "processed" (Cluster.marker is set), then reuse it instead of reprocessing it
-          const duplicateCluster = records.get({
+          const clusterKey = {
             lat: cluster.position.lat(),
             lng: cluster.position.lng(),
-          });
+          };
+          
+          const duplicateCluster = records.get(clusterKey);
 
           if (duplicateCluster) {
             // we'll reset the Cluster.markers here and only add the existing item
@@ -205,6 +207,7 @@ export class MarkerClusterer extends OverlayViewSafe {
             clusters[index].markers.push(duplicateCluster.marker);
 
             duplicateCluster.marker = null;
+            records.delete(clusterKey);
           }
         });
 
