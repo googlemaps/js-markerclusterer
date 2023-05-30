@@ -40,14 +40,23 @@ describe.each(markerClasses)(
     const renderer = { render };
 
     let map: google.maps.Map;
+    let rafSpy: jest.SpyInstance;
 
     beforeEach(() => {
       map = new google.maps.Map(document.createElement("div"));
+      // Runs the raf callback immediately.
+      rafSpy = jest
+        .spyOn(window, "requestAnimationFrame")
+        .mockImplementation((cb) => {
+          cb(performance.now());
+          return 0;
+        });
     });
 
     afterEach(() => {
       calculate.mockClear();
       render.mockClear();
+      rafSpy.mockRestore();
     });
 
     test("markerClusterer does not render if no map", () => {
@@ -81,7 +90,7 @@ describe.each(markerClasses)(
       markerClusterer.render();
 
       expect(calculate).toBeCalledWith({ map, markers, mapCanvasProjection });
-      expect(markerClusterer["reset"]).toHaveBeenCalledTimes(1);
+      expect(markerClusterer["reset"]).toHaveBeenCalledTimes(0);
       expect(markerClusterer["renderClusters"]).toHaveBeenCalledTimes(1);
     });
 
@@ -123,6 +132,86 @@ describe.each(markerClasses)(
 
       expect(MarkerUtils.setMap).toHaveBeenCalledWith(markers[0], null);
       expect(deleteSpy).toHaveBeenCalledTimes(1);
+    });
+
+    test("markerClusterer render should not remove markers from the map if they were already rendered", () => {
+      const marker = new markerClass();
+      const markers: Marker[] = [marker];
+
+      const algorithm = {
+        calculate: jest.fn().mockReturnValue({
+          clusters: [new Cluster({ markers })],
+          changed: true,
+        }),
+      };
+      const markerClusterer = new MarkerClusterer({
+        markers,
+        algorithm,
+      });
+      markerClusterer.getMap = jest.fn().mockImplementation(() => map);
+      markerClusterer.getProjection = jest
+        .fn()
+        .mockImplementation(() => jest.fn());
+      markerClusterer["renderClusters"] = jest.fn();
+      markerClusterer["clusters"] = [new Cluster({ markers })];
+
+      MarkerUtils.setMap = jest.fn().mockImplementation(() => null);
+
+      markerClusterer["render"]();
+
+      expect(MarkerUtils.setMap).toHaveBeenCalledTimes(0);
+    });
+
+    test("markerClusterer render should remove markers from the map if they are no more rendered", () => {
+      const marker = new markerClass();
+      const markers: Marker[] = [marker];
+
+      const algorithm = {
+        calculate: jest.fn().mockReturnValue({ clusters: [], changed: true }),
+      };
+      const markerClusterer = new MarkerClusterer({
+        markers,
+        algorithm,
+      });
+      markerClusterer.getMap = jest.fn().mockImplementation(() => map);
+      markerClusterer.getProjection = jest
+        .fn()
+        .mockImplementation(() => jest.fn());
+      markerClusterer["renderClusters"] = jest.fn();
+      const cluster = new Cluster({ markers });
+      cluster.marker = marker;
+      markerClusterer["clusters"] = [cluster];
+
+      MarkerUtils.setMap = jest.fn().mockImplementation(() => null);
+
+      markerClusterer["render"]();
+
+      expect(MarkerUtils.setMap).toHaveBeenCalledWith(marker, null);
+    });
+
+    test("markerClusterer render should remove all group cluster markers from the map", () => {
+      const markers: Marker[] = [new markerClass(), new markerClass()];
+      const algorithm = {
+        calculate: jest.fn().mockReturnValue({ clusters: [], changed: true }),
+      };
+      const markerClusterer = new MarkerClusterer({
+        markers,
+        algorithm,
+      });
+      markerClusterer.getMap = jest.fn().mockImplementation(() => map);
+      markerClusterer.getProjection = jest
+        .fn()
+        .mockImplementation(() => jest.fn());
+      markerClusterer["renderClusters"] = jest.fn();
+      const cluster = new Cluster({ markers });
+      cluster.marker = new markerClass();
+      markerClusterer["clusters"] = [cluster];
+
+      MarkerUtils.setMap = jest.fn().mockImplementation(() => null);
+
+      markerClusterer["render"]();
+
+      expect(MarkerUtils.setMap).toHaveBeenCalledWith(cluster.marker, null);
     });
 
     test("markerClusterer renderClusters bypasses renderer if just one", () => {
@@ -172,6 +261,28 @@ describe.each(markerClasses)(
         expect.any(ClusterStats),
         map
       );
+    });
+
+    test("markerClusterer renderClusters remove all individual markers from the map", () => {
+      const marker1 = new markerClass();
+      const marker2 = new markerClass();
+      const markers: Marker[] = [marker1, marker2];
+
+      const markerClusterer = new MarkerClusterer({
+        markers,
+        renderer,
+      });
+
+      MarkerUtils.setMap = jest.fn();
+      markerClusterer.getMap = jest.fn().mockImplementation(() => map);
+
+      const clusters = [new Cluster({ markers })];
+
+      markerClusterer["clusters"] = clusters;
+      markerClusterer["renderClusters"]();
+
+      expect(MarkerUtils.setMap).toBeCalledWith(marker1, null);
+      expect(MarkerUtils.setMap).toBeCalledWith(marker2, null);
     });
 
     test("markerClusterer renderClusters does not set click handler", () => {
