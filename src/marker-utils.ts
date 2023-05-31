@@ -37,7 +37,7 @@ export class MarkerUtils {
     if (this.isAdvancedMarker(marker)) {
       marker.map = map;
     } else {
-      (marker as google.maps.Marker).setMap(map);
+      marker.setMap(map);
     }
   }
 
@@ -58,7 +58,7 @@ export class MarkerUtils {
       }
       return new google.maps.LatLng(null);
     }
-    return (marker as google.maps.Marker).getPosition();
+    return marker.getPosition();
   }
 
   public static getVisible(marker: Marker) {
@@ -72,6 +72,6 @@ export class MarkerUtils {
        */
       return true;
     }
-    return (marker as google.maps.Marker).getVisible();
+    return marker.getVisible();
   }
 }
