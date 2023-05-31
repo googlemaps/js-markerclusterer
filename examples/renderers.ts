@@ -21,7 +21,7 @@ import {
   MarkerClusterer,
   Renderer,
 } from "../src";
-import { LOADER_OPTIONS, sync } from "./config";
+import { getLoaderOptions, sync } from "./config";
 
 import { Loader } from "@googlemaps/js-api-loader";
 import { interpolateRgb } from "d3-interpolate";
@@ -65,7 +65,7 @@ const interpolatedRenderer = {
   },
 };
 
-new Loader(LOADER_OPTIONS).load().then(() => {
+new Loader(getLoaderOptions()).load().then(() => {
   const maps: google.maps.Map[] = [];
 
   const panels: [HTMLElement, Renderer, string][] = [

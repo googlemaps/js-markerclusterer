@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LOADER_OPTIONS } from "./config";
+import { getLoaderOptions } from "./config";
 import { Loader } from "@googlemaps/js-api-loader";
 import { MarkerClusterer } from "../src";
 import trees from "./trees.json";
@@ -24,7 +24,7 @@ const mapOptions = {
   zoom: 12,
 };
 
-new Loader(LOADER_OPTIONS).load().then(async () => {
+new Loader(getLoaderOptions()).load().then(async () => {
   const element = document.getElementById("map");
 
   const map = new google.maps.Map(element, mapOptions);

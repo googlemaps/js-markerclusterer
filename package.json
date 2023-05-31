@@ -28,6 +28,7 @@
   "scripts": {
     "docs": "typedoc src/index.ts && cp -r dist docs/dist && npm run examples && cp -r public docs/public",
     "examples": "rollup -c rollup.config.examples.js",
+    "dev": "rollup -c rollup.config.examples.js --watch",
     "format": "eslint . --fix",
     "lint": "eslint .",
     "prepare": "rm -rf dist && rollup -c",
@@ -68,6 +69,8 @@
     "jest": "^26.4.2",
     "prettier": "^2.1.1",
     "rollup": "^2.26.11",
+    "rollup-plugin-copy": "^3.4.0",
+    "rollup-plugin-serve": "^2.0.2",
     "rollup-plugin-terser": "^7.0.2",
     "selenium-webdriver": "^4.0.0-alpha.7",
     "ts-jest": "^26.3.0",

@@ -21,10 +21,14 @@ import jsonNodeResolve from "@rollup/plugin-json";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 import path from "path";
 import typescript from "@rollup/plugin-typescript";
+import serve from "rollup-plugin-serve";
+import copy from "rollup-plugin-copy";
 
 const typescriptOptions = {
   tsconfig: "tsconfig.examples.json",
 };
+
+const isWatchMode = process.argv.includes("--watch");
 
 const examples = fs
   .readdirSync(path.join(__dirname, "examples"))
@@ -35,13 +39,24 @@ const getTemplate = (name) => {
   const templatePath = path.join(__dirname, "examples", `${name}.html`);
   return fs.readFileSync(templatePath, "utf-8");
 };
-export default examples.map((name) => ({
+
+export default examples.map((name, index) => ({
   input: `examples/${name}.ts`,
   plugins: [
     typescript(typescriptOptions),
     commonjs(),
     nodeResolve(),
     jsonNodeResolve(),
+    copy({
+      targets: [{ src: "examples/index.html", dest: "public/" }],
+    }),
+    isWatchMode &&
+      index == 0 &&
+      serve({
+        contentBase: "public",
+        port: 8080,
+        verbose: true,
+      }),
   ],
   output: {
     dir: `public/${name}`,

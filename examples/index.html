@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<!--
+ Copyright 2023 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<html>
+  <head>
+    <style>
+      html,
+      body,
+      #map {
+        margin: 0;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Google Maps JavaScript MarkerClusterer</h1>
+    <ul>
+        <li><a href="./algorithms/index.html">Algorithms</a></li>
+        <li><a href="./renderers/index.html">Renderers</a></li>
+        <li><a href="./updates/index.html">Updates</a></li>
+        <li><a href="./defaults/index.html">Defaults</a></li>
+    </ul>
+    <label>Google Maps API Key<input id="key" style="width: 400px"></input></label>
+
+    <script>
+      const input = document.querySelector("#key");
+      const key = localStorage.getItem("gmaps-key") ?? "";
+      input.value = key;
+      input.addEventListener("input", (event) => {
+        const key = event.target.value;
+        if (key.length > 1) {
+          localStorage.setItem("gmaps-key", key);
+        } else {
+          localStorage.removeItem("gmaps-key");
+        }
+      });
+
+    </script>
+  </body>
+</html>

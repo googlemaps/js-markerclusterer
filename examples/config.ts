@@ -18,11 +18,13 @@ import { LoaderOptions } from "@googlemaps/js-api-loader";
 
 export const MAP_ID = "7b9a897acd0a63a4";
 
-export const LOADER_OPTIONS: LoaderOptions = {
-  apiKey: "AIzaSyDhRjl83cPVWeaEer-SnKIw7GTjBuqWxXI",
+const DEFAULT_KEY = "AIzaSyDhRjl83cPVWeaEer-SnKIw7GTjBuqWxXI";
+
+export const getLoaderOptions = (): LoaderOptions => ({
+  apiKey: localStorage.getItem("gmaps-key") ?? DEFAULT_KEY,
   version: "weekly",
   libraries: [],
-};
+});
 
 // helper function to keep maps in sync
 export const sync = (...maps: google.maps.Map[]): void => {
