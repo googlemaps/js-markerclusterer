@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import { getLoaderOptions } from "./config";
+import { MAP_ID, getLoaderOptions } from "./config";
 import { Loader } from "@googlemaps/js-api-loader";
 import { MarkerClusterer } from "../src";
 import trees from "./trees.json";
 
-const mapOptions = {
+const mapOptions: google.maps.MapOptions = {
   center: { lat: 40.7128, lng: -73.85 },
   zoom: 12,
+  mapId: MAP_ID,
 };
 
 new Loader(getLoaderOptions()).load().then(() => {

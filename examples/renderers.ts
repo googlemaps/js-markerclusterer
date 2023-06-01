@@ -21,15 +21,16 @@ import {
   MarkerClusterer,
   Renderer,
 } from "../src";
-import { getLoaderOptions, sync } from "./config";
+import { MAP_ID, getLoaderOptions, sync } from "./config";
 
 import { Loader } from "@googlemaps/js-api-loader";
 import { interpolateRgb } from "d3-interpolate";
 import trees from "./trees.json";
 
-const mapOptions = {
+const mapOptions: google.maps.MapOptions = {
   center: { lat: 40.7128, lng: -73.85 },
   zoom: 10,
+  mapId: MAP_ID,
 };
 
 const interpolatedRenderer = {
