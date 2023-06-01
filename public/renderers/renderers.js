@@ -589,13 +589,14 @@ class MarkerClusterer extends OverlayViewSafe {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const MAP_ID = "DEMO_MAP_ID";
 const DEFAULT_KEY = "AIzaSyDhRjl83cPVWeaEer-SnKIw7GTjBuqWxXI";
 const getLoaderOptions = () => {
     var _a;
     return ({
         apiKey: (_a = localStorage.getItem("gmaps-key")) !== null && _a !== void 0 ? _a : DEFAULT_KEY,
         version: "weekly",
-        libraries: [],
+        libraries: ["marker"],
     });
 };
 // helper function to keep maps in sync
@@ -12645,6 +12646,7 @@ var trees = [
 const mapOptions = {
     center: { lat: 40.7128, lng: -73.85 },
     zoom: 10,
+    mapId: MAP_ID,
 };
 const interpolatedRenderer = {
     palette: interpolateRgb("red", "blue"),

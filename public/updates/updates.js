@@ -15,13 +15,14 @@ import { _ as __rest, S as Supercluster, e as equal, L as Loader, a as __awaiter
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const MAP_ID = "DEMO_MAP_ID";
 const DEFAULT_KEY = "AIzaSyDhRjl83cPVWeaEer-SnKIw7GTjBuqWxXI";
 const getLoaderOptions = () => {
     var _a;
     return ({
         apiKey: (_a = localStorage.getItem("gmaps-key")) !== null && _a !== void 0 ? _a : DEFAULT_KEY,
         version: "weekly",
-        libraries: [],
+        libraries: ["marker"],
     });
 };
 
@@ -12620,6 +12621,7 @@ var trees = [
 const mapOptions = {
     center: { lat: 40.7128, lng: -73.85 },
     zoom: 12,
+    mapId: MAP_ID,
 };
 new Loader(getLoaderOptions()).load().then(() => __awaiter(void 0, void 0, void 0, function* () {
     const element = document.getElementById("map");
