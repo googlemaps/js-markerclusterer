@@ -15,10 +15,14 @@ import { _ as __rest, S as Supercluster, e as equal, L as Loader } from './vendo
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const LOADER_OPTIONS = {
-    apiKey: "AIzaSyDhRjl83cPVWeaEer-SnKIw7GTjBuqWxXI",
-    version: "weekly",
-    libraries: [],
+const DEFAULT_KEY = "AIzaSyDhRjl83cPVWeaEer-SnKIw7GTjBuqWxXI";
+const getLoaderOptions = () => {
+    var _a;
+    return ({
+        apiKey: (_a = localStorage.getItem("gmaps-key")) !== null && _a !== void 0 ? _a : DEFAULT_KEY,
+        version: "weekly",
+        libraries: [],
+    });
 };
 
 /**
@@ -12617,7 +12621,7 @@ const mapOptions = {
     center: { lat: 40.7128, lng: -73.85 },
     zoom: 12,
 };
-new Loader(LOADER_OPTIONS).load().then(() => {
+new Loader(getLoaderOptions()).load().then(() => {
     const element = document.getElementById("map");
     const map = new google.maps.Map(element, mapOptions);
     const markers = trees.map(({ geometry }) => new google.maps.Marker({
