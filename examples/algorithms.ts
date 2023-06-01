@@ -21,7 +21,7 @@ import {
   NoopAlgorithm,
   SuperClusterAlgorithm,
 } from "../src";
-import { LOADER_OPTIONS, sync } from "./config";
+import { getLoaderOptions, sync } from "./config";
 
 import { Loader } from "@googlemaps/js-api-loader";
 import trees from "./trees.json";
@@ -31,7 +31,7 @@ const mapOptions = {
   zoom: 10,
 };
 
-new Loader(LOADER_OPTIONS).load().then(() => {
+new Loader(getLoaderOptions()).load().then(() => {
   const maps: google.maps.Map[] = [];
 
   const panels: [HTMLElement, AbstractAlgorithm, string][] = [
