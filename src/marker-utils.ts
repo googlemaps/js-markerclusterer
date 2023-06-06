@@ -24,6 +24,13 @@ export type Marker =
   | google.maps.marker.AdvancedMarkerElement;
 
 export class MarkerUtils {
+  public static isAdvancedMarkerAvailable(map: google.maps.Map): boolean {
+    return (
+      google.maps.marker &&
+      map.getMapCapabilities().isAdvancedMarkersAvailable === true
+    );
+  }
+
   public static isAdvancedMarker(
     marker: Marker
   ): marker is google.maps.marker.AdvancedMarkerElement {

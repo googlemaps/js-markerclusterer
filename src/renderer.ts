@@ -15,7 +15,7 @@
  */
 
 import { Cluster } from "./cluster";
-import { Marker } from "./marker-utils";
+import { Marker, MarkerUtils } from "./marker-utils";
 
 /**
  * Provides statistics on all clusters in the current render cycle for use in {@link Renderer.render}.
@@ -51,7 +51,7 @@ export class ClusterStats {
 
 export interface Renderer {
   /**
-   * Turn a {@link Cluster} into a `google.maps.Marker`.
+   * Turn a {@link Cluster} into a `Marker`.
    *
    * Below is a simple example to create a marker with the number of markers in the cluster as a label.
    *
@@ -124,10 +124,7 @@ export class DefaultRenderer implements Renderer {
       // adjust zIndex to be above other markers
       zIndex: number = Number(google.maps.Marker.MAX_ZINDEX) + count;
 
-    if (
-      google.maps.marker &&
-      map.getMapCapabilities().isAdvancedMarkersAvailable
-    ) {
+    if (MarkerUtils.isAdvancedMarkerAvailable(map)) {
       // create cluster SVG element
       const div = document.createElement("div");
       div.innerHTML = svg;
