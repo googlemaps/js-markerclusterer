@@ -15,6 +15,7 @@
  */
 
 import { LoaderOptions } from "@googlemaps/js-api-loader";
+import { MarkerUtils } from "../src/marker-utils";
 
 export const MAP_ID = "DEMO_MAP_ID";
 
@@ -55,3 +56,20 @@ export const sync = (...maps: google.maps.Map[]): void => {
     });
   });
 };
+
+// Creates a marker.
+//
+// Prefers advanced markers when they are available.
+export function createMarker(map: google.maps.Map, lat: number, lng: number) {
+  if (MarkerUtils.isAdvancedMarkerAvailable(map)) {
+    return new google.maps.marker.AdvancedMarkerElement({
+      map,
+      position: { lat, lng },
+    });
+  }
+
+  return new google.maps.Marker({
+    position: { lat, lng },
+    map,
+  });
+}
