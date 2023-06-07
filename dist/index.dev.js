@@ -1520,6 +1520,11 @@ var markerClusterer = (function (exports) {
       _classCallCheck(this, MarkerUtils);
     }
     _createClass(MarkerUtils, null, [{
+      key: "isAdvancedMarkerAvailable",
+      value: function isAdvancedMarkerAvailable(map) {
+        return google.maps.marker && map.getMapCapabilities().isAdvancedMarkersAvailable === true;
+      }
+    }, {
       key: "isAdvancedMarker",
       value: function isAdvancedMarker(marker) {
         return google.maps.marker && marker instanceof google.maps.marker.AdvancedMarkerElement;
@@ -3667,21 +3672,6 @@ var markerClusterer = (function (exports) {
   if (FORCED || IS_PURE) copyConstructorProperties(path[NUMBER], NativeNumber);
 
   /**
-   * Copyright 2021 Google LLC
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *      http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   */
-  /**
    * Provides statistics on all clusters in the current render cycle for use in {@link Renderer.render}.
    */
   var ClusterStats = /*#__PURE__*/_createClass(function ClusterStats(markers, clusters) {
@@ -3760,7 +3750,8 @@ var markerClusterer = (function (exports) {
         var title = "Cluster of ".concat(count, " markers"),
           // adjust zIndex to be above other markers
           zIndex = Number(google.maps.Marker.MAX_ZINDEX) + count;
-        if (google.maps.marker && map.getMapCapabilities().isAdvancedMarkersAvailable) {
+        if (MarkerUtils.isAdvancedMarkerAvailable(map)) {
+          // create cluster SVG element
           var div = document.createElement("div");
           div.innerHTML = svg;
           var svgEl = div.firstElementChild;

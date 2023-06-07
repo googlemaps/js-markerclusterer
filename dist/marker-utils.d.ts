@@ -20,6 +20,7 @@
  */
 export type Marker = google.maps.Marker | google.maps.marker.AdvancedMarkerElement;
 export declare class MarkerUtils {
+    static isAdvancedMarkerAvailable(map: google.maps.Map): boolean;
     static isAdvancedMarker(marker: Marker): marker is google.maps.marker.AdvancedMarkerElement;
     static setMap(marker: Marker, map: google.maps.Map | null): void;
     static getPosition(marker: Marker): google.maps.LatLng;

@@ -16,6 +16,10 @@ import { _ as __rest, e as equal, S as Supercluster, L as Loader } from './vendo
  * limitations under the License.
  */
 class MarkerUtils {
+    static isAdvancedMarkerAvailable(map) {
+        return (google.maps.marker &&
+            map.getMapCapabilities().isAdvancedMarkersAvailable === true);
+    }
     static isAdvancedMarker(marker) {
         return (google.maps.marker &&
             marker instanceof google.maps.marker.AdvancedMarkerElement);
@@ -575,8 +579,8 @@ class DefaultRenderer {
         const title = `Cluster of ${count} markers`, 
         // adjust zIndex to be above other markers
         zIndex = Number(google.maps.Marker.MAX_ZINDEX) + count;
-        if (google.maps.marker &&
-            map.getMapCapabilities().isAdvancedMarkersAvailable) {
+        if (MarkerUtils.isAdvancedMarkerAvailable(map)) {
+            // create cluster SVG element
             const div = document.createElement("div");
             div.innerHTML = svg;
             const svgEl = div.firstElementChild;
@@ -844,6 +848,21 @@ const sync = (...maps) => {
         });
     });
 };
+// Creates a marker.
+//
+// Prefers advanced markers when they are available.
+function createMarker(map, lat, lng) {
+    if (MarkerUtils.isAdvancedMarkerAvailable(map)) {
+        return new google.maps.marker.AdvancedMarkerElement({
+            map,
+            position: { lat, lng },
+        });
+    }
+    return new google.maps.Marker({
+        position: { lat, lng },
+        map,
+    });
+}
 
 var trees = [
 	{
@@ -12894,13 +12913,7 @@ new Loader(getLoaderOptions()).load().then(() => {
         textElement.innerText = text;
         textElement.classList.add("description");
         map.controls[google.maps.ControlPosition.LEFT_TOP].push(textElement);
-        const markers = trees.map(({ geometry }) => new google.maps.Marker({
-            position: {
-                lat: geometry.coordinates[1],
-                lng: geometry.coordinates[0],
-            },
-            map,
-        }));
+        const markers = trees.map(({ geometry }) => createMarker(map, geometry.coordinates[1], geometry.coordinates[0]));
         new MarkerClusterer({
             algorithm,
             map,

@@ -36,7 +36,7 @@ export declare class ClusterStats {
 }
 export interface Renderer {
     /**
-     * Turn a {@link Cluster} into a `google.maps.Marker`.
+     * Turn a {@link Cluster} into a `Marker`.
      *
      * Below is a simple example to create a marker with the number of markers in the cluster as a label.
      *

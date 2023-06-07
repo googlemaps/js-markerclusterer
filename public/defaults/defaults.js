@@ -1,32 +1,6 @@
 import { _ as __rest, S as Supercluster, e as equal, L as Loader } from './vendor.js';
 
 /**
- * Copyright 2021 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-const MAP_ID = "DEMO_MAP_ID";
-const DEFAULT_KEY = "AIzaSyDhRjl83cPVWeaEer-SnKIw7GTjBuqWxXI";
-const getLoaderOptions = () => {
-    var _a;
-    return ({
-        apiKey: (_a = localStorage.getItem("gmaps-key")) !== null && _a !== void 0 ? _a : DEFAULT_KEY,
-        version: "weekly",
-        libraries: ["marker"],
-    });
-};
-
-/**
  * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,6 +16,10 @@ const getLoaderOptions = () => {
  * limitations under the License.
  */
 class MarkerUtils {
+    static isAdvancedMarkerAvailable(map) {
+        return (google.maps.marker &&
+            map.getMapCapabilities().isAdvancedMarkersAvailable === true);
+    }
     static isAdvancedMarker(marker) {
         return (google.maps.marker &&
             marker instanceof google.maps.marker.AdvancedMarkerElement);
@@ -83,6 +61,47 @@ class MarkerUtils {
         }
         return marker.getVisible();
     }
+}
+
+/**
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+const MAP_ID = "DEMO_MAP_ID";
+const DEFAULT_KEY = "AIzaSyDhRjl83cPVWeaEer-SnKIw7GTjBuqWxXI";
+const getLoaderOptions = () => {
+    var _a;
+    return ({
+        apiKey: (_a = localStorage.getItem("gmaps-key")) !== null && _a !== void 0 ? _a : DEFAULT_KEY,
+        version: "weekly",
+        libraries: ["marker"],
+    });
+};
+// Creates a marker.
+//
+// Prefers advanced markers when they are available.
+function createMarker(map, lat, lng) {
+    if (MarkerUtils.isAdvancedMarkerAvailable(map)) {
+        return new google.maps.marker.AdvancedMarkerElement({
+            map,
+            position: { lat, lng },
+        });
+    }
+    return new google.maps.Marker({
+        position: { lat, lng },
+        map,
+    });
 }
 
 /**
@@ -365,8 +384,8 @@ class DefaultRenderer {
         const title = `Cluster of ${count} markers`, 
         // adjust zIndex to be above other markers
         zIndex = Number(google.maps.Marker.MAX_ZINDEX) + count;
-        if (google.maps.marker &&
-            map.getMapCapabilities().isAdvancedMarkersAvailable) {
+        if (MarkerUtils.isAdvancedMarkerAvailable(map)) {
+            // create cluster SVG element
             const div = document.createElement("div");
             div.innerHTML = svg;
             const svgEl = div.firstElementChild;
@@ -12610,13 +12629,7 @@ const mapOptions = {
 new Loader(getLoaderOptions()).load().then(() => {
     const element = document.getElementById("map");
     const map = new google.maps.Map(element, mapOptions);
-    const markers = trees.map(({ geometry }) => new google.maps.Marker({
-        position: {
-            lat: geometry.coordinates[1],
-            lng: geometry.coordinates[0],
-        },
-        map,
-    }));
+    const markers = trees.map(({ geometry }) => createMarker(map, geometry.coordinates[1], geometry.coordinates[0]));
     const markerCluster = new MarkerClusterer({
         markers,
     });

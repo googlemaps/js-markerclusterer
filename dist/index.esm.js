@@ -44,6 +44,10 @@ function __rest(s, e) {
  * limitations under the License.
  */
 class MarkerUtils {
+    static isAdvancedMarkerAvailable(map) {
+        return (google.maps.marker &&
+            map.getMapCapabilities().isAdvancedMarkersAvailable === true);
+    }
     static isAdvancedMarker(marker) {
         return (google.maps.marker &&
             marker instanceof google.maps.marker.AdvancedMarkerElement);
@@ -603,8 +607,8 @@ class DefaultRenderer {
         const title = `Cluster of ${count} markers`, 
         // adjust zIndex to be above other markers
         zIndex = Number(google.maps.Marker.MAX_ZINDEX) + count;
-        if (google.maps.marker &&
-            map.getMapCapabilities().isAdvancedMarkersAvailable) {
+        if (MarkerUtils.isAdvancedMarkerAvailable(map)) {
+            // create cluster SVG element
             const div = document.createElement("div");
             div.innerHTML = svg;
             const svgEl = div.firstElementChild;
