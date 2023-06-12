@@ -535,10 +535,10 @@ var markerClusterer = (function (exports) {
   (shared$3.exports = function (key, value) {
     return store$2[key] || (store$2[key] = value !== undefined ? value : {});
   })('versions', []).push({
-    version: '3.30.2',
+    version: '3.31.0',
     mode: 'global',
     copyright: '© 2014-2023 Denis Pushkarev (zloirock.ru)',
-    license: 'https://github.com/zloirock/core-js/blob/v3.30.2/LICENSE',
+    license: 'https://github.com/zloirock/core-js/blob/v3.31.0/LICENSE',
     source: 'https://github.com/zloirock/core-js'
   });
   var sharedExports = shared$3.exports;
