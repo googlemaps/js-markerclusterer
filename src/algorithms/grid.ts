@@ -50,14 +50,13 @@ export class GridAlgorithm extends AbstractViewportAlgorithm {
   protected gridSize: number;
   protected maxDistance: number;
   protected clusters: Cluster[] = [];
-  protected state: { zoom: number };
+  protected state = { zoom: -1 };
 
   constructor({ maxDistance = 40000, gridSize = 40, ...options }: GridOptions) {
     super(options);
 
     this.maxDistance = maxDistance;
     this.gridSize = gridSize;
-    this.state = { zoom: null };
   }
 
   public calculate({
@@ -67,8 +66,8 @@ export class GridAlgorithm extends AbstractViewportAlgorithm {
   }: AlgorithmInput): AlgorithmOutput {
     const state = { zoom: map.getZoom() };
     let changed = false;
-    if (this.state.zoom > this.maxZoom && state.zoom > this.maxZoom) {
-      // still beyond maxZoom, no change
+    if (this.state.zoom >= this.maxZoom && state.zoom >= this.maxZoom) {
+      // still at or beyond maxZoom, no change
     } else {
       changed = !equal(this.state, state);
     }

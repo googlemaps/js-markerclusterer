@@ -16,7 +16,6 @@
 
 import { GridAlgorithm } from "./grid";
 import { initialize, MapCanvasProjection } from "@googlemaps/jest-mocks";
-import { Marker } from "../marker-utils";
 
 initialize();
 const markers = [
@@ -35,7 +34,7 @@ describe.each(markers)(
 
     test("calculate should return changed: true for first call when zoom > max zoom", () => {
       const mapCanvasProjection = new MapCanvasProjection();
-      const markers: Marker[] = [marker];
+      const markers = [marker];
 
       const grid = new GridAlgorithm({ maxZoom: 16 });
       grid["noop"] = jest.fn();
@@ -60,10 +59,10 @@ describe.each(markers)(
       expect(changed).toBe(true);
     });
 
-    test("calculate should return changed: false for next calls above max zoom", () => {
+    test("calculate should return changed: false when zoom doesn't change", () => {
       const mapCanvasProjection =
         jest.fn() as unknown as google.maps.MapCanvasProjection;
-      const markers: Marker[] = [marker];
+      const markers = [marker];
 
       const grid = new GridAlgorithm({ maxZoom: 16 });
       grid["noop"] = jest.fn();
@@ -87,10 +86,10 @@ describe.each(markers)(
       expect(result.changed).toBe(false);
     });
 
-    test("calculate should return changed: false for next calls above max zoom, even if zoom changed", () => {
+    test("calculate should return changed: false for next calls at or above max zoom, even if zoom changed", () => {
       const mapCanvasProjection =
         jest.fn() as unknown as google.maps.MapCanvasProjection;
-      const markers: Marker[] = [marker];
+      const markers = [marker];
 
       const grid = new GridAlgorithm({ maxZoom: 16 });
       grid["noop"] = jest.fn();
@@ -106,6 +105,16 @@ describe.each(markers)(
       expect(result.changed).toBe(true);
 
       map.getZoom = jest.fn().mockReturnValue(18);
+
+      result = grid.calculate({
+        markers,
+        map,
+        mapCanvasProjection,
+      });
+
+      expect(result.changed).toBe(false);
+
+      map.getZoom = jest.fn().mockReturnValue(16);
 
       result = grid.calculate({
         markers,
