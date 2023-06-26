@@ -1971,11 +1971,11 @@ var markerClusterer = (function (exports) {
         options = __rest(_a, ["maxDistance", "gridSize"]);
       _this = _super.call(this, options);
       _this.clusters = [];
+      _this.state = {
+        zoom: -1
+      };
       _this.maxDistance = maxDistance;
       _this.gridSize = gridSize;
-      _this.state = {
-        zoom: null
-      };
       return _this;
     }
     _createClass(GridAlgorithm, [{
@@ -1988,7 +1988,7 @@ var markerClusterer = (function (exports) {
           zoom: map.getZoom()
         };
         var changed = false;
-        if (this.state.zoom > this.maxZoom && state.zoom > this.maxZoom) ; else {
+        if (this.state.zoom >= this.maxZoom && state.zoom >= this.maxZoom) ; else {
           changed = !equal(this.state, state);
         }
         this.state = state;
@@ -2888,13 +2888,13 @@ var markerClusterer = (function (exports) {
       _this = _super.call(this, {
         maxZoom: maxZoom
       });
+      _this.state = {
+        zoom: -1
+      };
       _this.superCluster = new Supercluster(Object.assign({
         maxZoom: _this.maxZoom,
         radius: radius
       }, options));
-      _this.state = {
-        zoom: null
-      };
       return _this;
     }
     _createClass(SuperClusterAlgorithm, [{

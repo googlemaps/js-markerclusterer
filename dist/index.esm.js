@@ -349,14 +349,14 @@ class GridAlgorithm extends AbstractViewportAlgorithm {
         var { maxDistance = 40000, gridSize = 40 } = _a, options = __rest(_a, ["maxDistance", "gridSize"]);
         super(options);
         this.clusters = [];
+        this.state = { zoom: -1 };
         this.maxDistance = maxDistance;
         this.gridSize = gridSize;
-        this.state = { zoom: null };
     }
     calculate({ markers, map, mapCanvasProjection, }) {
         const state = { zoom: map.getZoom() };
         let changed = false;
-        if (this.state.zoom > this.maxZoom && state.zoom > this.maxZoom) ;
+        if (this.state.zoom >= this.maxZoom && state.zoom >= this.maxZoom) ;
         else {
             changed = !equal(this.state, state);
         }
@@ -464,8 +464,8 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
     constructor(_a) {
         var { maxZoom, radius = 60 } = _a, options = __rest(_a, ["maxZoom", "radius"]);
         super({ maxZoom });
+        this.state = { zoom: -1 };
         this.superCluster = new SuperCluster(Object.assign({ maxZoom: this.maxZoom, radius }, options));
-        this.state = { zoom: null };
     }
     calculate(input) {
         let changed = false;

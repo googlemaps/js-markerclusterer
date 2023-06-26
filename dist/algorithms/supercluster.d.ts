@@ -32,7 +32,7 @@ export declare class SuperClusterAlgorithm extends AbstractAlgorithm {
     protected markers: Marker[];
     protected clusters: Cluster[];
     protected state: {
-        zoom: number | null;
+        zoom: number;
     };
     constructor({ maxZoom, radius, ...options }: SuperClusterOptions);
     calculate(input: AlgorithmInput): AlgorithmOutput;

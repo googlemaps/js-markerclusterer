@@ -241,8 +241,8 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
     constructor(_a) {
         var { maxZoom, radius = 60 } = _a, options = __rest(_a, ["maxZoom", "radius"]);
         super({ maxZoom });
+        this.state = { zoom: -1 };
         this.superCluster = new Supercluster(Object.assign({ maxZoom: this.maxZoom, radius }, options));
-        this.state = { zoom: null };
     }
     calculate(input) {
         let changed = false;
