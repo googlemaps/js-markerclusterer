@@ -36,7 +36,7 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
   protected superCluster: SuperCluster;
   protected markers: Marker[];
   protected clusters: Cluster[];
-  protected state: { zoom: number | null };
+  protected state = { zoom: -1 };
 
   constructor({ maxZoom, radius = 60, ...options }: SuperClusterOptions) {
     super({ maxZoom });
@@ -46,8 +46,6 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
       radius,
       ...options,
     });
-
-    this.state = { zoom: null };
   }
 
   public calculate(input: AlgorithmInput): AlgorithmOutput {
