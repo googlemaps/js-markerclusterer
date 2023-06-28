@@ -73,26 +73,35 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
     }
 
     if (!changed) {
-      if (this.state.zoom <= this.maxZoom || state.zoom <= this.maxZoom) {
-        changed = !equal(this.state, state);
+      // if (this.state.zoom <= this.maxZoom || state.zoom <= this.maxZoom) {
+      //   changed = !equal(this.state, state);
+      const zoomChanged = this.state.zoom != state.zoom;
+      if (this.state.zoom > this.maxZoom && state.zoom > this.maxZoom) {
+        // still beyond maxZoom, no change
+        // changed = zoomChanged;
+      } else {
+        changed = zoomChanged || !equal(this.state, state);
       }
     }
 
     this.state = state;
 
-    if (changed) {
-      this.clusters = this.cluster(input);
-    }
+    this.clusters = this.cluster(input);
 
     return { clusters: this.clusters, changed };
   }
 
   public cluster({ map }: AlgorithmInput): Cluster[] {
-    return this.superCluster
-      .getClusters([-180, -90, 180, 90], Math.round(map.getZoom()))
-      .map((feature: ClusterFeature<{ marker: Marker }>) =>
-        this.transformCluster(feature)
-      );
+    const { west, south, east, north } = map.getBounds().toJSON();
+    return (
+        this.superCluster
+            .getClusters([west, south, east, north], Math.round(map.getZoom()))
+            // .getClusters([-180, -90, 180, 90], Math.round(map.getZoom()))
+            .map((feature: ClusterFeature<{ marker: Marker }>) =>
+                this.transformCluster(feature)
+            )
+    );
+      // .map(this.transformCluster.bind(this));
   }
 
   protected transformCluster({

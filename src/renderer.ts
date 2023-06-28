@@ -105,25 +105,31 @@ export class DefaultRenderer implements Renderer {
    * ```
    */
   public render(
-    { count, position }: Cluster,
+    { count, position, markers }: Cluster,
     stats: ClusterStats,
     map: google.maps.Map
   ): Marker {
-    // change color if this cluster has more markers than the mean cluster
-    const color =
-      count > Math.max(10, stats.clusters.markers.mean) ? "#ff0000" : "#0000ff";
-
-    // create svg literal with fill color
+    let color = "#00c853"; //OK
+    if (markers){
+      // @ts-ignore
+      const anyError = markers.some(marker => marker["hasError"] !== undefined && marker["hasError"] === true);
+      if (anyError) color = "#ff0000"; //ERROR
+      else{
+        // @ts-ignore
+        const anyWarning = markers.some(marker => marker["hasWarning"] !== undefined && marker["hasWarning"] === true);
+        if (anyWarning) color = "#ffa500"; //WARNING
+      }
+    }
+    // create svg url with fill color
     const svg = `<svg fill="${color}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="50" height="50">
-<circle cx="120" cy="120" opacity=".6" r="70" />
-<circle cx="120" cy="120" opacity=".3" r="90" />
-<circle cx="120" cy="120" opacity=".2" r="110" />
-<text x="50%" y="50%" style="fill:#fff" text-anchor="middle" font-size="50" dominant-baseline="middle" font-family="roboto,arial,sans-serif">${count}</text>
-</svg>`;
+      <circle cx="120" cy="120" opacity=".6" r="70" />
+      <circle cx="120" cy="120" opacity=".4" r="90" />
+      <circle cx="120" cy="120" opacity=".3" r="110" />
+      <text x="50%" y="52%" style="fill:#000" text-anchor="middle" font-size="65" font-weight="bold" dominant-baseline="middle" font-family="roboto,arial,sans-serif">${count}</text>
+    </svg>`;
 
-    const title = `Cluster of ${count} markers`,
-      // adjust zIndex to be above other markers
-      zIndex: number = Number(google.maps.Marker.MAX_ZINDEX) + count;
+
+    const zIndex: number = Number(google.maps.Marker.MAX_ZINDEX) + count;
 
     if (MarkerUtils.isAdvancedMarkerAvailable(map)) {
       // create cluster SVG element
@@ -136,16 +142,14 @@ export class DefaultRenderer implements Renderer {
         map,
         position,
         zIndex,
-        title,
         content: svgEl,
       };
+
       return new google.maps.marker.AdvancedMarkerElement(clusterOptions);
     }
-
     const clusterOptions: google.maps.MarkerOptions = {
       position,
       zIndex,
-      title,
       icon: {
         url: `data:image/svg+xml;base64,${btoa(svg)}`,
         anchor: new google.maps.Point(25, 25),

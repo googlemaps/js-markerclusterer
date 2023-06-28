@@ -51,6 +51,8 @@ export enum MarkerClustererEvents {
   CLUSTERING_BEGIN = "clusteringbegin",
   CLUSTERING_END = "clusteringend",
   CLUSTER_CLICK = "click",
+  SUBSCRIBE_TO = "subscribeTo",
+  UNSUBSCRIBE = "unsubscribe",
 }
 
 export const defaultOnClusterClickHandler: onClusterClickHandler = (
@@ -82,7 +84,7 @@ export class MarkerClusterer extends OverlayViewSafe {
     map,
     markers = [],
     algorithmOptions = {},
-    algorithm = new SuperClusterAlgorithm(algorithmOptions),
+    algorithm = new SuperClusterAlgorithm({ maxZoom: 12, minPoints: 1 }),
     renderer = new DefaultRenderer(),
     onClusterClick = defaultOnClusterClickHandler,
   }: MarkerClustererOptions) {
@@ -164,7 +166,14 @@ export class MarkerClusterer extends OverlayViewSafe {
   /**
    * Recalculates and draws all the marker clusters.
    */
-  public render(): void {
+  public redraw() : void {
+    this.render(true);
+  }
+  
+  /**
+   * Recalculates and draws all the marker clusters.
+   */
+  public render(force = false): void {
     const map = this.getMap();
     if (map instanceof google.maps.Map && map.getProjection()) {
       google.maps.event.trigger(
@@ -177,9 +186,8 @@ export class MarkerClusterer extends OverlayViewSafe {
         map,
         mapCanvasProjection: this.getProjection(),
       });
-
       // allow algorithms to return flag on whether the clusters/markers have changed
-      if (changed || changed == undefined) {
+      if (changed || changed == undefined || force) {
         // reset visibility of markers and clusters
         this.reset();
         // store new clusters
@@ -219,24 +227,35 @@ export class MarkerClusterer extends OverlayViewSafe {
     const stats = new ClusterStats(this.markers, this.clusters);
     const map = this.getMap() as google.maps.Map;
     this.clusters.forEach((cluster) => {
-      if (cluster.markers.length === 1) {
+      if (cluster.markers.length === 1 && map.getZoom() >= 12) {
         cluster.marker = cluster.markers[0];
+        google.maps.event.trigger(
+          this,
+          MarkerClustererEvents.SUBSCRIBE_TO,
+        // @ts-ignore
+          [cluster.marker["id"]]
+        );
       } else {
         cluster.marker = this.renderer.render(cluster, stats, map);
-        if (this.onClusterClick) {
-          cluster.marker.addListener(
-            "click",
-            /* istanbul ignore next */
-            (event: google.maps.MapMouseEvent) => {
-              google.maps.event.trigger(
-                this,
-                MarkerClustererEvents.CLUSTER_CLICK,
-                cluster
-              );
-              this.onClusterClick(event, cluster, map);
-            }
-          );
-        }
+        // cluster.marker = this.renderer.render(cluster, stats);
+        google.maps.event.trigger(
+          this,
+          MarkerClustererEvents.UNSUBSCRIBE,
+        // @ts-ignore
+          cluster.markers.map(marker => marker["id"])
+        );
+        cluster.marker.addListener(
+          "click",
+          /* istanbul ignore next */
+          (event: google.maps.MapMouseEvent) => {
+            google.maps.event.trigger(
+              this,
+              MarkerClustererEvents.CLUSTER_CLICK,
+              cluster
+            );
+            defaultOnClusterClickHandler(event, cluster, map);
+          }
+        );
       }
       MarkerUtils.setMap(cluster.marker, map);
     });
