@@ -57,8 +57,10 @@ export interface Algorithm {
 }
 
 export interface AlgorithmOptions {
+  // Markers are not clustered at maxZoom and above.
   maxZoom?: number;
 }
+
 /**
  * @hidden
  */

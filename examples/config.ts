@@ -15,15 +15,16 @@
  */
 
 import { LoaderOptions } from "@googlemaps/js-api-loader";
+import { MarkerUtils } from "../src/marker-utils";
 
-export const MAP_ID = "7b9a897acd0a63a4";
+export const MAP_ID = "DEMO_MAP_ID";
 
 const DEFAULT_KEY = "AIzaSyDhRjl83cPVWeaEer-SnKIw7GTjBuqWxXI";
 
 export const getLoaderOptions = (): LoaderOptions => ({
   apiKey: localStorage.getItem("gmaps-key") ?? DEFAULT_KEY,
   version: "weekly",
-  libraries: [],
+  libraries: ["marker"],
 });
 
 // helper function to keep maps in sync
@@ -55,3 +56,20 @@ export const sync = (...maps: google.maps.Map[]): void => {
     });
   });
 };
+
+// Creates a marker.
+//
+// Prefers advanced markers when they are available.
+export function createMarker(map: google.maps.Map, lat: number, lng: number) {
+  if (MarkerUtils.isAdvancedMarkerAvailable(map)) {
+    return new google.maps.marker.AdvancedMarkerElement({
+      map,
+      position: { lat, lng },
+    });
+  }
+
+  return new google.maps.Marker({
+    position: { lat, lng },
+    map,
+  });
+}

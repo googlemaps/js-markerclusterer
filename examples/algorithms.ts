@@ -21,14 +21,15 @@ import {
   NoopAlgorithm,
   SuperClusterAlgorithm,
 } from "../src";
-import { getLoaderOptions, sync } from "./config";
+import { MAP_ID, createMarker, getLoaderOptions, sync } from "./config";
 
 import { Loader } from "@googlemaps/js-api-loader";
 import trees from "./trees.json";
 
-const mapOptions = {
+const mapOptions: google.maps.MapOptions = {
   center: { lat: 40.7128, lng: -73.85 },
   zoom: 10,
+  mapId: MAP_ID,
 };
 
 new Loader(getLoaderOptions()).load().then(() => {
@@ -62,15 +63,8 @@ new Loader(getLoaderOptions()).load().then(() => {
 
     map.controls[google.maps.ControlPosition.LEFT_TOP].push(textElement);
 
-    const markers = trees.map(
-      ({ geometry }) =>
-        new google.maps.Marker({
-          position: {
-            lat: geometry.coordinates[1],
-            lng: geometry.coordinates[0],
-          },
-          map,
-        })
+    const markers = trees.map(({ geometry }) =>
+      createMarker(map, geometry.coordinates[1], geometry.coordinates[0])
     );
 
     new MarkerClusterer({

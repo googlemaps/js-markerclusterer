@@ -1,6 +1,6 @@
 {
   "name": "@googlemaps/markerclusterer",
-  "version": "2.2.0-beta.2",
+  "version": "2.3.1",
   "description": "Creates and manages per-zoom-level clusters for large amounts of markers.",
   "keywords": [
     "cluster",
@@ -33,7 +33,6 @@
     "lint": "eslint .",
     "prepare": "rm -rf dist && rollup -c",
     "test": "jest --passWithNoTests src/*",
-    "test:e2e": "jest --passWithNoTests e2e/*",
     "test:all": "jest"
   },
   "dependencies": {
@@ -54,18 +53,15 @@
     "@types/d3-interpolate": "^3.0.1",
     "@types/google.maps": "^3.53.1",
     "@types/jest": "^27.0.1",
-    "@types/selenium-webdriver": "^4.0.9",
     "@types/supercluster": "^7.1.0",
     "@typescript-eslint/eslint-plugin": ">=4.1.0",
     "@typescript-eslint/parser": ">=4.1.0",
-    "chromedriver": "^113.0.0",
     "core-js": "^3.6.5",
     "d3-interpolate": "^3.0.1",
     "eslint": "^8.41.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-jest": "^27.0.1",
     "eslint-plugin-prettier": "^4.0.0",
-    "geckodriver": "^4.0.0",
     "jest": "^26.4.2",
     "prettier": "^2.1.1",
     "rollup": "^2.26.11",

@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 Google LLC
+ * Copyright 2023 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import { MAP_ID, createMarker, getLoaderOptions } from "./config";
+import { getLoaderOptions } from "./config";
 import { Loader } from "@googlemaps/js-api-loader";
 import { MarkerClusterer } from "../src";
-import trees from "./trees.json";
+import points from "./realworld.json";
 
+// Do not set the mapId to force legacy markers
 const mapOptions: google.maps.MapOptions = {
-  center: { lat: 40.7128, lng: -73.85 },
-  zoom: 12,
-  mapId: MAP_ID,
+  center: { lat: -37.89, lng: 175.46 },
+  zoom: 8,
+  maxZoom: 18,
 };
 
 new Loader(getLoaderOptions()).load().then(() => {
@@ -30,12 +31,14 @@ new Loader(getLoaderOptions()).load().then(() => {
 
   const map = new google.maps.Map(element, mapOptions);
 
-  const markers = trees.map(({ geometry }) =>
-    createMarker(map, geometry.coordinates[1], geometry.coordinates[0])
+  const markers = (points as [number, number, string][]).map(
+    ([lat, lng, label]) =>
+      new google.maps.Marker({ position: { lat, lng }, label })
   );
 
   const markerCluster = new MarkerClusterer({
     markers,
+    algorithmOptions: { maxZoom: 30 },
   });
 
   markerCluster.setMap(map);

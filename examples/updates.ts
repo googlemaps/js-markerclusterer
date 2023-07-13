@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import { getLoaderOptions } from "./config";
+import { MAP_ID, createMarker, getLoaderOptions } from "./config";
 import { Loader } from "@googlemaps/js-api-loader";
 import { MarkerClusterer } from "../src";
 import trees from "./trees.json";
 
-const mapOptions = {
+const mapOptions: google.maps.MapOptions = {
   center: { lat: 40.7128, lng: -73.85 },
   zoom: 12,
+  mapId: MAP_ID,
 };
 
 new Loader(getLoaderOptions()).load().then(async () => {
@@ -29,14 +30,8 @@ new Loader(getLoaderOptions()).load().then(async () => {
 
   const map = new google.maps.Map(element, mapOptions);
 
-  const markers = trees.map(
-    ({ geometry }) =>
-      new google.maps.Marker({
-        position: {
-          lat: geometry.coordinates[1],
-          lng: geometry.coordinates[0],
-        },
-      })
+  const markers = trees.map(({ geometry }) =>
+    createMarker(map, geometry.coordinates[1], geometry.coordinates[0])
   );
 
   const markerCluster = new MarkerClusterer({
