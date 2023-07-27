@@ -61,6 +61,21 @@ export const extendBoundsToPaddedViewport = (
 };
 
 /**
+ * Gets the extended bounds as a bbox [westLng, southLat, eastLng, northLat]
+ */
+export const getPaddedViewport = (
+  bounds: google.maps.LatLngBounds,
+  projection: google.maps.MapCanvasProjection,
+  pixels: number
+): [number, number, number, number] => {
+  const extended = extendBoundsToPaddedViewport(bounds, projection, pixels);
+  const ne = extended.getNorthEast();
+  const sw = extended.getSouthWest();
+
+  return [sw.lng(), sw.lat(), ne.lng(), ne.lat()];
+};
+
+/**
  * Returns the distance between 2 positions.
  *
  * @hidden
