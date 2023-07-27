@@ -1678,6 +1678,15 @@ var markerClusterer = (function (exports) {
     return pixelBoundsToLatLngBounds(extendedPixelBounds, projection);
   };
   /**
+   * Gets the extended bounds as a bbox [westLng, southLat, eastLng, northLat]
+   */
+  var getPaddedViewport = function getPaddedViewport(bounds, projection, pixels) {
+    var extended = extendBoundsToPaddedViewport(bounds, projection, pixels);
+    var ne = extended.getNorthEast();
+    var sw = extended.getSouthWest();
+    return [sw.lng(), sw.lat(), ne.lng(), ne.lat()];
+  };
+  /**
    * Returns the distance between 2 positions.
    *
    * @hidden
@@ -2974,6 +2983,117 @@ var markerClusterer = (function (exports) {
     }]);
     return SuperClusterAlgorithm;
   }(AbstractAlgorithm);
+
+  /**
+   * A very fast JavaScript algorithm for geospatial point clustering using KD trees.
+   *
+   * @see https://www.npmjs.com/package/supercluster for more information on options.
+   */
+  var SuperClusterViewportAlgorithm = /*#__PURE__*/function (_AbstractViewportAlgo) {
+    _inherits(SuperClusterViewportAlgorithm, _AbstractViewportAlgo);
+    var _super = _createSuper(SuperClusterViewportAlgorithm);
+    function SuperClusterViewportAlgorithm(_a) {
+      var _this;
+      _classCallCheck(this, SuperClusterViewportAlgorithm);
+      var maxZoom = _a.maxZoom,
+        _a$radius = _a.radius,
+        radius = _a$radius === void 0 ? 60 : _a$radius,
+        _a$viewportPadding = _a.viewportPadding,
+        viewportPadding = _a$viewportPadding === void 0 ? 60 : _a$viewportPadding,
+        options = __rest(_a, ["maxZoom", "radius", "viewportPadding"]);
+      _this = _super.call(this, {
+        maxZoom: maxZoom,
+        viewportPadding: viewportPadding
+      });
+      _this.superCluster = new Supercluster(Object.assign({
+        maxZoom: _this.maxZoom,
+        radius: radius
+      }, options));
+      _this.state = {
+        zoom: -1,
+        view: [0, 0, 0, 0]
+      };
+      return _this;
+    }
+    _createClass(SuperClusterViewportAlgorithm, [{
+      key: "calculate",
+      value: function calculate(input) {
+        var state = {
+          zoom: Math.round(input.map.getZoom()),
+          view: getPaddedViewport(input.map.getBounds(), input.mapCanvasProjection, this.viewportPadding)
+        };
+        var changed = !equal(this.state, state);
+        if (!equal(input.markers, this.markers)) {
+          changed = true;
+          // TODO use proxy to avoid copy?
+          this.markers = _toConsumableArray(input.markers);
+          var points = this.markers.map(function (marker) {
+            var position = MarkerUtils.getPosition(marker);
+            var coordinates = [position.lng(), position.lat()];
+            return {
+              type: "Feature",
+              geometry: {
+                type: "Point",
+                coordinates: coordinates
+              },
+              properties: {
+                marker: marker
+              }
+            };
+          });
+          this.superCluster.load(points);
+        }
+        if (changed) {
+          this.clusters = this.cluster(input);
+          this.state = state;
+        }
+        return {
+          clusters: this.clusters,
+          changed: changed
+        };
+      }
+    }, {
+      key: "cluster",
+      value: function cluster(_ref) {
+        var _this2 = this;
+        var map = _ref.map,
+          mapCanvasProjection = _ref.mapCanvasProjection;
+        /* recalculate new state because we can't use the cached version. */
+        var state = {
+          zoom: Math.round(map.getZoom()),
+          view: getPaddedViewport(map.getBounds(), mapCanvasProjection, this.viewportPadding)
+        };
+        return this.superCluster.getClusters(state.view, state.zoom).map(function (feature) {
+          return _this2.transformCluster(feature);
+        });
+      }
+    }, {
+      key: "transformCluster",
+      value: function transformCluster(_ref2) {
+        var _ref2$geometry$coordi = _slicedToArray(_ref2.geometry.coordinates, 2),
+          lng = _ref2$geometry$coordi[0],
+          lat = _ref2$geometry$coordi[1],
+          properties = _ref2.properties;
+        if (properties.cluster) {
+          return new Cluster({
+            markers: this.superCluster.getLeaves(properties.cluster_id, Infinity).map(function (leaf) {
+              return leaf.properties.marker;
+            }),
+            position: {
+              lat: lat,
+              lng: lng
+            }
+          });
+        }
+        var marker = properties.marker;
+        return new Cluster({
+          markers: [marker],
+          position: MarkerUtils.getPosition(marker)
+        });
+      }
+    }]);
+    return SuperClusterViewportAlgorithm;
+  }(AbstractViewportAlgorithm);
 
   var objectDefineProperties = {};
 
@@ -5128,11 +5248,13 @@ var markerClusterer = (function (exports) {
   exports.MarkerClusterer = MarkerClusterer;
   exports.NoopAlgorithm = NoopAlgorithm;
   exports.SuperClusterAlgorithm = SuperClusterAlgorithm;
+  exports.SuperClusterViewportAlgorithm = SuperClusterViewportAlgorithm;
   exports.defaultOnClusterClickHandler = defaultOnClusterClickHandler;
   exports.distanceBetweenPoints = distanceBetweenPoints;
   exports.extendBoundsToPaddedViewport = extendBoundsToPaddedViewport;
   exports.extendPixelBounds = extendPixelBounds;
   exports.filterMarkersToPaddedViewport = filterMarkersToPaddedViewport;
+  exports.getPaddedViewport = getPaddedViewport;
   exports.noop = _noop;
   exports.pixelBoundsToLatLngBounds = pixelBoundsToLatLngBounds;
 

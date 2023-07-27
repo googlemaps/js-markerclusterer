@@ -30,6 +30,10 @@ export declare const filterMarkersToPaddedViewport: (map: google.maps.Map, mapCa
  */
 export declare const extendBoundsToPaddedViewport: (bounds: google.maps.LatLngBounds, projection: google.maps.MapCanvasProjection, numPixels: number) => google.maps.LatLngBounds;
 /**
+ * Gets the extended bounds as a bbox [westLng, southLat, eastLng, northLat]
+ */
+export declare const getPaddedViewport: (bounds: google.maps.LatLngBounds, projection: google.maps.MapCanvasProjection, pixels: number) => [number, number, number, number];
+/**
  * Returns the distance between 2 positions.
  *
  * @hidden

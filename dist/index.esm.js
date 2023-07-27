@@ -192,6 +192,15 @@ const extendBoundsToPaddedViewport = (bounds, projection, numPixels) => {
     return pixelBoundsToLatLngBounds(extendedPixelBounds, projection);
 };
 /**
+ * Gets the extended bounds as a bbox [westLng, southLat, eastLng, northLat]
+ */
+const getPaddedViewport = (bounds, projection, pixels) => {
+    const extended = extendBoundsToPaddedViewport(bounds, projection, pixels);
+    const ne = extended.getNorthEast();
+    const sw = extended.getSouthWest();
+    return [sw.lng(), sw.lat(), ne.lng(), ne.lat()];
+};
+/**
  * Returns the distance between 2 positions.
  *
  * @hidden
@@ -502,6 +511,90 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
     cluster({ map }) {
         return this.superCluster
             .getClusters([-180, -90, 180, 90], Math.round(map.getZoom()))
+            .map((feature) => this.transformCluster(feature));
+    }
+    transformCluster({ geometry: { coordinates: [lng, lat], }, properties, }) {
+        if (properties.cluster) {
+            return new Cluster({
+                markers: this.superCluster
+                    .getLeaves(properties.cluster_id, Infinity)
+                    .map((leaf) => leaf.properties.marker),
+                position: { lat, lng },
+            });
+        }
+        const marker = properties.marker;
+        return new Cluster({
+            markers: [marker],
+            position: MarkerUtils.getPosition(marker),
+        });
+    }
+}
+
+/**
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * A very fast JavaScript algorithm for geospatial point clustering using KD trees.
+ *
+ * @see https://www.npmjs.com/package/supercluster for more information on options.
+ */
+class SuperClusterViewportAlgorithm extends AbstractViewportAlgorithm {
+    constructor(_a) {
+        var { maxZoom, radius = 60, viewportPadding = 60 } = _a, options = __rest(_a, ["maxZoom", "radius", "viewportPadding"]);
+        super({ maxZoom, viewportPadding });
+        this.superCluster = new SuperCluster(Object.assign({ maxZoom: this.maxZoom, radius }, options));
+        this.state = { zoom: -1, view: [0, 0, 0, 0] };
+    }
+    calculate(input) {
+        const state = {
+            zoom: Math.round(input.map.getZoom()),
+            view: getPaddedViewport(input.map.getBounds(), input.mapCanvasProjection, this.viewportPadding),
+        };
+        let changed = !equal(this.state, state);
+        if (!equal(input.markers, this.markers)) {
+            changed = true;
+            // TODO use proxy to avoid copy?
+            this.markers = [...input.markers];
+            const points = this.markers.map((marker) => {
+                const position = MarkerUtils.getPosition(marker);
+                const coordinates = [position.lng(), position.lat()];
+                return {
+                    type: "Feature",
+                    geometry: {
+                        type: "Point",
+                        coordinates,
+                    },
+                    properties: { marker },
+                };
+            });
+            this.superCluster.load(points);
+        }
+        if (changed) {
+            this.clusters = this.cluster(input);
+            this.state = state;
+        }
+        return { clusters: this.clusters, changed };
+    }
+    cluster({ map, mapCanvasProjection }) {
+        /* recalculate new state because we can't use the cached version. */
+        const state = {
+            zoom: Math.round(map.getZoom()),
+            view: getPaddedViewport(map.getBounds(), mapCanvasProjection, this.viewportPadding),
+        };
+        return this.superCluster
+            .getClusters(state.view, state.zoom)
             .map((feature) => this.transformCluster(feature));
     }
     transformCluster({ geometry: { coordinates: [lng, lat], }, properties, }) {
@@ -856,5 +949,5 @@ class MarkerClusterer extends OverlayViewSafe {
     }
 }
 
-export { AbstractAlgorithm, AbstractViewportAlgorithm, Cluster, ClusterStats, DefaultRenderer, GridAlgorithm, MarkerClusterer, MarkerClustererEvents, NoopAlgorithm, SuperClusterAlgorithm, defaultOnClusterClickHandler, distanceBetweenPoints, extendBoundsToPaddedViewport, extendPixelBounds, filterMarkersToPaddedViewport, noop, pixelBoundsToLatLngBounds };
+export { AbstractAlgorithm, AbstractViewportAlgorithm, Cluster, ClusterStats, DefaultRenderer, GridAlgorithm, MarkerClusterer, MarkerClustererEvents, NoopAlgorithm, SuperClusterAlgorithm, SuperClusterViewportAlgorithm, defaultOnClusterClickHandler, distanceBetweenPoints, extendBoundsToPaddedViewport, extendPixelBounds, filterMarkersToPaddedViewport, getPaddedViewport, noop, pixelBoundsToLatLngBounds };
 //# sourceMappingURL=index.esm.js.map
