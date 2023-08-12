@@ -16,7 +16,7 @@
 
 import points from "./realworld.json";
 
-declare let L: any;
+declare let L: any; /* eslint-disable-line @typescript-eslint/no-explicit-any */
 
 const tiles = L.tileLayer("//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 18,
