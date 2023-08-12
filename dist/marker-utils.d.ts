@@ -15,10 +15,13 @@
  */
 /// <reference types="google.maps" />
 /**
+ * Supports markers of either either "legacy" or "advanced" types.
+ */
+export type Marker = google.maps.Marker | google.maps.marker.AdvancedMarkerElement;
+/**
  * util class that creates a common set of convenience functions to wrap
  * shared behavior of Advanced Markers and Markers.
  */
-export type Marker = google.maps.Marker | google.maps.marker.AdvancedMarkerElement;
 export declare class MarkerUtils {
     static isAdvancedMarkerAvailable(map: google.maps.Map): boolean;
     static isAdvancedMarker(marker: Marker): marker is google.maps.marker.AdvancedMarkerElement;

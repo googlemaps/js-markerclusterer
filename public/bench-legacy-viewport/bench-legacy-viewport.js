@@ -172,6 +172,83 @@ class Cluster {
  * limitations under the License.
  */
 /**
+ * Returns the markers visible in a padded map viewport
+ *
+ * @param map
+ * @param mapCanvasProjection
+ * @param markers The list of marker to filter
+ * @param viewportPaddingPixels The padding in pixel
+ * @returns The list of markers in the padded viewport
+ */
+const filterMarkersToPaddedViewport = (map, mapCanvasProjection, markers, viewportPaddingPixels) => {
+    const extendedMapBounds = extendBoundsToPaddedViewport(map.getBounds(), mapCanvasProjection, viewportPaddingPixels);
+    return markers.filter((marker) => extendedMapBounds.contains(MarkerUtils.getPosition(marker)));
+};
+/**
+ * Extends a bounds by a number of pixels in each direction
+ */
+const extendBoundsToPaddedViewport = (bounds, projection, numPixels) => {
+    const { northEast, southWest } = latLngBoundsToPixelBounds(bounds, projection);
+    const extendedPixelBounds = extendPixelBounds({ northEast, southWest }, numPixels);
+    return pixelBoundsToLatLngBounds(extendedPixelBounds, projection);
+};
+/**
+ * Gets the extended bounds as a bbox [westLng, southLat, eastLng, northLat]
+ */
+const getPaddedViewport = (bounds, projection, pixels) => {
+    const extended = extendBoundsToPaddedViewport(bounds, projection, pixels);
+    const ne = extended.getNorthEast();
+    const sw = extended.getSouthWest();
+    return [sw.lng(), sw.lat(), ne.lng(), ne.lat()];
+};
+/**
+ * Converts a LatLng bound to pixels.
+ *
+ * @hidden
+ */
+const latLngBoundsToPixelBounds = (bounds, projection) => {
+    return {
+        northEast: projection.fromLatLngToDivPixel(bounds.getNorthEast()),
+        southWest: projection.fromLatLngToDivPixel(bounds.getSouthWest()),
+    };
+};
+/**
+ * Extends a pixel bounds by numPixels in all directions.
+ *
+ * @hidden
+ */
+const extendPixelBounds = ({ northEast, southWest }, numPixels) => {
+    northEast.x += numPixels;
+    northEast.y -= numPixels;
+    southWest.x -= numPixels;
+    southWest.y += numPixels;
+    return { northEast, southWest };
+};
+/**
+ * @hidden
+ */
+const pixelBoundsToLatLngBounds = ({ northEast, southWest }, projection) => {
+    const sw = projection.fromDivPixelToLatLng(southWest);
+    const ne = projection.fromDivPixelToLatLng(northEast);
+    return new google.maps.LatLngBounds(sw, ne);
+};
+
+/**
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
  * @hidden
  */
 class AbstractAlgorithm {
@@ -192,6 +269,37 @@ class AbstractAlgorithm {
      */
     noop({ markers, }) {
         return noop(markers);
+    }
+}
+/**
+ * Abstract viewport algorithm proves a class to filter markers by a padded
+ * viewport. This is a common optimization.
+ *
+ * @hidden
+ */
+class AbstractViewportAlgorithm extends AbstractAlgorithm {
+    constructor(_a) {
+        var { viewportPadding = 60 } = _a, options = __rest(_a, ["viewportPadding"]);
+        super(options);
+        this.viewportPadding = 60;
+        this.viewportPadding = viewportPadding;
+    }
+    calculate({ markers, map, mapCanvasProjection, }) {
+        if (map.getZoom() >= this.maxZoom) {
+            return {
+                clusters: this.noop({
+                    markers,
+                }),
+                changed: false,
+            };
+        }
+        return {
+            clusters: this.cluster({
+                markers: filterMarkersToPaddedViewport(map, mapCanvasProjection, markers, this.viewportPadding),
+                map,
+                mapCanvasProjection,
+            }),
+        };
     }
 }
 /**
@@ -267,6 +375,90 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
     cluster({ map }) {
         return this.superCluster
             .getClusters([-180, -90, 180, 90], Math.round(map.getZoom()))
+            .map((feature) => this.transformCluster(feature));
+    }
+    transformCluster({ geometry: { coordinates: [lng, lat], }, properties, }) {
+        if (properties.cluster) {
+            return new Cluster({
+                markers: this.superCluster
+                    .getLeaves(properties.cluster_id, Infinity)
+                    .map((leaf) => leaf.properties.marker),
+                position: { lat, lng },
+            });
+        }
+        const marker = properties.marker;
+        return new Cluster({
+            markers: [marker],
+            position: MarkerUtils.getPosition(marker),
+        });
+    }
+}
+
+/**
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * A very fast JavaScript algorithm for geospatial point clustering using KD trees.
+ *
+ * @see https://www.npmjs.com/package/supercluster for more information on options.
+ */
+class SuperClusterViewportAlgorithm extends AbstractViewportAlgorithm {
+    constructor(_a) {
+        var { maxZoom, radius = 60, viewportPadding = 60 } = _a, options = __rest(_a, ["maxZoom", "radius", "viewportPadding"]);
+        super({ maxZoom, viewportPadding });
+        this.superCluster = new Supercluster(Object.assign({ maxZoom: this.maxZoom, radius }, options));
+        this.state = { zoom: -1, view: [0, 0, 0, 0] };
+    }
+    calculate(input) {
+        const state = {
+            zoom: Math.round(input.map.getZoom()),
+            view: getPaddedViewport(input.map.getBounds(), input.mapCanvasProjection, this.viewportPadding),
+        };
+        let changed = !equal(this.state, state);
+        if (!equal(input.markers, this.markers)) {
+            changed = true;
+            // TODO use proxy to avoid copy?
+            this.markers = [...input.markers];
+            const points = this.markers.map((marker) => {
+                const position = MarkerUtils.getPosition(marker);
+                const coordinates = [position.lng(), position.lat()];
+                return {
+                    type: "Feature",
+                    geometry: {
+                        type: "Point",
+                        coordinates,
+                    },
+                    properties: { marker },
+                };
+            });
+            this.superCluster.load(points);
+        }
+        if (changed) {
+            this.clusters = this.cluster(input);
+            this.state = state;
+        }
+        return { clusters: this.clusters, changed };
+    }
+    cluster({ map, mapCanvasProjection }) {
+        /* recalculate new state because we can't use the cached version. */
+        const state = {
+            zoom: Math.round(map.getZoom()),
+            view: getPaddedViewport(map.getBounds(), mapCanvasProjection, this.viewportPadding),
+        };
+        return this.superCluster
+            .getClusters(state.view, state.zoom)
             .map((feature) => this.transformCluster(feature));
     }
     transformCluster({ geometry: { coordinates: [lng, lat], }, properties, }) {
@@ -50651,7 +50843,10 @@ new Loader(getLoaderOptions()).load().then(() => {
     const markers = points.map(([lat, lng, label]) => new google.maps.Marker({ position: { lat, lng }, label }));
     const markerCluster = new MarkerClusterer({
         markers,
-        algorithmOptions: { maxZoom: 30 },
+        algorithm: new SuperClusterViewportAlgorithm({
+            maxZoom: 30,
+            viewportPadding: 60,
+        }),
     });
     markerCluster.setMap(map);
 });

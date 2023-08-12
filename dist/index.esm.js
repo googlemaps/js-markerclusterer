@@ -43,6 +43,10 @@ function __rest(s, e) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * util class that creates a common set of convenience functions to wrap
+ * shared behavior of Advanced Markers and Markers.
+ */
 class MarkerUtils {
     static isAdvancedMarkerAvailable(map) {
         return (google.maps.marker &&
