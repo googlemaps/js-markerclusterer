@@ -566,9 +566,8 @@ class DefaultRenderer {
         zIndex = Number(google.maps.Marker.MAX_ZINDEX) + count;
         if (MarkerUtils.isAdvancedMarkerAvailable(map)) {
             // create cluster SVG element
-            const div = document.createElement("div");
-            div.innerHTML = svg;
-            const svgEl = div.firstElementChild;
+            const parser = new DOMParser();
+            const svgEl = parser.parseFromString(svg, "image/svg+xml").documentElement;
             svgEl.setAttribute("transform", "translate(0 25)");
             const clusterOptions = {
                 map,

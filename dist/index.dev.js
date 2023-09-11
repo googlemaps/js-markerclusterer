@@ -4948,9 +4948,8 @@ var markerClusterer = (function (exports) {
           zIndex = Number(google.maps.Marker.MAX_ZINDEX) + count;
         if (MarkerUtils.isAdvancedMarkerAvailable(map)) {
           // create cluster SVG element
-          var div = document.createElement("div");
-          div.innerHTML = svg;
-          var svgEl = div.firstElementChild;
+          var parser = new DOMParser();
+          var svgEl = parser.parseFromString(svg, "image/svg+xml").documentElement;
           svgEl.setAttribute("transform", "translate(0 25)");
           var _clusterOptions = {
             map: map,
