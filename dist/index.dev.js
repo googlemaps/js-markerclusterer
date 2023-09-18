@@ -535,10 +535,10 @@ var markerClusterer = (function (exports) {
   (shared$3.exports = function (key, value) {
     return store$2[key] || (store$2[key] = value !== undefined ? value : {});
   })('versions', []).push({
-    version: '3.32.1',
+    version: '3.32.2',
     mode: 'global',
     copyright: '© 2014-2023 Denis Pushkarev (zloirock.ru)',
-    license: 'https://github.com/zloirock/core-js/blob/v3.32.1/LICENSE',
+    license: 'https://github.com/zloirock/core-js/blob/v3.32.2/LICENSE',
     source: 'https://github.com/zloirock/core-js'
   });
   var sharedExports = shared$3.exports;
@@ -3628,7 +3628,7 @@ var markerClusterer = (function (exports) {
     createIteratorConstructor(IteratorConstructor, NAME, next);
     var getIterationMethod = function (KIND) {
       if (KIND === DEFAULT && defaultIterator) return defaultIterator;
-      if (!BUGGY_SAFARI_ITERATORS && KIND in IterablePrototype) return IterablePrototype[KIND];
+      if (!BUGGY_SAFARI_ITERATORS && KIND && KIND in IterablePrototype) return IterablePrototype[KIND];
       switch (KIND) {
         case KEYS:
           return function keys() {
@@ -4108,7 +4108,11 @@ var markerClusterer = (function (exports) {
     });
   } catch (error) {/* empty */}
   var checkCorrectnessOfIteration$1 = function (exec, SKIP_CLOSING) {
-    if (!SKIP_CLOSING && !SAFE_CLOSING) return false;
+    try {
+      if (!SKIP_CLOSING && !SAFE_CLOSING) return false;
+    } catch (error) {
+      return false;
+    } // workaround of old WebKit + `eval` bug
     var ITERATION_SUPPORT = false;
     try {
       var object = {};
@@ -4798,18 +4802,18 @@ var markerClusterer = (function (exports) {
         if (third === 88 || third === 120) return NaN; // Number('+0x1') should be NaN, old V8 fix
       } else if (first === 48) {
         switch (charCodeAt(it, 1)) {
+          // fast equal of /^0b[01]+$/i
           case 66:
           case 98:
             radix = 2;
             maxCode = 49;
             break;
-          // fast equal of /^0b[01]+$/i
+          // fast equal of /^0o[0-7]+$/i
           case 79:
           case 111:
             radix = 8;
             maxCode = 55;
             break;
-          // fast equal of /^0o[0-7]+$/i
           default:
             return +it;
         }
