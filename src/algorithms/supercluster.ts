@@ -15,7 +15,7 @@
  */
 
 import { AbstractAlgorithm, AlgorithmInput, AlgorithmOutput } from "./core";
-import SuperCluster, { ClusterFeature } from "supercluster";
+import * as SuperCluster, { ClusterFeature } from "supercluster";
 import { MarkerUtils, Marker } from "../marker-utils";
 import { Cluster } from "../cluster";
 import equal from "fast-deep-equal";
