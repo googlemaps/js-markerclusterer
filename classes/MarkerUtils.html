@@ -1,4 +1,4 @@
-<!DOCTYPE html><html class="default" lang="en"><head><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>SuperClusterViewportState | @googlemaps/js-markerclusterer</title><meta name="description" content="Documentation for @googlemaps/js-markerclusterer"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os"</script><header class="tsd-page-toolbar">
+<!DOCTYPE html><html class="default" lang="en"><head><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>MarkerUtils | @googlemaps/js-markerclusterer</title><meta name="description" content="Documentation for @googlemaps/js-markerclusterer"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os"</script><header class="tsd-page-toolbar">
 <div class="tsd-toolbar-contents container">
 <div class="table-cell" id="tsd-search" data-base="..">
 <div class="field"><label for="tsd-search-field" class="tsd-widget tsd-toolbar-icon search no-caption"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><use href="#icon-search"></use></svg></label><input type="text" id="tsd-search-field" aria-label="Search"/></div>
@@ -13,36 +13,113 @@
 <div class="tsd-page-title">
 <ul class="tsd-breadcrumb">
 <li><a href="../modules.html">@googlemaps/js-markerclusterer</a></li>
-<li><a href="SuperClusterViewportState.html">SuperClusterViewportState</a></li></ul>
-<h1>Interface SuperClusterViewportState</h1></div>
+<li><a href="MarkerUtils.html">MarkerUtils</a></li></ul>
+<h1>Class MarkerUtils</h1></div>
+<section class="tsd-panel tsd-comment">
+<div class="tsd-comment tsd-typography"><p>util class that creates a common set of convenience functions to wrap
+shared behavior of Advanced Markers and Markers.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div></section>
 <section class="tsd-panel tsd-hierarchy">
 <h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
-<li><span class="target">SuperClusterViewportState</span></li></ul></section><aside class="tsd-sources">
+<li><span class="target">MarkerUtils</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/googlemaps/js-markerclusterer/blob/442a740/src/algorithms/superviewport.ts#L34">algorithms/superviewport.ts:34</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/googlemaps/js-markerclusterer/blob/442a740/src/marker-utils.ts#L28">marker-utils.ts:28</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
 <h5 class="tsd-index-heading uppercase" role="button" aria-expanded="false" tabIndex=0><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><use href="#icon-chevronSmall"></use></svg> Index</h5></summary>
 <div class="tsd-accordion-details">
 <section class="tsd-index-section">
-<h3 class="tsd-index-heading">Properties</h3>
-<div class="tsd-index-list"><a href="SuperClusterViewportState.html#view" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>view</span></a>
-<a href="SuperClusterViewportState.html#zoom" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>zoom</span></a>
+<h3 class="tsd-index-heading">Constructors</h3>
+<div class="tsd-index-list"><a href="MarkerUtils.html#constructor" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-512"></use></svg><span>constructor</span></a>
+</div></section>
+<section class="tsd-index-section">
+<h3 class="tsd-index-heading">Methods</h3>
+<div class="tsd-index-list"><a href="MarkerUtils.html#getPosition" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>get<wbr/>Position</span></a>
+<a href="MarkerUtils.html#getVisible" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>get<wbr/>Visible</span></a>
+<a href="MarkerUtils.html#isAdvancedMarker" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>is<wbr/>Advanced<wbr/>Marker</span></a>
+<a href="MarkerUtils.html#isAdvancedMarkerAvailable" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>is<wbr/>Advanced<wbr/>Marker<wbr/>Available</span></a>
+<a href="MarkerUtils.html#setMap" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>set<wbr/>Map</span></a>
 </div></section></div></details></section></section>
 <section class="tsd-panel-group tsd-member-group">
-<h2>Properties</h2>
-<section class="tsd-panel tsd-member"><a id="view" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>view</span><a href="#view" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">view</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span></div><aside class="tsd-sources">
+<h2>Constructors</h2>
+<section class="tsd-panel tsd-member"><a id="constructor" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>constructor</span><a href="#constructor" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="tsd-signature tsd-anchor-link" id="constructor.new_MarkerUtils"><span class="tsd-kind-constructor-signature">new <wbr/>Marker<wbr/>Utils</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="MarkerUtils.html" class="tsd-signature-type tsd-kind-class">MarkerUtils</a><a href="#constructor.new_MarkerUtils" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description">
+<h4 class="tsd-returns-title">Returns <a href="MarkerUtils.html" class="tsd-signature-type tsd-kind-class">MarkerUtils</a></h4></li></ul></section></section>
+<section class="tsd-panel-group tsd-member-group">
+<h2>Methods</h2>
+<section class="tsd-panel tsd-member"><a id="getPosition" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>get<wbr/>Position</span><a href="#getPosition" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="tsd-signature tsd-anchor-link" id="getPosition.getPosition-1"><span class="tsd-kind-call-signature">get<wbr/>Position</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">marker</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">LatLng</span><a href="#getPosition.getPosition-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">marker</span>: <a href="../types/Marker.html" class="tsd-signature-type tsd-kind-type-alias">Marker</a></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">LatLng</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/googlemaps/js-markerclusterer/blob/442a740/src/algorithms/superviewport.ts#L39">algorithms/superviewport.ts:39</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member"><a id="zoom" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>zoom</span><a href="#zoom" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">zoom</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
+<li>Defined in <a href="https://github.com/googlemaps/js-markerclusterer/blob/442a740/src/marker-utils.ts#L53">marker-utils.ts:53</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member"><a id="getVisible" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>get<wbr/>Visible</span><a href="#getVisible" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="tsd-signature tsd-anchor-link" id="getVisible.getVisible-1"><span class="tsd-kind-call-signature">get<wbr/>Visible</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">marker</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><a href="#getVisible.getVisible-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">marker</span>: <a href="../types/Marker.html" class="tsd-signature-type tsd-kind-type-alias">Marker</a></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/googlemaps/js-markerclusterer/blob/442a740/src/algorithms/superviewport.ts#L36">algorithms/superviewport.ts:36</a></li></ul></aside></section></section></div>
+<li>Defined in <a href="https://github.com/googlemaps/js-markerclusterer/blob/442a740/src/marker-utils.ts#L73">marker-utils.ts:73</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member"><a id="isAdvancedMarker" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>is<wbr/>Advanced<wbr/>Marker</span><a href="#isAdvancedMarker" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="tsd-signature tsd-anchor-link" id="isAdvancedMarker.isAdvancedMarker-1"><span class="tsd-kind-call-signature">is<wbr/>Advanced<wbr/>Marker</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">marker</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-kind-parameter">marker</span><span class="tsd-signature-symbol"> is </span><span class="tsd-signature-type ">AdvancedMarkerElement</span><a href="#isAdvancedMarker.isAdvancedMarker-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">marker</span>: <a href="../types/Marker.html" class="tsd-signature-type tsd-kind-type-alias">Marker</a></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-kind-parameter">marker</span><span class="tsd-signature-symbol"> is </span><span class="tsd-signature-type ">AdvancedMarkerElement</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/googlemaps/js-markerclusterer/blob/442a740/src/marker-utils.ts#L36">marker-utils.ts:36</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member"><a id="isAdvancedMarkerAvailable" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>is<wbr/>Advanced<wbr/>Marker<wbr/>Available</span><a href="#isAdvancedMarkerAvailable" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="tsd-signature tsd-anchor-link" id="isAdvancedMarkerAvailable.isAdvancedMarkerAvailable-1"><span class="tsd-kind-call-signature">is<wbr/>Advanced<wbr/>Marker<wbr/>Available</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">map</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><a href="#isAdvancedMarkerAvailable.isAdvancedMarkerAvailable-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">map</span>: <span class="tsd-signature-type ">Map</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/googlemaps/js-markerclusterer/blob/442a740/src/marker-utils.ts#L29">marker-utils.ts:29</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member"><a id="setMap" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>set<wbr/>Map</span><a href="#setMap" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="tsd-signature tsd-anchor-link" id="setMap.setMap-1"><span class="tsd-kind-call-signature">set<wbr/>Map</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">marker</span>, <span class="tsd-kind-parameter">map</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#setMap.setMap-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">marker</span>: <a href="../types/Marker.html" class="tsd-signature-type tsd-kind-type-alias">Marker</a></h5></li>
+<li>
+<h5><span class="tsd-kind-parameter">map</span>: <span class="tsd-signature-type ">Map</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/googlemaps/js-markerclusterer/blob/442a740/src/marker-utils.ts#L45">marker-utils.ts:45</a></li></ul></aside></li></ul></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -60,31 +137,35 @@
 <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg>On This Page</h3></summary>
 <div class="tsd-accordion-details">
 <ul>
-<li><a href="#view" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>view</span></a></li>
-<li><a href="#zoom" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>zoom</span></a></li></ul></div></details></div>
+<li><a href="#constructor" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-512"></use></svg><span>constructor</span></a></li>
+<li><a href="#getPosition" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>get<wbr/>Position</span></a></li>
+<li><a href="#getVisible" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>get<wbr/>Visible</span></a></li>
+<li><a href="#isAdvancedMarker" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>is<wbr/>Advanced<wbr/>Marker</span></a></li>
+<li><a href="#isAdvancedMarkerAvailable" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>is<wbr/>Advanced<wbr/>Marker<wbr/>Available</span></a></li>
+<li><a href="#setMap" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>set<wbr/>Map</span></a></li></ul></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../modules.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1"></use></svg><span>@googlemaps/js-markerclusterer</span></a>
 <ul class="tsd-small-nested-navigation" id="tsd-nav-container" data-base="..">
 <li><a href="../enums/MarkerClustererEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8"></use></svg>MarkerClustererEvents</a></li>
-<li><a href="../classes/Cluster.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg>Cluster</a></li>
-<li><a href="../classes/ClusterStats.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg>ClusterStats</a></li>
-<li><a href="../classes/DefaultRenderer.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg>DefaultRenderer</a></li>
-<li><a href="../classes/GridAlgorithm.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg>GridAlgorithm</a></li>
-<li><a href="../classes/MarkerClusterer.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg>MarkerClusterer</a></li>
-<li><a href="../classes/MarkerUtils.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg>MarkerUtils</a></li>
-<li><a href="../classes/NoopAlgorithm.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg>NoopAlgorithm</a></li>
-<li><a href="../classes/SuperClusterAlgorithm.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg>SuperClusterAlgorithm</a></li>
-<li><a href="../classes/SuperClusterViewportAlgorithm.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg>SuperClusterViewportAlgorithm</a></li>
-<li><a href="Algorithm.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg>Algorithm</a></li>
-<li><a href="AlgorithmInput.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg>AlgorithmInput</a></li>
-<li><a href="AlgorithmOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg>AlgorithmOptions</a></li>
-<li><a href="AlgorithmOutput.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg>AlgorithmOutput</a></li>
-<li><a href="ClusterOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg>ClusterOptions</a></li>
-<li><a href="GridOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg>GridOptions</a></li>
-<li><a href="MarkerClustererOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg>MarkerClustererOptions</a></li>
-<li><a href="Renderer.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg>Renderer</a></li>
-<li><a href="SuperClusterViewportOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg>SuperClusterViewportOptions</a></li>
-<li><a href="SuperClusterViewportState.html" class="current"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg>SuperClusterViewportState</a></li>
+<li><a href="Cluster.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg>Cluster</a></li>
+<li><a href="ClusterStats.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg>ClusterStats</a></li>
+<li><a href="DefaultRenderer.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg>DefaultRenderer</a></li>
+<li><a href="GridAlgorithm.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg>GridAlgorithm</a></li>
+<li><a href="MarkerClusterer.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg>MarkerClusterer</a></li>
+<li><a href="MarkerUtils.html" class="current"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg>MarkerUtils</a></li>
+<li><a href="NoopAlgorithm.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg>NoopAlgorithm</a></li>
+<li><a href="SuperClusterAlgorithm.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg>SuperClusterAlgorithm</a></li>
+<li><a href="SuperClusterViewportAlgorithm.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg>SuperClusterViewportAlgorithm</a></li>
+<li><a href="../interfaces/Algorithm.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg>Algorithm</a></li>
+<li><a href="../interfaces/AlgorithmInput.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg>AlgorithmInput</a></li>
+<li><a href="../interfaces/AlgorithmOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg>AlgorithmOptions</a></li>
+<li><a href="../interfaces/AlgorithmOutput.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg>AlgorithmOutput</a></li>
+<li><a href="../interfaces/ClusterOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg>ClusterOptions</a></li>
+<li><a href="../interfaces/GridOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg>GridOptions</a></li>
+<li><a href="../interfaces/MarkerClustererOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg>MarkerClustererOptions</a></li>
+<li><a href="../interfaces/Renderer.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg>Renderer</a></li>
+<li><a href="../interfaces/SuperClusterViewportOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg>SuperClusterViewportOptions</a></li>
+<li><a href="../interfaces/SuperClusterViewportState.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg>SuperClusterViewportState</a></li>
 <li><a href="../types/Marker.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2097152"></use></svg>Marker</a></li>
 <li>Loading...</li></ul></nav></div></div></div>
 <div class="tsd-generator">

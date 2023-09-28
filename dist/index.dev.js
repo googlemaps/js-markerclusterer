@@ -5259,6 +5259,7 @@ var markerClusterer = (function (exports) {
   exports.DefaultRenderer = DefaultRenderer;
   exports.GridAlgorithm = GridAlgorithm;
   exports.MarkerClusterer = MarkerClusterer;
+  exports.MarkerUtils = MarkerUtils;
   exports.NoopAlgorithm = NoopAlgorithm;
   exports.SuperClusterAlgorithm = SuperClusterAlgorithm;
   exports.SuperClusterViewportAlgorithm = SuperClusterViewportAlgorithm;

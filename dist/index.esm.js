@@ -952,5 +952,5 @@ class MarkerClusterer extends OverlayViewSafe {
     }
 }
 
-export { AbstractAlgorithm, AbstractViewportAlgorithm, Cluster, ClusterStats, DefaultRenderer, GridAlgorithm, MarkerClusterer, MarkerClustererEvents, NoopAlgorithm, SuperClusterAlgorithm, SuperClusterViewportAlgorithm, defaultOnClusterClickHandler, distanceBetweenPoints, extendBoundsToPaddedViewport, extendPixelBounds, filterMarkersToPaddedViewport, getPaddedViewport, noop, pixelBoundsToLatLngBounds };
+export { AbstractAlgorithm, AbstractViewportAlgorithm, Cluster, ClusterStats, DefaultRenderer, GridAlgorithm, MarkerClusterer, MarkerClustererEvents, MarkerUtils, NoopAlgorithm, SuperClusterAlgorithm, SuperClusterViewportAlgorithm, defaultOnClusterClickHandler, distanceBetweenPoints, extendBoundsToPaddedViewport, extendPixelBounds, filterMarkersToPaddedViewport, getPaddedViewport, noop, pixelBoundsToLatLngBounds };
 //# sourceMappingURL=index.esm.js.map
