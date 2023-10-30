@@ -60,7 +60,7 @@
     "d3-interpolate": "^3.0.1",
     "eslint": "^8.41.0",
     "eslint-config-prettier": "^9.0.0",
-    "eslint-plugin-jest": "^27.0.1",
+    "eslint-plugin-jest": "^27.6.0",
     "eslint-plugin-prettier": "^4.0.0",
     "jest": "^26.4.2",
     "prettier": "^2.1.1",
