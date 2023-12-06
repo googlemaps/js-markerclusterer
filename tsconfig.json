@@ -9,7 +9,7 @@
     "target": "es2016",
     "moduleResolution": "node",
     "allowJs": true,
-    "module": "commonjs",
+    "module": "esnext",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true
