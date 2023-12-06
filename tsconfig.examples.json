@@ -6,7 +6,6 @@
     "outDir": null,
     "declarationDir": null,
     "noImplicitAny": false,
-    "sourceMap": false,
     "resolveJsonModule": true,
   },
   "include": ["src/**/*", "examples/**/*"]
