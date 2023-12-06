@@ -69,14 +69,14 @@ const interpolatedRenderer = {
 new Loader(getLoaderOptions()).load().then(() => {
   const maps: google.maps.Map[] = [];
 
-  const panels: [HTMLElement, Renderer, string][] = [
+  const panels: [HTMLElement, Renderer, string | null][] = [
     [
-      document.getElementById("default"),
+      document.getElementById("default")!,
       new DefaultRenderer(),
       `new DefaultRenderer()`,
     ],
     [
-      document.getElementById("simple"),
+      document.getElementById("simple")!,
       {
         render: ({ count, position }: Cluster) =>
           new google.maps.Marker({
@@ -88,8 +88,8 @@ new Loader(getLoaderOptions()).load().then(() => {
       },
       null,
     ],
-    [document.getElementById("svg"), new DefaultRenderer(), null],
-    [document.getElementById("interpolated"), interpolatedRenderer, null],
+    [document.getElementById("svg")!, new DefaultRenderer(), null],
+    [document.getElementById("interpolated")!, interpolatedRenderer, null],
   ];
 
   panels.forEach(([element, renderer, text]) => {
