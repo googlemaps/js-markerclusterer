@@ -16,12 +16,13 @@
 
 import { babel } from "@rollup/plugin-babel";
 import commonjs from "@rollup/plugin-commonjs";
-import { terser } from "rollup-plugin-terser";
+import terser from "@rollup/plugin-terser";
 import typescript from "@rollup/plugin-typescript";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 
 const babelOptions = {
   extensions: [".js", ".ts"],
+  babelHelpers: "bundled",
 };
 
 const terserOptions = { output: { comments: "" } };
@@ -67,6 +68,7 @@ export default [
   },
   {
     input: "src/index.ts",
+    external: ["supercluster", "fast-deep-equal"],
     plugins: [
       typescript({ tsconfig: "./tsconfig.json", declarationDir: "./" }),
     ],

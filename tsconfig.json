@@ -6,9 +6,14 @@
     "outDir": "./dist",
     "esModuleInterop": true,
     "lib": ["DOM", "ESNext"],
-    "target": "ES6",
-    "moduleResolution": "node"
+    "target": "es2016",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "module": "esnext",
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "./dist"]
+  "exclude": ["./dist"]
 }
