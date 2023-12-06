@@ -17,7 +17,7 @@
 import { SuperClusterAlgorithm } from "./supercluster";
 import { initialize } from "@googlemaps/jest-mocks";
 import { Marker } from "../marker-utils";
-import { ClusterFeature, PointFeature } from "supercluster";
+import { ClusterFeature } from "supercluster";
 
 initialize();
 const markerClasses = [
