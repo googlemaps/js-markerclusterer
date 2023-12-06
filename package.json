@@ -33,7 +33,7 @@
     "format": "eslint . --fix",
     "lint": "eslint .",
     "prepare": "rm -rf dist && rollup -c",
-    "test": "jest --passWithNoTests src/*",
+    "test": "jest src/*",
     "test:all": "jest"
   },
   "dependencies": {
