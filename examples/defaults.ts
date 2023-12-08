@@ -26,7 +26,7 @@ const mapOptions: google.maps.MapOptions = {
 };
 
 new Loader(getLoaderOptions()).load().then(() => {
-  const element = document.getElementById("map");
+  const element = document.getElementById("map")!;
 
   const map = new google.maps.Map(element, mapOptions);
 
