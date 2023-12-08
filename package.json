@@ -27,12 +27,13 @@
     "dist/*"
   ],
   "scripts": {
-    "docs": "typedoc src/index.ts && cp -r dist docs/dist && npm run examples && cp -r public docs/public",
+    "build": "rm -rf dist && rollup -c",
+    "docs": "npm run build && typedoc src/index.ts && cp -r dist docs/dist && npm run examples && cp -r public docs/public",
     "examples": "rollup -c rollup.config.examples.js",
     "dev": "rollup -c rollup.config.examples.js --watch",
     "format": "eslint . --fix",
     "lint": "eslint .",
-    "prepare": "rm -rf dist && rollup -c",
+    "prepack": "npm run build",
     "test": "jest src/*",
     "test:all": "jest"
   },
