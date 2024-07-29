@@ -73,7 +73,7 @@ export default [
       typescript({ tsconfig: "./tsconfig.json", declarationDir: "./" }),
     ],
     output: {
-      file: "dist/index.esm.js",
+      file: "dist/index.esm.mjs",
       format: "esm",
       sourcemap: true,
       name: "markerClusterer",
