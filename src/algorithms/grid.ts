@@ -115,12 +115,18 @@ export class GridAlgorithm extends AbstractViewportAlgorithm {
   ): void {
     let maxDistance = this.maxDistance; // Some large number
     let cluster: Cluster = null;
+    const position = MarkerUtils.getPosition(marker);
+
+    if (position === null) {
+      // Marker has no position, which makes it invisible and not part of the cluster
+      return;
+    }
 
     for (let i = 0; i < this.clusters.length; i++) {
       const candidate = this.clusters[i];
       const distance = distanceBetweenPoints(
         candidate.bounds.getCenter().toJSON(),
-        MarkerUtils.getPosition(marker).toJSON()
+        position.toJSON()
       );
 
       if (distance < maxDistance) {
@@ -135,7 +141,7 @@ export class GridAlgorithm extends AbstractViewportAlgorithm {
         cluster.bounds,
         projection,
         this.gridSize
-      ).contains(MarkerUtils.getPosition(marker))
+      ).contains(position)
     ) {
       cluster.push(marker);
     } else {
