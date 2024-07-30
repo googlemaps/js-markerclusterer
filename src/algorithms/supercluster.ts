@@ -18,7 +18,7 @@ import { AbstractAlgorithm, AlgorithmInput, AlgorithmOutput } from "./core";
 import SuperCluster, { ClusterFeature } from "supercluster";
 import { MarkerUtils, Marker } from "../marker-utils";
 import { Cluster } from "../cluster";
-import equal from "fast-deep-equal";
+import { deepEqual } from "fast-equals";
 
 export type SuperClusterOptions = SuperCluster.Options<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -52,7 +52,7 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
     let changed = false;
     const state = { zoom: input.map.getZoom() };
 
-    if (!equal(input.markers, this.markers)) {
+    if (!deepEqual(input.markers, this.markers)) {
       changed = true;
       // TODO use proxy to avoid copy?
       this.markers = [...input.markers];
@@ -74,7 +74,7 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
 
     if (!changed) {
       if (this.state.zoom <= this.maxZoom || state.zoom <= this.maxZoom) {
-        changed = !equal(this.state, state);
+        changed = !deepEqual(this.state, state);
       }
     }
 
