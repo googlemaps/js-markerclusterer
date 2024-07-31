@@ -50,7 +50,7 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
 
   public calculate(input: AlgorithmInput): AlgorithmOutput {
     let changed = false;
-    const state = { zoom: input.map.getZoom() };
+    const state = { zoom: Math.round(input.map.getZoom()) };
 
     if (!equal(input.markers, this.markers)) {
       changed = true;
