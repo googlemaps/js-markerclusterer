@@ -25,7 +25,7 @@ function __rest(s, e) {
     return t;
 }
 
-function getDefaultExportFromCjs (x) {
+function getDefaultExportFromCjs$1 (x) {
 	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
 }
 
@@ -74,7 +74,7 @@ var fastDeepEqual$1 = function equal(a, b) {
   return a!==a && b!==b;
 };
 
-var equal = /*@__PURE__*/getDefaultExportFromCjs(fastDeepEqual$1);
+var equal = /*@__PURE__*/getDefaultExportFromCjs$1(fastDeepEqual$1);
 
 const ARRAY_TYPES = [
     Int8Array, Uint8Array, Uint8ClampedArray, Int16Array, Uint16Array,
@@ -825,7 +825,7 @@ function yLat(y) {
     return 360 * Math.atan(Math.exp(y2)) / Math.PI - 90;
 }
 
-/*! *****************************************************************************
+/******************************************************************************
 Copyright (c) Microsoft Corporation.
 
 Permission to use, copy, modify, and/or distribute this software for any
@@ -839,6 +839,8 @@ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 ***************************************************************************** */
+/* global Reflect, Promise, SuppressedError, Symbol */
+
 
 function __awaiter(thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -848,6 +850,15 @@ function __awaiter(thisArg, _arguments, P, generator) {
         function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
+}
+
+typeof SuppressedError === "function" ? SuppressedError : function (error, suppressed, message) {
+    var e = new Error(message);
+    return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
+};
+
+function getDefaultExportFromCjs (x) {
+	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
 }
 
 // do not edit .js files directly - edit src/index.jst
@@ -894,6 +905,8 @@ var fastDeepEqual = function equal(a, b) {
   // true if both NaN, false otherwise
   return a!==a && b!==b;
 };
+
+var isEqual = /*@__PURE__*/getDefaultExportFromCjs(fastDeepEqual);
 
 /**
  * Copyright 2019 Google LLC. All Rights Reserved.
@@ -969,7 +982,7 @@ class Loader {
         this.url = url;
         this.version = version;
         if (Loader.instance) {
-            if (!fastDeepEqual(this.options, Loader.instance.options)) {
+            if (!isEqual(this.options, Loader.instance.options)) {
                 throw new Error(`Loader must not be called again with different options. ${JSON.stringify(this.options)} !== ${JSON.stringify(Loader.instance.options)}`);
             }
             return Loader.instance;
@@ -1015,7 +1028,7 @@ class Loader {
      */
     createUrl() {
         let url = this.url;
-        url += `?callback=__googleMapsCallback`;
+        url += `?callback=__googleMapsCallback&loading=async`;
         if (this.apiKey) {
             url += `&key=${this.apiKey}`;
         }
@@ -1199,22 +1212,23 @@ class Loader {
     }
     execute() {
         this.resetIfRetryingFailed();
+        if (this.loading) {
+            // do nothing but wait
+            return;
+        }
         if (this.done) {
             this.callback();
         }
         else {
             // short circuit and warn if google.maps is already loaded
             if (window.google && window.google.maps && window.google.maps.version) {
-                console.warn("Google Maps already loaded outside @googlemaps/js-api-loader." +
+                console.warn("Google Maps already loaded outside @googlemaps/js-api-loader. " +
                     "This may result in undesirable behavior as options and script parameters may not match.");
                 this.callback();
                 return;
             }
-            if (this.loading) ;
-            else {
-                this.loading = true;
-                this.setScript();
-            }
+            this.loading = true;
+            this.setScript();
         }
     }
 }
