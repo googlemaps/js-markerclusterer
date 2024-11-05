@@ -76,8 +76,8 @@ export class MarkerUtils {
         }
         // since we can't cast to LatLngLiteral for reasons =(
         if (
-          typeof marker.position.lat === 'number' &&
-          typeof marker.position.lng === 'number'
+          typeof marker.position.lat === "number" &&
+          typeof marker.position.lng === "number"
         ) {
           return new google.maps.LatLng(
             marker.position.lat,
