@@ -76,19 +76,31 @@ export class MarkerUtils {
         }
         // since we can't cast to LatLngLiteral for reasons =(
         if (
-          marker.position.lat !== null &&
-          marker.position.lat !== undefined &&
-          marker.position.lng !== null &&
-          marker.position.lng !== undefined
+          // marker.position.lat !== null &&
+          // marker.position.lat !== undefined &&
+          // marker.position.lng !== null &&
+          // marker.position.lng !== undefined
+          typeof marker.position.lat === 'number' &&
+          typeof marker.position.lng === 'number'
         ) {
+          console.log('Inside LatLngLiteral check...');
           return new google.maps.LatLng(
             marker.position.lat,
             marker.position.lng
           );
         }
       }
+      console.log(
+        `Returning empty LatLng for Advanced marker... Position was ${JSON.stringify(
+          marker.position
+        )} with type ${typeof marker.position}`
+      );
+
       return new google.maps.LatLng(null);
     }
+
+    console.log('Returning regular Marker position...');
+
     return marker.getPosition();
   }
 
