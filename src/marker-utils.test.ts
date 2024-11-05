@@ -69,9 +69,9 @@ describe.each(markerClasses)(
 
     test('gets the marker position from an AdvancedMarkerElement with a LatLng position', () => {
       latLngTestScenarios.forEach((position: google.maps.LatLng) => {
-        const marker = new google.maps.marker.AdvancedMarkerElement({
-          position: position,
-        });
+        const marker = new google.maps.marker.AdvancedMarkerElement();
+
+        marker.position = position;
 
         const markerPosition = MarkerUtils.getPosition(marker);
 
@@ -81,39 +81,14 @@ describe.each(markerClasses)(
       });
     });
 
-    test.only('gets the marker position from an AdvancedMarkerElement with a LatLngLiteral position', () => {
+    test('gets the marker position from an AdvancedMarkerElement with a LatLngLiteral position', () => {
       latLngLiteralTestScenarios.forEach(
         (position: google.maps.LatLngLiteral) => {
           const marker = new google.maps.marker.AdvancedMarkerElement();
-          // const marker = new google.maps.marker.AdvancedMarkerElement({
-          //   position: position,
-          // });
 
           marker.position = position;
 
-          console.log(
-            `
-            Advanced marker position: ${JSON.stringify(marker.position)}
-            ${typeof marker.position.lat}
-            ${typeof marker.position.lng}
-            `
-          );
-
           const markerPosition = MarkerUtils.getPosition(marker);
-
-          //   console.log(`
-          //   Original: [${JSON.stringify(position)}]
-          //   markerClass data: [${JSON.stringify(markerClass)}]
-          //   markerClass type: [${typeof markerClass}]
-          //   Converted: [${markerPosition.lat()}, ${markerPosition.lng()}]
-          // `);
-          // console.log(
-          //   `Converted: [${markerPosition.lat()}, ${markerPosition.lng()}]`
-          // );
-
-          console.log(
-            `Received [${markerPosition.lat()}, ${markerPosition.lng()}]`
-          );
 
           expect(markerPosition).toBeInstanceOf(google.maps.LatLng);
           expect(markerPosition.lat()).toEqual(position.lat);
