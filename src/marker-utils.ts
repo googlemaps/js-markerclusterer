@@ -54,6 +54,23 @@ export class MarkerUtils {
     // SuperClusterAlgorithm.calculate expects a LatLng instance so we fake it for Adv Markers
     if (this.isAdvancedMarker(marker)) {
       if (marker.position) {
+        /* 
+          TODO: This check doesn't work when a `loader` is used to create the position object.
+          The type check sees `marker.position` as a generic `object`, but I'm not sure how to
+          fix this. Example `LatLng` object creation to reproduce:
+          ```ts
+            import {Loader} from '@googlemaps/js-api-loader';
+
+            const loader = new Loader(...);
+            const {LatLng} = await loader.importLibrary('core');
+            const latLng = new LatLng({lat: latitude, lng: longitude});
+
+            const newAdvancedMarker = new AdvancedMarkerElement({
+              position: latLng,
+              ...
+            });
+          ```
+        */
         if (marker.position instanceof google.maps.LatLng) {
           return marker.position;
         }

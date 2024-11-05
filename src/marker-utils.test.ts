@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { MarkerUtils } from "./marker-utils";
-import { initialize } from "@googlemaps/jest-mocks";
+import { MarkerUtils } from './marker-utils';
+import { initialize } from '@googlemaps/jest-mocks';
 
 initialize();
 const markerClasses = [
@@ -24,15 +24,15 @@ const markerClasses = [
 ];
 
 describe.each(markerClasses)(
-  "MarkerUtils works with legacy and Advanced Markers",
+  'MarkerUtils works with legacy and Advanced Markers',
   (markerClass) => {
     let map: google.maps.Map;
 
     beforeEach(() => {
-      map = new google.maps.Map(document.createElement("div"));
+      map = new google.maps.Map(document.createElement('div'));
     });
 
-    test("identifies AdvancedMarker instances", () => {
+    test('identifies AdvancedMarker instances', () => {
       const isAdvancedMarker = MarkerUtils.isAdvancedMarker(new markerClass());
       if (markerClass === google.maps.marker.AdvancedMarkerElement) {
         expect(isAdvancedMarker).toBeTruthy;
@@ -41,7 +41,7 @@ describe.each(markerClasses)(
       expect(isAdvancedMarker).toBeFalsy;
     });
 
-    test("sets the map", () => {
+    test('sets the map', () => {
       const marker = new markerClass();
       MarkerUtils.setMap(marker, map);
       if (markerClass === google.maps.marker.AdvancedMarkerElement) {
@@ -53,21 +53,43 @@ describe.each(markerClasses)(
       expect((marker as google.maps.Marker).setMap).toHaveBeenCalled;
     });
 
-    test("gets the marker position and returns a LatLng", () => {
+    test('gets the marker position and returns a LatLng', () => {
       // test markers created with LatLng and LatLngLiteral
-      [new google.maps.LatLng(1, 1), { lat: 1, lng: 1 }].forEach((position) => {
+      [
+        new google.maps.LatLng(1, 1),
+        { lat: 1, lng: 1 },
+        new google.maps.LatLng(0, 0),
+        { lat: 0, lng: 0 },
+        new google.maps.LatLng(0, 1),
+        { lat: 0, lng: 1 },
+        new google.maps.LatLng(1, 0),
+        { lat: 1, lng: 0 },
+      ].forEach((position) => {
         const marker = new markerClass({ position: position });
         if (markerClass === google.maps.marker.AdvancedMarkerElement) {
           (marker as google.maps.marker.AdvancedMarkerElement).position =
             position;
         }
-        expect(MarkerUtils.getPosition(marker)).toBeInstanceOf(
-          google.maps.LatLng
-        );
+
+        const markerPosition = MarkerUtils.getPosition(marker);
+
+        expect(markerPosition).toBeInstanceOf(google.maps.LatLng);
+
+        if (typeof position.lat === 'number') {
+          expect(markerPosition.lat()).toEqual(position.lat);
+        } else if (typeof position.lat === 'function') {
+          expect(markerPosition.lat()).toEqual(position.lat());
+        }
+
+        if (typeof position.lng === 'number') {
+          expect(markerPosition.lng()).toEqual(position.lng);
+        } else if (typeof position.lng === 'function') {
+          expect(markerPosition.lng()).toEqual(position.lng());
+        }
       });
     });
 
-    test("", () => {
+    test('detects the visibility of a marker', () => {
       const marker = new markerClass();
       expect(MarkerUtils.getVisible(marker)).toBeTruthy;
     });
