@@ -1,4 +1,4 @@
-[![npm](https://img.shields.io/npm/v/@googlemaps/markerclusterer)](https://www.npmjs.com/package/@googlemaps/markerclusterer)
+[![npm](https://img.shields.io/npm/v/@googlemaps/markerclusterer)][npm-pkg]
 ![Tests/Build Status](https://github.com/googlemaps/js-markerclusterer/workflows/Test/badge.svg)
 ![Release](https://github.com/googlemaps/js-markerclusterer/workflows/Release/badge.svg)
 ![Stable](https://img.shields.io/badge/stability-stable-green)
@@ -24,12 +24,14 @@ See the [history section](#history) and [migration section](#migration) for how 
 
 ## Requirements
 
-- A modern frontend framework like Angular, React, or Vue.js
-- An [API key][api-key]
+* [Sign up with Google Maps Platform]
+* A Google Maps Platform [project] with the [**Maps Javascript API**][maps-sdk] enabled
+* An [API key] associated with the project above
+* [@googlemaps/markerclusterer NPM package][npm-pkg]
 
 ## Installation
 
-Available via npm as the package [@googlemaps/markerclusterer](https://www.npmjs.com/package/@googlemaps/markerclusterer).
+Install the [@googlemaps/markerclusterer NPM package][npm-pkg] with:
 
 ```
 npm i @googlemaps/markerclusterer
@@ -45,7 +47,7 @@ When adding via unpkg, the `MarkerClusterer` can be accessed at `markerClusterer
 
 #### TypeScript
 
-This library uses the official TypeScript typings for Google Maps Platform, [@types/google.maps](https://www.npmjs.com/package/@types/google.maps).
+This library uses the official TypeScript typings for Google Maps Platform, [@types/google.maps](https://npmjs.com/package/@types/google.maps).
 
 ```sh
 npm i -D @types/google.maps
@@ -68,7 +70,7 @@ const markerCluster = new MarkerClusterer({ map, markers });
 
 View the package in action:
 
-- [Algorithm Comparisons](https://googlemaps.github.io/js-markerclusterer/public/algorithms) - This example demonstrates the different algorithms. Please note that spacing and many other options can be changed for each algorithm. 
+- [Algorithm Comparisons](https://googlemaps.github.io/js-markerclusterer/public/algorithms) - This example demonstrates the different algorithms. Please note that spacing and many other options can be changed for each algorithm.
 
 
 
@@ -106,7 +108,7 @@ The API of [@googlemaps/markerclusterer][@googlemaps/markerclusterer] has change
 ```
 
 - The `MarkerClusterer` accepts a single options argument instead of positional parameters.
-- The traditional `GridAlgorithm` is still supported, **but is not the default**. The default is [supercluster](https://www.npmjs.com/package/supercluster) which uses [k-d trees](https://en.wikipedia.org/wiki/K-d_tree) for improved performance.
+- The traditional `GridAlgorithm` is still supported, **but is not the default**. The default is [supercluster](https://npmjs.com/package/supercluster) which uses [k-d trees](https://en.wikipedia.org/wiki/K-d_tree) for improved performance.
 - Styling of clusters has been simplifed and moved to the renderer interface.
 - The `MarkerClusterer` class is still an instance of `google.maps.OverlayView`, but uses `google.maps.Marker`s instead of `google.maps.Overlay` to render the clusters. This solves issues related to the usage of map panes and click handlers.
 - @googlemaps/markerclusterer supports Marker and Map [a11y improvements](https://cloud.google.com/blog/products/maps-platform/improved-accessibility-maps-javascript-api).
@@ -131,15 +133,13 @@ If you find a bug, or have a feature request, please [file an issue] on GitHub. 
 
 You can also discuss this library on our [Discord server].
 
-[@googlemaps/markerclustererplus]: https://www.npmjs.com/package/@googlemaps/markerclustererplus
-[@google/markerclusterer]: https://www.npmjs.com/package/@google/markerclusterer
-[@googlemaps/markerclusterer]: https://www.npmjs.com/package/@googlemaps/markerclusterer
+[@googlemaps/markerclustererplus]: https://npmjs.com/package/@googlemaps/markerclustererplus
+[@google/markerclusterer]: https://npmjs.com/package/@google/markerclusterer
 
-[api-key]: https://developers.google.com/maps/documentation/android-sdk/get-api-key
-[devsite-guide]: https://developers.google.com/maps/documentation/android-sdk/utility
-[gmp-start]: https://console.cloud.google.com/google/maps-apis/start
-[maps-sdk]: https://developers.google.com/maps/documentation/android-sdk
+[API key]: https://developers.google.com/maps/documentation/javascript/get-api-key
+[maps-sdk]: https://developers.google.com/maps/documentation/javascript
 [documentation]: https://googlemaps.github.io/js-markerclusterer
+[npm-pkg]: https://npmjs.com/package/@googlemaps/markerclusterer)
 
 [code of conduct]: CODE_OF_CONDUCT.md
 [contributing guide]: CONTRIBUTING.md
@@ -148,8 +148,10 @@ You can also discuss this library on our [Discord server].
 [Discord server]: https://discord.gg/hYsWbmk
 [file an issue]: https://github.com/googlemaps/js-markerclusterer/issues/new/choose
 [license]: LICENSE
+[project]: https://developers.google.com/maps/documentation/javascript/cloud-setup#enabling-apis
 [pull request]: https://github.com/googlemaps/js-markerclusterer/compare
 [semantic versioning]: https://semver.org
+[Sign up with Google Maps Platform]: https://console.cloud.google.com/google/maps-apis/start
 [similar inquiry]: https://github.com/googlemaps/js-markerclusterer/issues
 [SLA]: https://cloud.google.com/maps-platform/terms/sla
 [Technical Support Services Guidelines]: https://cloud.google.com/maps-platform/terms/tssg
