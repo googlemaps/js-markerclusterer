@@ -45,7 +45,10 @@ export class Cluster {
 
     const bounds = new google.maps.LatLngBounds(this._position, this._position);
     for (const marker of this.markers) {
-      bounds.extend(MarkerUtils.getPosition(marker));
+      const position = MarkerUtils.getPosition(marker);
+      if (position) {
+        bounds.extend(position);
+      }
     }
     return bounds;
   }

@@ -85,6 +85,10 @@ export class SuperClusterViewportAlgorithm extends AbstractViewportAlgorithm {
 
       const points = this.markers.map((marker) => {
         const position = MarkerUtils.getPosition(marker);
+        if (!position) {
+          return null;
+        }
+
         const coordinates = [position.lng(), position.lat()];
         return {
           type: "Feature" as const,
@@ -95,7 +99,7 @@ export class SuperClusterViewportAlgorithm extends AbstractViewportAlgorithm {
           properties: { marker },
         };
       });
-      this.superCluster.load(points);
+      this.superCluster.load(points.filter((p) => p != null));
     }
 
     if (changed) {
