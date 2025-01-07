@@ -141,7 +141,7 @@ You can also discuss this library on our [Discord server].
 [API key]: https://developers.google.com/maps/documentation/javascript/get-api-key
 [maps-sdk]: https://developers.google.com/maps/documentation/javascript
 [documentation]: https://googlemaps.github.io/js-markerclusterer
-[npm-pkg]: https://npmjs.com/package/@googlemaps/markerclusterer)
+[npm-pkg]: https://npmjs.com/package/@googlemaps/markerclusterer
 
 [code of conduct]: ?tab=coc-ov-file#readme
 [contributing guide]: CONTRIBUTING.md
