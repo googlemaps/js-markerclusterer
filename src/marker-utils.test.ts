@@ -23,6 +23,10 @@ const markerClasses = [
   google.maps.marker.AdvancedMarkerElement,
 ];
 
+beforeEach(() => {
+  initialize();
+});
+
 describe.each(markerClasses)(
   "MarkerUtils works with legacy and Advanced Markers",
   (markerClass) => {
@@ -35,10 +39,10 @@ describe.each(markerClasses)(
     test("identifies AdvancedMarker instances", () => {
       const isAdvancedMarker = MarkerUtils.isAdvancedMarker(new markerClass());
       if (markerClass === google.maps.marker.AdvancedMarkerElement) {
-        expect(isAdvancedMarker).toBeTruthy;
+        expect(isAdvancedMarker).toBeTruthy();
         return;
       }
-      expect(isAdvancedMarker).toBeFalsy;
+      expect(isAdvancedMarker).toBeFalsy();
     });
 
     test("sets the map", () => {
@@ -50,7 +54,7 @@ describe.each(markerClasses)(
         ).toEqual(map);
         return;
       }
-      expect((marker as google.maps.Marker).setMap).toHaveBeenCalled;
+      expect((marker as google.maps.Marker).setMap).toHaveBeenCalled();
     });
 
     test("gets the marker position and returns a LatLng", () => {
@@ -67,9 +71,16 @@ describe.each(markerClasses)(
       });
     });
 
-    test("", () => {
+    test(`${markerClass.name}.getVisible`, () => {
       const marker = new markerClass();
-      expect(MarkerUtils.getVisible(marker)).toBeTruthy;
+
+      const res = MarkerUtils.getVisible(marker);
+
+      if (marker instanceof google.maps.Marker) {
+        expect(marker.getVisible).toHaveBeenCalled();
+      } else {
+        expect(res).toBe(true);
+      }
     });
   }
 );
