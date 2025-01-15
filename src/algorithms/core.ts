@@ -17,6 +17,7 @@
 import { Cluster } from "../cluster";
 import { filterMarkersToPaddedViewport } from "./utils";
 import { MarkerUtils, Marker } from "../marker-utils";
+import { assertNotNull } from "../utils";
 
 export interface AlgorithmInput {
   /**
@@ -130,7 +131,11 @@ export abstract class AbstractViewportAlgorithm extends AbstractAlgorithm {
     map,
     mapCanvasProjection,
   }: AlgorithmInput): AlgorithmOutput {
-    if (map.getZoom() >= this.maxZoom) {
+    const zoom = map.getZoom();
+
+    assertNotNull(zoom);
+
+    if (zoom >= this.maxZoom) {
       return {
         clusters: this.noop({
           markers,
