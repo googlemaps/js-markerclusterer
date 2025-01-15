@@ -17,6 +17,7 @@
 import { SuperClusterViewportAlgorithm } from "./superviewport";
 import { initialize, MapCanvasProjection } from "@googlemaps/jest-mocks";
 import { Marker } from "../marker-utils";
+import { ClusterFeature } from "supercluster";
 
 initialize();
 const markerClasses = [
@@ -93,20 +94,26 @@ describe.each(markerClasses)(
     test("should transform to Cluster with single marker if not cluster", () => {
       const superCluster = new SuperClusterViewportAlgorithm({});
       const marker: Marker = new markerClass();
-
-      const cluster = superCluster["transformCluster"]({
+      const clusterFeature: ClusterFeature<{ marker: Marker }> = {
         type: "Feature",
         geometry: { coordinates: [0, 0], type: "Point" },
         properties: {
           marker,
-          cluster: null,
-          cluster_id: null,
+          cluster: true,
+          cluster_id: 0,
           point_count: 1,
           point_count_abbreviated: 1,
         },
-      });
-      expect(cluster.markers.length).toEqual(1);
-      expect(cluster.markers[0]).toBe(marker);
+      };
+
+      // mock out the supercluster implementation
+      jest
+        .spyOn(superCluster["superCluster"], "getLeaves")
+        .mockImplementation(() => [clusterFeature]);
+
+      const cluster = superCluster["transformCluster"](clusterFeature);
+      expect(cluster.markers?.length).toEqual(1);
+      expect(cluster.markers?.at(0)).toBe(marker);
     });
 
     test("should not cluster if zoom didn't change", () => {

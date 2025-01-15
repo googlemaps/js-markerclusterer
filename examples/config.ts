@@ -45,8 +45,8 @@ export const sync = (...maps: google.maps.Map[]): void => {
 
   maps.forEach((m) => {
     m.addListener("bounds_changed", () => {
-      const changedCenter = m.getCenter();
-      const changedZoom = m.getZoom();
+      const changedCenter = m.getCenter()!;
+      const changedZoom = m.getZoom()!;
 
       if (changedCenter !== center || changedZoom !== zoom) {
         center = changedCenter;

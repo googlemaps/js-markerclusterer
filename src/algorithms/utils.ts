@@ -15,6 +15,7 @@
  */
 
 import { MarkerUtils, Marker } from "../marker-utils";
+import { assertNotNull } from "../utils";
 
 /**
  * Returns the markers visible in a padded map viewport
@@ -31,18 +32,22 @@ export const filterMarkersToPaddedViewport = (
   markers: Marker[],
   viewportPaddingPixels: number
 ): Marker[] => {
+  const bounds = map.getBounds();
+  assertNotNull(bounds);
+
   const extendedMapBounds = extendBoundsToPaddedViewport(
-    map.getBounds(),
+    bounds,
     mapCanvasProjection,
     viewportPaddingPixels
   );
+
   return markers.filter((marker) =>
     extendedMapBounds.contains(MarkerUtils.getPosition(marker))
   );
 };
 
 /**
- * Extends a bounds by a number of pixels in each direction
+ * Extends bounds by a number of pixels in each direction
  */
 export const extendBoundsToPaddedViewport = (
   bounds: google.maps.LatLngBounds,
@@ -113,10 +118,13 @@ const latLngBoundsToPixelBounds = (
   bounds: google.maps.LatLngBounds,
   projection: google.maps.MapCanvasProjection
 ): PixelBounds => {
-  return {
-    northEast: projection.fromLatLngToDivPixel(bounds.getNorthEast()),
-    southWest: projection.fromLatLngToDivPixel(bounds.getSouthWest()),
-  };
+  const northEast = projection.fromLatLngToDivPixel(bounds.getNorthEast());
+  const southWest = projection.fromLatLngToDivPixel(bounds.getSouthWest());
+
+  assertNotNull(northEast);
+  assertNotNull(southWest);
+
+  return { northEast, southWest };
 };
 
 /**

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+/** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
-  transform: {
-    "^.+\\.tsx?$": "ts-jest",
-  },
+  preset: "ts-jest/presets/js-with-ts",
+  testEnvironment: "jsdom",
+  transformIgnorePatterns: [],
   collectCoverage: true,
   testPathIgnorePatterns: ["/dist/"],
 };
