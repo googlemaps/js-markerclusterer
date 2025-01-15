@@ -65,9 +65,12 @@ export class MarkerUtils {
           );
         }
       }
+
+      // @ts-ignore
       return new google.maps.LatLng(null);
     }
-    return marker.getPosition();
+
+    return marker.getPosition()!;
   }
 
   public static getVisible(marker: Marker) {

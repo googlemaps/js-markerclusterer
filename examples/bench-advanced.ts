@@ -17,6 +17,7 @@
 import { MAP_ID, getLoaderOptions } from "./config";
 import { Loader } from "@googlemaps/js-api-loader";
 import { MarkerClusterer } from "../src";
+
 import points from "./realworld.json";
 
 // Do not set the mapId to force legacy markers
@@ -28,7 +29,7 @@ const mapOptions: google.maps.MapOptions = {
 };
 
 new Loader(getLoaderOptions()).load().then(() => {
-  const element = document.getElementById("map");
+  const element = document.getElementById("map")!;
 
   const map = new google.maps.Map(element, mapOptions);
 

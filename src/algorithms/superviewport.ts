@@ -26,6 +26,7 @@ import { MarkerUtils, Marker } from "../marker-utils";
 import { Cluster } from "../cluster";
 import { getPaddedViewport } from "./utils";
 import equal from "fast-deep-equal";
+import { assertNotNull } from "../utils";
 
 export interface SuperClusterViewportOptions
   extends SuperClusterOptions,
@@ -46,8 +47,8 @@ export interface SuperClusterViewportState {
  */
 export class SuperClusterViewportAlgorithm extends AbstractViewportAlgorithm {
   protected superCluster: SuperCluster;
-  protected markers: Marker[];
-  protected clusters: Cluster[];
+  protected markers: Marker[] = [];
+  protected clusters: Cluster[] = [];
   protected state: SuperClusterViewportState;
 
   constructor({
@@ -68,14 +69,7 @@ export class SuperClusterViewportAlgorithm extends AbstractViewportAlgorithm {
   }
 
   public calculate(input: AlgorithmInput): AlgorithmOutput {
-    const state: SuperClusterViewportState = {
-      zoom: Math.round(input.map.getZoom()),
-      view: getPaddedViewport(
-        input.map.getBounds(),
-        input.mapCanvasProjection,
-        this.viewportPadding
-      ),
-    };
+    const state = this.getViewportState(input);
 
     let changed = !equal(this.state, state);
     if (!equal(input.markers, this.markers)) {
@@ -106,21 +100,14 @@ export class SuperClusterViewportAlgorithm extends AbstractViewportAlgorithm {
     return { clusters: this.clusters, changed };
   }
 
-  public cluster({ map, mapCanvasProjection }: AlgorithmInput): Cluster[] {
+  public cluster(input: AlgorithmInput): Cluster[] {
     /* recalculate new state because we can't use the cached version. */
-    const state: SuperClusterViewportState = {
-      zoom: Math.round(map.getZoom()),
-      view: getPaddedViewport(
-        map.getBounds(),
-        mapCanvasProjection,
-        this.viewportPadding
-      ),
-    };
+    const state = this.getViewportState(input);
 
     return this.superCluster
       .getClusters(state.view, state.zoom)
-      .map((feature: ClusterFeature<{ marker: Marker }>) =>
-        this.transformCluster(feature)
+      .map((feature) =>
+        this.transformCluster(feature as ClusterFeature<{ marker: Marker }>)
       );
   }
 
@@ -145,5 +132,22 @@ export class SuperClusterViewportAlgorithm extends AbstractViewportAlgorithm {
       markers: [marker],
       position: MarkerUtils.getPosition(marker),
     });
+  }
+
+  protected getViewportState(input: AlgorithmInput): SuperClusterViewportState {
+    const mapZoom = input.map.getZoom();
+    const mapBounds = input.map.getBounds();
+
+    assertNotNull(mapZoom);
+    assertNotNull(mapBounds);
+
+    return {
+      zoom: Math.round(mapZoom),
+      view: getPaddedViewport(
+        mapBounds,
+        input.mapCanvasProjection,
+        this.viewportPadding
+      ),
+    };
   }
 }
