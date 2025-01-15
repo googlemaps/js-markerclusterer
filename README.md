@@ -1,5 +1,4 @@
 [![npm](https://img.shields.io/npm/v/@googlemaps/markerclusterer)][npm-pkg]
-
 ![Release](https://github.com/googlemaps/js-markerclusterer/workflows/Release/badge.svg)
 ![Stable](https://img.shields.io/badge/stability-stable-green)
 [![Tests/Build](https://github.com/googlemaps/js-markerclusterer/actions/workflows/test.yml/badge.svg)](https://github.com/googlemaps/js-markerclusterer/actions/workflows/test.yml)
@@ -12,7 +11,6 @@
 [![License](https://img.shields.io/github/license/googlemaps/js-markerclusterer?color=blue)][license]
 [![StackOverflow](https://img.shields.io/stackexchange/stackoverflow/t/google-maps?color=orange&label=google-maps&logo=stackoverflow)](https://stackoverflow.com/questions/tagged/google-maps)
 [![Discord](https://img.shields.io/discord/676948200904589322?color=6A7EC2&logo=discord&logoColor=ffffff)][Discord server]
-
 
 # Google Maps JavaScript MarkerClusterer
 
@@ -28,10 +26,10 @@ See the [history section](#history) and [migration section](#migration) for how 
 
 ## Requirements
 
-* [Sign up with Google Maps Platform]
-* A Google Maps Platform [project] with the [**Maps Javascript API**][maps-sdk] enabled
-* An [API key] associated with the project above
-* [@googlemaps/markerclusterer NPM package][npm-pkg]
+- [Sign up with Google Maps Platform]
+- A Google Maps Platform [project] with the [**Maps Javascript API**][maps-sdk] enabled
+- An [API key] associated with the project above
+- [@googlemaps/markerclusterer NPM package][npm-pkg]
 
 ## Installation
 
