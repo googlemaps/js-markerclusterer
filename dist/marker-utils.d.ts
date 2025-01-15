@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/// <reference types="google.maps" />
 /**
  * Supports markers of either either "legacy" or "advanced" types.
  */

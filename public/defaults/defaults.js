@@ -48,6 +48,7 @@ class MarkerUtils {
                     return new google.maps.LatLng(marker.position.lat, marker.position.lng);
                 }
             }
+            // @ts-ignore
             return new google.maps.LatLng(null);
         }
         return marker.getPosition();
@@ -87,7 +88,7 @@ const DEFAULT_KEY = "AIzaSyDhRjl83cPVWeaEer-SnKIw7GTjBuqWxXI";
 const getLoaderOptions = () => {
     var _a;
     return ({
-        apiKey: (_a = localStorage.getItem("gmaps-key")) !== null && _a !== void 0 ? _a : DEFAULT_KEY,
+        apiKey: (_a = localStorage.getItem("gmaps-key")) !== null && _a !== undefined ? _a : DEFAULT_KEY,
         version: "weekly",
         libraries: ["marker"],
     });
@@ -125,7 +126,9 @@ function createMarker(map, lat, lng) {
  */
 class Cluster {
     constructor({ markers, position }) {
-        this.markers = markers;
+        this.markers = [];
+        if (markers)
+            this.markers = markers;
         if (position) {
             if (position instanceof google.maps.LatLng) {
                 this._position = position;
@@ -146,6 +149,7 @@ class Cluster {
         return bounds;
     }
     get position() {
+        // @ts-ignore
         return this._position || this.bounds.getCenter();
     }
     /**
@@ -169,6 +173,34 @@ class Cluster {
             this.marker = undefined;
         }
         this.markers.length = 0;
+    }
+}
+
+/**
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * A typescript assertion function used in cases where typescript has to be
+ * convinced that the object in question can not be null.
+ *
+ * @param value
+ * @param message
+ */
+function assertNotNull(value, message = "assertion failed") {
+    if (value === null || value === undefined) {
+        throw Error(message);
     }
 }
 
@@ -245,12 +277,16 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
     constructor(_a) {
         var { maxZoom, radius = 60 } = _a, options = __rest(_a, ["maxZoom", "radius"]);
         super({ maxZoom });
+        this.markers = [];
+        this.clusters = [];
         this.state = { zoom: -1 };
         this.superCluster = new Supercluster(Object.assign({ maxZoom: this.maxZoom, radius }, options));
     }
     calculate(input) {
         let changed = false;
-        const state = { zoom: input.map.getZoom() };
+        const zoom = input.map.getZoom();
+        assertNotNull(zoom);
+        const state = { zoom: zoom };
         if (!equal(input.markers, this.markers)) {
             changed = true;
             // TODO use proxy to avoid copy?
@@ -281,8 +317,10 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
         return { clusters: this.clusters, changed };
     }
     cluster({ map }) {
+        const zoom = map.getZoom();
+        assertNotNull(zoom);
         return this.superCluster
-            .getClusters([-180, -90, 180, 90], Math.round(map.getZoom()))
+            .getClusters([-180, -90, 180, 90], Math.round(zoom))
             .map((feature) => this.transformCluster(feature));
     }
     transformCluster({ geometry: { coordinates: [lng, lat], }, properties, }) {
@@ -448,6 +486,7 @@ function extend(type1, type2) {
 /**
  * @ignore
  */
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 class OverlayViewSafe {
     constructor() {
         // MarkerClusterer implements google.maps.OverlayView interface. We use the
@@ -481,7 +520,8 @@ var MarkerClustererEvents;
     MarkerClustererEvents["CLUSTER_CLICK"] = "click";
 })(MarkerClustererEvents || (MarkerClustererEvents = {}));
 const defaultOnClusterClickHandler = (_, cluster, map) => {
-    map.fitBounds(cluster.bounds);
+    if (cluster.bounds)
+        map.fitBounds(cluster.bounds);
 };
 /**
  * MarkerClusterer creates and manages per-zoom-level clusters for large amounts
@@ -491,6 +531,9 @@ const defaultOnClusterClickHandler = (_, cluster, map) => {
 class MarkerClusterer extends OverlayViewSafe {
     constructor({ map, markers = [], algorithmOptions = {}, algorithm = new SuperClusterAlgorithm(algorithmOptions), renderer = new DefaultRenderer(), onClusterClick = defaultOnClusterClickHandler, }) {
         super();
+        /** @see {@link MarkerClustererOptions.map} */
+        this.map = null;
+        this.idleListener = null;
         this.markers = [...markers];
         this.clusters = [];
         this.algorithm = algorithm;
@@ -597,11 +640,14 @@ class MarkerClusterer extends OverlayViewSafe {
         }
     }
     onAdd() {
-        this.idleListener = this.getMap().addListener("idle", this.render.bind(this));
+        const map = this.getMap();
+        assertNotNull(map);
+        this.idleListener = map.addListener("idle", this.render.bind(this));
         this.render();
     }
     onRemove() {
-        google.maps.event.removeListener(this.idleListener);
+        if (this.idleListener)
+            google.maps.event.removeListener(this.idleListener);
         this.reset();
     }
     reset() {

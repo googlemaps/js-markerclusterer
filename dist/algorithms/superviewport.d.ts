@@ -36,8 +36,9 @@ export declare class SuperClusterViewportAlgorithm extends AbstractViewportAlgor
     protected state: SuperClusterViewportState;
     constructor({ maxZoom, radius, viewportPadding, ...options }: SuperClusterViewportOptions);
     calculate(input: AlgorithmInput): AlgorithmOutput;
-    cluster({ map, mapCanvasProjection }: AlgorithmInput): Cluster[];
+    cluster(input: AlgorithmInput): Cluster[];
     protected transformCluster({ geometry: { coordinates: [lng, lat], }, properties, }: ClusterFeature<{
         marker: Marker;
     }>): Cluster;
+    protected getViewportState(input: AlgorithmInput): SuperClusterViewportState;
 }

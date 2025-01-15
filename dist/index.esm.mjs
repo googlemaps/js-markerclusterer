@@ -1,7 +1,7 @@
 import equal from 'fast-deep-equal';
 import SuperCluster from 'supercluster';
 
-/*! *****************************************************************************
+/******************************************************************************
 Copyright (c) Microsoft Corporation.
 
 Permission to use, copy, modify, and/or distribute this software for any
@@ -15,6 +15,8 @@ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 ***************************************************************************** */
+/* global Reflect, Promise, SuppressedError, Symbol */
+
 
 function __rest(s, e) {
     var t = {};
@@ -27,6 +29,11 @@ function __rest(s, e) {
         }
     return t;
 }
+
+typeof SuppressedError === "function" ? SuppressedError : function (error, suppressed, message) {
+    var e = new Error(message);
+    return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
+};
 
 /**
  * Copyright 2023 Google LLC
@@ -76,6 +83,7 @@ class MarkerUtils {
                     return new google.maps.LatLng(marker.position.lat, marker.position.lng);
                 }
             }
+            // @ts-ignore
             return new google.maps.LatLng(null);
         }
         return marker.getPosition();
@@ -112,7 +120,9 @@ class MarkerUtils {
  */
 class Cluster {
     constructor({ markers, position }) {
-        this.markers = markers;
+        this.markers = [];
+        if (markers)
+            this.markers = markers;
         if (position) {
             if (position instanceof google.maps.LatLng) {
                 this._position = position;
@@ -133,6 +143,7 @@ class Cluster {
         return bounds;
     }
     get position() {
+        // @ts-ignore
         return this._position || this.bounds.getCenter();
     }
     /**
@@ -175,6 +186,34 @@ class Cluster {
  * limitations under the License.
  */
 /**
+ * A typescript assertion function used in cases where typescript has to be
+ * convinced that the object in question can not be null.
+ *
+ * @param value
+ * @param message
+ */
+function assertNotNull(value, message = "assertion failed") {
+    if (value === null || value === undefined) {
+        throw Error(message);
+    }
+}
+
+/**
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
  * Returns the markers visible in a padded map viewport
  *
  * @param map
@@ -184,11 +223,13 @@ class Cluster {
  * @returns The list of markers in the padded viewport
  */
 const filterMarkersToPaddedViewport = (map, mapCanvasProjection, markers, viewportPaddingPixels) => {
-    const extendedMapBounds = extendBoundsToPaddedViewport(map.getBounds(), mapCanvasProjection, viewportPaddingPixels);
+    const bounds = map.getBounds();
+    assertNotNull(bounds);
+    const extendedMapBounds = extendBoundsToPaddedViewport(bounds, mapCanvasProjection, viewportPaddingPixels);
     return markers.filter((marker) => extendedMapBounds.contains(MarkerUtils.getPosition(marker)));
 };
 /**
- * Extends a bounds by a number of pixels in each direction
+ * Extends bounds by a number of pixels in each direction
  */
 const extendBoundsToPaddedViewport = (bounds, projection, numPixels) => {
     const { northEast, southWest } = latLngBoundsToPixelBounds(bounds, projection);
@@ -229,10 +270,11 @@ const distanceBetweenPoints = (p1, p2) => {
  * @hidden
  */
 const latLngBoundsToPixelBounds = (bounds, projection) => {
-    return {
-        northEast: projection.fromLatLngToDivPixel(bounds.getNorthEast()),
-        southWest: projection.fromLatLngToDivPixel(bounds.getSouthWest()),
-    };
+    const northEast = projection.fromLatLngToDivPixel(bounds.getNorthEast());
+    const southWest = projection.fromLatLngToDivPixel(bounds.getSouthWest());
+    assertNotNull(northEast);
+    assertNotNull(southWest);
+    return { northEast, southWest };
 };
 /**
  * Extends a pixel bounds by numPixels in all directions.
@@ -307,7 +349,9 @@ class AbstractViewportAlgorithm extends AbstractAlgorithm {
         this.viewportPadding = viewportPadding;
     }
     calculate({ markers, map, mapCanvasProjection, }) {
-        if (map.getZoom() >= this.maxZoom) {
+        const zoom = map.getZoom();
+        assertNotNull(zoom);
+        if (zoom >= this.maxZoom) {
             return {
                 clusters: this.noop({
                     markers,
@@ -367,18 +411,18 @@ class GridAlgorithm extends AbstractViewportAlgorithm {
         this.gridSize = gridSize;
     }
     calculate({ markers, map, mapCanvasProjection, }) {
-        const state = { zoom: map.getZoom() };
+        const zoom = map.getZoom();
+        assertNotNull(zoom);
+        const newState = { zoom };
         let changed = false;
-        if (this.state.zoom >= this.maxZoom && state.zoom >= this.maxZoom) ;
+        if (this.state.zoom >= this.maxZoom && newState.zoom >= this.maxZoom) ;
         else {
-            changed = !equal(this.state, state);
+            changed = !equal(this.state, newState);
         }
-        this.state = state;
-        if (map.getZoom() >= this.maxZoom) {
+        this.state = newState;
+        if (zoom >= this.maxZoom) {
             return {
-                clusters: this.noop({
-                    markers,
-                }),
+                clusters: this.noop({ markers }),
                 changed,
             };
         }
@@ -402,15 +446,22 @@ class GridAlgorithm extends AbstractViewportAlgorithm {
         let cluster = null;
         for (let i = 0; i < this.clusters.length; i++) {
             const candidate = this.clusters[i];
+            assertNotNull(candidate.bounds);
             const distance = distanceBetweenPoints(candidate.bounds.getCenter().toJSON(), MarkerUtils.getPosition(marker).toJSON());
             if (distance < maxDistance) {
                 maxDistance = distance;
                 cluster = candidate;
             }
         }
-        if (cluster &&
-            extendBoundsToPaddedViewport(cluster.bounds, projection, this.gridSize).contains(MarkerUtils.getPosition(marker))) {
-            cluster.push(marker);
+        if (cluster) {
+            assertNotNull(cluster.bounds);
+            if (extendBoundsToPaddedViewport(cluster.bounds, projection, this.gridSize).contains(MarkerUtils.getPosition(marker))) {
+                cluster.push(marker);
+            }
+            else {
+                const cluster = new Cluster({ markers: [marker] });
+                this.clusters.push(cluster);
+            }
         }
         else {
             const cluster = new Cluster({ markers: [marker] });
@@ -477,12 +528,16 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
     constructor(_a) {
         var { maxZoom, radius = 60 } = _a, options = __rest(_a, ["maxZoom", "radius"]);
         super({ maxZoom });
+        this.markers = [];
+        this.clusters = [];
         this.state = { zoom: -1 };
         this.superCluster = new SuperCluster(Object.assign({ maxZoom: this.maxZoom, radius }, options));
     }
     calculate(input) {
         let changed = false;
-        const state = { zoom: input.map.getZoom() };
+        const zoom = input.map.getZoom();
+        assertNotNull(zoom);
+        const state = { zoom: zoom };
         if (!equal(input.markers, this.markers)) {
             changed = true;
             // TODO use proxy to avoid copy?
@@ -513,8 +568,10 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
         return { clusters: this.clusters, changed };
     }
     cluster({ map }) {
+        const zoom = map.getZoom();
+        assertNotNull(zoom);
         return this.superCluster
-            .getClusters([-180, -90, 180, 90], Math.round(map.getZoom()))
+            .getClusters([-180, -90, 180, 90], Math.round(zoom))
             .map((feature) => this.transformCluster(feature));
     }
     transformCluster({ geometry: { coordinates: [lng, lat], }, properties, }) {
@@ -558,14 +615,13 @@ class SuperClusterViewportAlgorithm extends AbstractViewportAlgorithm {
     constructor(_a) {
         var { maxZoom, radius = 60, viewportPadding = 60 } = _a, options = __rest(_a, ["maxZoom", "radius", "viewportPadding"]);
         super({ maxZoom, viewportPadding });
+        this.markers = [];
+        this.clusters = [];
         this.superCluster = new SuperCluster(Object.assign({ maxZoom: this.maxZoom, radius }, options));
         this.state = { zoom: -1, view: [0, 0, 0, 0] };
     }
     calculate(input) {
-        const state = {
-            zoom: Math.round(input.map.getZoom()),
-            view: getPaddedViewport(input.map.getBounds(), input.mapCanvasProjection, this.viewportPadding),
-        };
+        const state = this.getViewportState(input);
         let changed = !equal(this.state, state);
         if (!equal(input.markers, this.markers)) {
             changed = true;
@@ -591,12 +647,9 @@ class SuperClusterViewportAlgorithm extends AbstractViewportAlgorithm {
         }
         return { clusters: this.clusters, changed };
     }
-    cluster({ map, mapCanvasProjection }) {
+    cluster(input) {
         /* recalculate new state because we can't use the cached version. */
-        const state = {
-            zoom: Math.round(map.getZoom()),
-            view: getPaddedViewport(map.getBounds(), mapCanvasProjection, this.viewportPadding),
-        };
+        const state = this.getViewportState(input);
         return this.superCluster
             .getClusters(state.view, state.zoom)
             .map((feature) => this.transformCluster(feature));
@@ -615,6 +668,16 @@ class SuperClusterViewportAlgorithm extends AbstractViewportAlgorithm {
             markers: [marker],
             position: MarkerUtils.getPosition(marker),
         });
+    }
+    getViewportState(input) {
+        const mapZoom = input.map.getZoom();
+        const mapBounds = input.map.getBounds();
+        assertNotNull(mapZoom);
+        assertNotNull(mapBounds);
+        return {
+            zoom: Math.round(mapZoom),
+            view: getPaddedViewport(mapBounds, input.mapCanvasProjection, this.viewportPadding),
+        };
     }
 }
 
@@ -764,6 +827,7 @@ function extend(type1, type2) {
 /**
  * @ignore
  */
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 class OverlayViewSafe {
     constructor() {
         // MarkerClusterer implements google.maps.OverlayView interface. We use the
@@ -797,7 +861,8 @@ var MarkerClustererEvents;
     MarkerClustererEvents["CLUSTER_CLICK"] = "click";
 })(MarkerClustererEvents || (MarkerClustererEvents = {}));
 const defaultOnClusterClickHandler = (_, cluster, map) => {
-    map.fitBounds(cluster.bounds);
+    if (cluster.bounds)
+        map.fitBounds(cluster.bounds);
 };
 /**
  * MarkerClusterer creates and manages per-zoom-level clusters for large amounts
@@ -807,6 +872,9 @@ const defaultOnClusterClickHandler = (_, cluster, map) => {
 class MarkerClusterer extends OverlayViewSafe {
     constructor({ map, markers = [], algorithmOptions = {}, algorithm = new SuperClusterAlgorithm(algorithmOptions), renderer = new DefaultRenderer(), onClusterClick = defaultOnClusterClickHandler, }) {
         super();
+        /** @see {@link MarkerClustererOptions.map} */
+        this.map = null;
+        this.idleListener = null;
         this.markers = [...markers];
         this.clusters = [];
         this.algorithm = algorithm;
@@ -913,11 +981,14 @@ class MarkerClusterer extends OverlayViewSafe {
         }
     }
     onAdd() {
-        this.idleListener = this.getMap().addListener("idle", this.render.bind(this));
+        const map = this.getMap();
+        assertNotNull(map);
+        this.idleListener = map.addListener("idle", this.render.bind(this));
         this.render();
     }
     onRemove() {
-        google.maps.event.removeListener(this.idleListener);
+        if (this.idleListener)
+            google.maps.event.removeListener(this.idleListener);
         this.reset();
     }
     reset() {
@@ -953,4 +1024,4 @@ class MarkerClusterer extends OverlayViewSafe {
 }
 
 export { AbstractAlgorithm, AbstractViewportAlgorithm, Cluster, ClusterStats, DefaultRenderer, GridAlgorithm, MarkerClusterer, MarkerClustererEvents, MarkerUtils, NoopAlgorithm, SuperClusterAlgorithm, SuperClusterViewportAlgorithm, defaultOnClusterClickHandler, distanceBetweenPoints, extendBoundsToPaddedViewport, extendPixelBounds, filterMarkersToPaddedViewport, getPaddedViewport, noop, pixelBoundsToLatLngBounds };
-//# sourceMappingURL=index.esm.js.map
+//# sourceMappingURL=index.esm.mjs.map

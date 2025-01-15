@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/// <reference types="google.maps" />
 import { Marker } from "./marker-utils";
 export interface ClusterOptions {
     position?: google.maps.LatLng | google.maps.LatLngLiteral;
@@ -21,8 +20,8 @@ export interface ClusterOptions {
 }
 export declare class Cluster {
     marker?: Marker;
-    readonly markers?: Marker[];
-    protected _position: google.maps.LatLng;
+    readonly markers: Marker[];
+    protected _position?: google.maps.LatLng;
     constructor({ markers, position }: ClusterOptions);
     get bounds(): google.maps.LatLngBounds | undefined;
     get position(): google.maps.LatLng;

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/// <reference types="google.maps" />
 import { Marker } from "../marker-utils";
 /**
  * Returns the markers visible in a padded map viewport
@@ -26,7 +25,7 @@ import { Marker } from "../marker-utils";
  */
 export declare const filterMarkersToPaddedViewport: (map: google.maps.Map, mapCanvasProjection: google.maps.MapCanvasProjection, markers: Marker[], viewportPaddingPixels: number) => Marker[];
 /**
- * Extends a bounds by a number of pixels in each direction
+ * Extends bounds by a number of pixels in each direction
  */
 export declare const extendBoundsToPaddedViewport: (bounds: google.maps.LatLngBounds, projection: google.maps.MapCanvasProjection, numPixels: number) => google.maps.LatLngBounds;
 /**

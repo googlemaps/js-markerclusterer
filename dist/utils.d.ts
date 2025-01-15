@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 Google LLC. All Rights Reserved.
+ * Copyright 2021 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export interface OverlayViewSafe extends google.maps.OverlayView {
-}
 /**
- * @ignore
+ * A typescript assertion function used in cases where typescript has to be
+ * convinced that the object in question can not be null.
+ *
+ * @param value
+ * @param message
  */
-export declare class OverlayViewSafe {
-    constructor();
-}
+export declare function assertNotNull<TValue>(value: TValue, message?: string): asserts value is NonNullable<TValue>;
