@@ -17,6 +17,7 @@
 import { SuperClusterAlgorithm } from "./supercluster";
 import { initialize } from "@googlemaps/jest-mocks";
 import { Marker } from "../marker-utils";
+import { ClusterFeature } from "supercluster";
 
 initialize();
 const markerClasses = [
@@ -82,17 +83,25 @@ describe.each(markerClasses)(
       const superCluster = new SuperClusterAlgorithm({});
       const marker: Marker = new markerClass();
 
-      const cluster = superCluster["transformCluster"]({
+      // mock out the supercluster implementation
+      jest
+        .spyOn(superCluster["superCluster"], "getLeaves")
+        .mockImplementation(() => [clusterFeature]);
+
+      const clusterFeature: ClusterFeature<{ marker: Marker }> = {
         type: "Feature",
         geometry: { coordinates: [0, 0], type: "Point" },
         properties: {
           marker,
-          cluster: null,
-          cluster_id: null,
+          cluster: true,
+          cluster_id: 100,
           point_count: 1,
           point_count_abbreviated: 1,
         },
-      });
+      };
+
+      const cluster = superCluster["transformCluster"](clusterFeature);
+
       expect(cluster.markers.length).toEqual(1);
       expect(cluster.markers[0]).toBe(marker);
     });

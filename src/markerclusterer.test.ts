@@ -118,19 +118,21 @@ describe.each(markerClasses)(
     });
 
     test("markerClusterer reset calls delete and setMap null", () => {
-      const markers: Marker[] = [new markerClass()];
+      const marker = new markerClass();
+      const markers: Marker[] = [marker];
+
       const markerClusterer = new MarkerClusterer({
         markers,
       });
       const clusters = [new Cluster({ markers })];
-      const deleteSpy = spyOn(clusters[0], "delete");
+      const deleteSpy = jest.spyOn(clusters[0], "delete");
 
       MarkerUtils.setMap = jest.fn().mockImplementation(() => null);
 
       markerClusterer["clusters"] = clusters;
       markerClusterer["reset"]();
 
-      expect(MarkerUtils.setMap).toHaveBeenCalledWith(markers[0], null);
+      expect(MarkerUtils.setMap).toHaveBeenCalledWith(marker, null);
       expect(deleteSpy).toHaveBeenCalledTimes(1);
     });
 
@@ -250,7 +252,7 @@ describe.each(markerClasses)(
 
       clusters.forEach((cluster) => {
         expect(MarkerUtils.setMap).toBeCalledWith(cluster.marker, map);
-        expect(cluster.marker.addListener).toHaveBeenCalledWith(
+        expect(cluster.marker?.addListener).toHaveBeenCalledWith(
           "click",
           expect.any(Function)
         );
@@ -290,7 +292,7 @@ describe.each(markerClasses)(
 
       const markerClusterer = new MarkerClusterer({
         markers,
-        onClusterClick: null,
+        onClusterClick: undefined,
       });
 
       markerClusterer.getMap = jest.fn().mockImplementation(() => map);
@@ -301,7 +303,7 @@ describe.each(markerClasses)(
       markerClusterer["renderClusters"]();
 
       clusters.forEach((cluster) => {
-        expect(cluster.marker.addListener).toBeCalledTimes(0);
+        expect(cluster.marker?.addListener).toBeCalledTimes(0);
       });
     });
 
@@ -329,7 +331,7 @@ describe.each(markerClasses)(
       markerClusterer.onRemove();
 
       expect(markerClusterer["reset"]).toBeCalledTimes(1);
-      expect(markerClusterer["idleListener"]).toBeUndefined();
+      expect(markerClusterer["idleListener"]).toBeNull();
     });
 
     test("markerClusterer addMarker", () => {

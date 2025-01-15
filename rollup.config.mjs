@@ -16,12 +16,13 @@
 
 import { babel } from "@rollup/plugin-babel";
 import commonjs from "@rollup/plugin-commonjs";
-import { terser } from "rollup-plugin-terser";
+import terser from "@rollup/plugin-terser";
 import typescript from "@rollup/plugin-typescript";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 
 const babelOptions = {
   extensions: [".js", ".ts"],
+  babelHelpers: "bundled",
 };
 
 const terserOptions = { output: { comments: "" } };
@@ -30,7 +31,7 @@ export default [
   {
     input: "src/index.ts",
     plugins: [
-      typescript({ tsconfig: "./tsconfig.json", declarationDir: "./" }),
+      typescript({ tsconfig: "./tsconfig.json" }),
       commonjs(),
       nodeResolve(),
       babel(babelOptions),
@@ -54,7 +55,7 @@ export default [
   {
     input: "src/index.ts",
     plugins: [
-      typescript({ tsconfig: "./tsconfig.json", declarationDir: "./" }),
+      typescript({ tsconfig: "./tsconfig.json" }),
       commonjs(),
       nodeResolve(),
       babel(babelOptions),
@@ -67,11 +68,10 @@ export default [
   },
   {
     input: "src/index.ts",
-    plugins: [
-      typescript({ tsconfig: "./tsconfig.json", declarationDir: "./" }),
-    ],
+    external: ["supercluster", "fast-deep-equal"],
+    plugins: [typescript({ tsconfig: "./tsconfig.json" })],
     output: {
-      file: "dist/index.esm.js",
+      file: "dist/index.esm.mjs",
       format: "esm",
       sourcemap: true,
       name: "markerClusterer",
