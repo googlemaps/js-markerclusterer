@@ -30,7 +30,9 @@ import { assertNotNull } from "../utils";
 
 export interface SuperClusterViewportOptions
   extends SuperClusterOptions,
-    ViewportAlgorithmOptions {}
+    ViewportAlgorithmOptions {
+  radius?: number;
+}
 
 export interface SuperClusterViewportState {
   /* The current zoom level */
