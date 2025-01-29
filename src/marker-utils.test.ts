@@ -36,7 +36,7 @@ describe.each(markerClasses)(
       map = new google.maps.Map(document.createElement("div"));
     });
 
-    test("identifies AdvancedMarker instances", () => {
+    test(`${markerClass.name}: identifies AdvancedMarker instances`, () => {
       const isAdvancedMarker = MarkerUtils.isAdvancedMarker(new markerClass());
       if (markerClass === google.maps.marker.AdvancedMarkerElement) {
         expect(isAdvancedMarker).toBeTruthy();
@@ -45,7 +45,7 @@ describe.each(markerClasses)(
       expect(isAdvancedMarker).toBeFalsy();
     });
 
-    test("sets the map", () => {
+    test(`${markerClass.name}: sets the map`, () => {
       const marker = new markerClass();
       MarkerUtils.setMap(marker, map);
       if (markerClass === google.maps.marker.AdvancedMarkerElement) {
@@ -57,21 +57,48 @@ describe.each(markerClasses)(
       expect((marker as google.maps.Marker).setMap).toHaveBeenCalled();
     });
 
-    test("gets the marker position and returns a LatLng", () => {
-      // test markers created with LatLng and LatLngLiteral
-      [new google.maps.LatLng(1, 1), { lat: 1, lng: 1 }].forEach((position) => {
-        const marker = new markerClass({ position: position });
-        if (markerClass === google.maps.marker.AdvancedMarkerElement) {
-          (marker as google.maps.marker.AdvancedMarkerElement).position =
-            position;
-        }
-        expect(MarkerUtils.getPosition(marker)).toBeInstanceOf(
-          google.maps.LatLng
-        );
-      });
-    });
+    test.each([
+      [{ lat: 0, lng: 0 }, false, 0, 0],
+      [{ lat: 0, lng: 1 }, false, 0, 1],
+      [{ lat: 1, lng: 0 }, false, 1, 0],
+      [{ lat: 1, lng: 1 }, false, 1, 1],
+      [{ lat: 2, lng: 2 }, true, 2, 2],
+    ])(
+      `${markerClass.name}: gets the marker position and returns a LatLng (%p)`,
+      (input, convertToLatLng, lat, lng) => {
+        // this test needs the partial implementation of the LatLng class that can be found below
+        overwriteLatLngMock();
 
-    test(`${markerClass.name}.getVisible`, () => {
+        const isAdvMarker =
+          markerClass === google.maps.marker.AdvancedMarkerElement;
+        let marker:
+          | google.maps.Marker
+          | google.maps.marker.AdvancedMarkerElement;
+
+        if (isAdvMarker) {
+          const m = new google.maps.marker.AdvancedMarkerElement();
+          // in some test-cases, the advanced-marker version returns a
+          // LatLng instance as well
+          m.position = convertToLatLng ? new google.maps.LatLng(input) : input;
+
+          marker = m;
+        } else {
+          const m = new google.maps.Marker();
+          jest
+            .mocked(m.getPosition)
+            .mockReturnValue(new google.maps.LatLng(input));
+          marker = m;
+        }
+
+        const res = MarkerUtils.getPosition(marker);
+
+        expect(res).toBeInstanceOf(google.maps.LatLng);
+        expect(res.lat()).toBe(lat);
+        expect(res.lng()).toBe(lng);
+      }
+    );
+
+    test(`${markerClass.name}: MarkerUtils.getVisible`, () => {
       const marker = new markerClass();
 
       const res = MarkerUtils.getVisible(marker);
@@ -84,3 +111,42 @@ describe.each(markerClasses)(
     });
   }
 );
+
+/* overwrites the google.maps.LatLng class with a partly functional version */
+function overwriteLatLngMock() {
+  const LatLngMock = class extends google.maps.LatLng {
+    constructor(
+      latOrLatLngOrLatLngLiteral:
+        | number
+        | google.maps.LatLngLiteral
+        | google.maps.LatLng,
+      lngOrNoClampNoWrap?: number | boolean | null,
+      noClampNoWrap?: boolean
+    ) {
+      super(latOrLatLngOrLatLngLiteral, lngOrNoClampNoWrap, noClampNoWrap);
+
+      let lat: number;
+      let lng: number;
+
+      if (typeof latOrLatLngOrLatLngLiteral === "object") {
+        if (
+          typeof latOrLatLngOrLatLngLiteral.lat === "function" &&
+          typeof latOrLatLngOrLatLngLiteral.lng === "function"
+        ) {
+          lat = latOrLatLngOrLatLngLiteral.lat();
+          lng = latOrLatLngOrLatLngLiteral.lng();
+        } else {
+          lat = latOrLatLngOrLatLngLiteral.lat as number;
+          lng = latOrLatLngOrLatLngLiteral.lng as number;
+        }
+      } else {
+        lat = latOrLatLngOrLatLngLiteral as number;
+        lng = lngOrNoClampNoWrap as number;
+      }
+
+      this.lat = () => lat;
+      this.lng = () => lng;
+    }
+  };
+  google.maps.LatLng = LatLngMock;
+}
