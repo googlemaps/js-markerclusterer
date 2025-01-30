@@ -29,6 +29,7 @@ import {
 import { Cluster } from "../cluster";
 import { deepEqual } from "fast-equals";
 import { MarkerUtils, Marker } from "../marker-utils";
+import { assertNotNull } from "../utils";
 
 export interface GridOptions extends ViewportAlgorithmOptions {
   gridSize?: number;
@@ -64,19 +65,23 @@ export class GridAlgorithm extends AbstractViewportAlgorithm {
     map,
     mapCanvasProjection,
   }: AlgorithmInput): AlgorithmOutput {
-    const state = { zoom: map.getZoom() };
+    const zoom = map.getZoom();
+
+    assertNotNull(zoom);
+
+    const newState = { zoom };
     let changed = false;
-    if (this.state.zoom >= this.maxZoom && state.zoom >= this.maxZoom) {
+    if (this.state.zoom >= this.maxZoom && newState.zoom >= this.maxZoom) {
       // still at or beyond maxZoom, no change
     } else {
-      changed = !deepEqual(this.state, state);
+      changed = !deepEqual(this.state, newState);
     }
-    this.state = state;
-    if (map.getZoom() >= this.maxZoom) {
+
+    this.state = newState;
+
+    if (zoom >= this.maxZoom) {
       return {
-        clusters: this.noop({
-          markers,
-        }),
+        clusters: this.noop({ markers }),
         changed,
       };
     }
@@ -114,10 +119,13 @@ export class GridAlgorithm extends AbstractViewportAlgorithm {
     projection: google.maps.MapCanvasProjection
   ): void {
     let maxDistance = this.maxDistance; // Some large number
-    let cluster: Cluster = null;
+    let cluster: Cluster | null = null;
 
     for (let i = 0; i < this.clusters.length; i++) {
       const candidate = this.clusters[i];
+
+      assertNotNull(candidate.bounds);
+
       const distance = distanceBetweenPoints(
         candidate.bounds.getCenter().toJSON(),
         MarkerUtils.getPosition(marker).toJSON()
@@ -129,15 +137,21 @@ export class GridAlgorithm extends AbstractViewportAlgorithm {
       }
     }
 
-    if (
-      cluster &&
-      extendBoundsToPaddedViewport(
-        cluster.bounds,
-        projection,
-        this.gridSize
-      ).contains(MarkerUtils.getPosition(marker))
-    ) {
-      cluster.push(marker);
+    if (cluster) {
+      assertNotNull(cluster.bounds);
+
+      if (
+        extendBoundsToPaddedViewport(
+          cluster.bounds,
+          projection,
+          this.gridSize
+        ).contains(MarkerUtils.getPosition(marker))
+      ) {
+        cluster.push(marker);
+      } else {
+        const cluster = new Cluster({ markers: [marker] });
+        this.clusters.push(cluster);
+      }
     } else {
       const cluster = new Cluster({ markers: [marker] });
       this.clusters.push(cluster);

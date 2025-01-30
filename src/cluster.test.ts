@@ -48,13 +48,13 @@ describe.each(markers)(
     test("can push additional markers", () => {
       const cluster = new Cluster({ markers: [] });
       cluster.push(marker);
-      expect(cluster["markers"].length).toBe(1);
+      expect(cluster["markers"]?.length).toBe(1);
     });
 
     test("count visible markers", () => {
       const cluster = new Cluster({ markers: [marker] });
       MarkerUtils.getVisible = jest.fn().mockReturnValue(true);
-      expect(cluster["markers"].length).toBe(1);
+      expect(cluster["markers"]?.length).toBe(1);
     });
 
     test("delete if marker set", () => {
