@@ -1,4 +1,4 @@
-import { _ as __rest, S as Supercluster, e as equal, L as Loader } from './vendor.js';
+import { _ as __rest, S as Supercluster, d as deepEqual, L as Loader } from './vendor.js';
 
 /**
  * Copyright 2023 Google LLC
@@ -384,7 +384,7 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
         const zoom = input.map.getZoom();
         assertNotNull(zoom);
         const state = { zoom: zoom };
-        if (!equal(input.markers, this.markers)) {
+        if (!deepEqual(input.markers, this.markers)) {
             changed = true;
             // TODO use proxy to avoid copy?
             this.markers = [...input.markers];
@@ -404,7 +404,7 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
         }
         if (!changed) {
             if (this.state.zoom <= this.maxZoom || state.zoom <= this.maxZoom) {
-                changed = !equal(this.state, state);
+                changed = !deepEqual(this.state, state);
             }
         }
         this.state = state;
@@ -468,8 +468,8 @@ class SuperClusterViewportAlgorithm extends AbstractViewportAlgorithm {
     }
     calculate(input) {
         const state = this.getViewportState(input);
-        let changed = !equal(this.state, state);
-        if (!equal(input.markers, this.markers)) {
+        let changed = !deepEqual(this.state, state);
+        if (!deepEqual(input.markers, this.markers)) {
             changed = true;
             // TODO use proxy to avoid copy?
             this.markers = [...input.markers];
