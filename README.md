@@ -69,7 +69,7 @@ const markerCluster = new MarkerClusterer({ map, markers });
 ```
 
 To run the examples:
-- Install dependencies: ```npm i @googlemaps/markerclusterer```
+- Install dependencies: ```npm install```
 - Start the development server in the root folder: ```npm run dev```
 - Navigate to [http://localhost:8080/](http://localhost:8080/) in your web browser.
 - Provide a valid Google Maps Platform API key.
