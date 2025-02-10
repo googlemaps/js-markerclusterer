@@ -260,12 +260,7 @@ export class MarkerClusterer extends OverlayViewSafe {
         // Make sure all individual markers are removed from the map.
         cluster.markers.forEach((marker) => MarkerUtils.setMap(marker, null));
         if (this.onClusterClick) {
-          /**
-           * As of February 21, 2024, `google.maps.Marker` is deprecated in favor of
-           * `google.maps.marker.AdvancedMarkerElement`. When handling click events:
-           * - Standard `google.maps.Marker` uses the `"click"` event.
-           * - `AdvancedMarkerElement` requires `"gmp-click"` instead.
-           */
+          // legacy Marker uses 'click' events, whereas AdvancedMarkerElement uses 'gmp-click'
           const markerClickEventName = MarkerUtils.isAdvancedMarker(
             cluster.marker
           )
