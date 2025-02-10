@@ -23,6 +23,7 @@ import { ClusterStats, DefaultRenderer, Renderer } from "./renderer";
 import { Cluster } from "./cluster";
 import { OverlayViewSafe } from "./overlay-view-safe";
 import { MarkerUtils, Marker } from "./marker-utils";
+import { assertNotNull } from "./utils";
 
 export type onClusterClickHandler = (
   event: google.maps.MapMouseEvent,
@@ -51,6 +52,7 @@ export enum MarkerClustererEvents {
   CLUSTERING_BEGIN = "clusteringbegin",
   CLUSTERING_END = "clusteringend",
   CLUSTER_CLICK = "click",
+  GMP_CLICK = "gmp-click",
 }
 
 export const defaultOnClusterClickHandler: onClusterClickHandler = (
@@ -58,7 +60,7 @@ export const defaultOnClusterClickHandler: onClusterClickHandler = (
   cluster: Cluster,
   map: google.maps.Map
 ): void => {
-  map.fitBounds(cluster.bounds);
+  if (cluster.bounds) map.fitBounds(cluster.bounds);
 };
 /**
  * MarkerClusterer creates and manages per-zoom-level clusters for large amounts
@@ -75,8 +77,8 @@ export class MarkerClusterer extends OverlayViewSafe {
   /** @see {@link MarkerClustererOptions.renderer} */
   protected renderer: Renderer;
   /** @see {@link MarkerClustererOptions.map} */
-  protected map: google.maps.Map | null;
-  protected idleListener: google.maps.MapsEventListener;
+  protected map: google.maps.Map | null = null;
+  protected idleListener: google.maps.MapsEventListener | null = null;
 
   constructor({
     map,
@@ -226,15 +228,15 @@ export class MarkerClusterer extends OverlayViewSafe {
   }
 
   public onAdd(): void {
-    this.idleListener = this.getMap().addListener(
-      "idle",
-      this.render.bind(this)
-    );
+    const map = this.getMap();
+    assertNotNull(map);
+
+    this.idleListener = map.addListener("idle", this.render.bind(this));
     this.render();
   }
 
   public onRemove(): void {
-    google.maps.event.removeListener(this.idleListener);
+    if (this.idleListener) google.maps.event.removeListener(this.idleListener);
     this.reset();
   }
 
@@ -258,8 +260,15 @@ export class MarkerClusterer extends OverlayViewSafe {
         // Make sure all individual markers are removed from the map.
         cluster.markers.forEach((marker) => MarkerUtils.setMap(marker, null));
         if (this.onClusterClick) {
+          // legacy Marker uses 'click' events, whereas AdvancedMarkerElement uses 'gmp-click'
+          const markerClickEventName = MarkerUtils.isAdvancedMarker(
+            cluster.marker
+          )
+            ? MarkerClustererEvents.GMP_CLICK
+            : MarkerClustererEvents.CLUSTER_CLICK;
+
           cluster.marker.addListener(
-            "click",
+            markerClickEventName,
             /* istanbul ignore next */
             (event: google.maps.MapMouseEvent) => {
               google.maps.event.trigger(

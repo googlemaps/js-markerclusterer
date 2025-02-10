@@ -23,12 +23,11 @@ export interface ClusterOptions {
 
 export class Cluster {
   public marker?: Marker;
-  public readonly markers?: Marker[];
-  protected _position: google.maps.LatLng;
+  public readonly markers: Marker[] = [];
+  protected _position?: google.maps.LatLng;
 
   constructor({ markers, position }: ClusterOptions) {
-    this.markers = markers;
-
+    if (markers) this.markers = markers;
     if (position) {
       if (position instanceof google.maps.LatLng) {
         this._position = position;
@@ -54,6 +53,7 @@ export class Cluster {
   }
 
   public get position(): google.maps.LatLng {
+    // @ts-ignore
     return this._position || this.bounds.getCenter();
   }
 

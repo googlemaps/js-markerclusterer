@@ -18,7 +18,8 @@ import { AbstractAlgorithm, AlgorithmInput, AlgorithmOutput } from "./core";
 import SuperCluster, { ClusterFeature } from "supercluster";
 import { MarkerUtils, Marker } from "../marker-utils";
 import { Cluster } from "../cluster";
-import equal from "fast-deep-equal";
+import { deepEqual } from "fast-equals";
+import { assertNotNull } from "../utils";
 
 export type SuperClusterOptions = SuperCluster.Options<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -34,8 +35,8 @@ export type SuperClusterOptions = SuperCluster.Options<
  */
 export class SuperClusterAlgorithm extends AbstractAlgorithm {
   protected superCluster: SuperCluster;
-  protected markers: Marker[];
-  protected clusters: Cluster[];
+  protected markers: Marker[] = [];
+  protected clusters: Cluster[] = [];
   protected state = { zoom: -1 };
 
   constructor({ maxZoom, radius = 60, ...options }: SuperClusterOptions) {
@@ -50,9 +51,13 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
 
   public calculate(input: AlgorithmInput): AlgorithmOutput {
     let changed = false;
-    const state = { zoom: input.map.getZoom() };
+    const zoom = input.map.getZoom();
 
-    if (!equal(input.markers, this.markers)) {
+    assertNotNull(zoom);
+
+    const state = { zoom: zoom };
+
+    if (!deepEqual(input.markers, this.markers)) {
       changed = true;
       // TODO use proxy to avoid copy?
       this.markers = [...input.markers];
@@ -78,7 +83,7 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
 
     if (!changed) {
       if (this.state.zoom <= this.maxZoom || state.zoom <= this.maxZoom) {
-        changed = !equal(this.state, state);
+        changed = !deepEqual(this.state, state);
       }
     }
 
@@ -92,10 +97,13 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
   }
 
   public cluster({ map }: AlgorithmInput): Cluster[] {
+    const zoom = map.getZoom();
+    assertNotNull(zoom);
+
     return this.superCluster
-      .getClusters([-180, -90, 180, 90], Math.round(map.getZoom()))
-      .map((feature: ClusterFeature<{ marker: Marker }>) =>
-        this.transformCluster(feature)
+      .getClusters([-180, -90, 180, 90], Math.round(zoom))
+      .map((feature) =>
+        this.transformCluster(feature as ClusterFeature<{ marker: Marker }>)
       );
   }
 

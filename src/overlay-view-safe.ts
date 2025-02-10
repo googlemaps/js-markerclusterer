@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+// eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-unsafe-declaration-merging, @typescript-eslint/no-empty-object-type
 export interface OverlayViewSafe extends google.maps.OverlayView {}
 
 /**
@@ -36,6 +36,7 @@ function extend(type1: any, type2: any): void {
 /**
  * @ignore
  */
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export class OverlayViewSafe {
   constructor() {
     // MarkerClusterer implements google.maps.OverlayView interface. We use the
