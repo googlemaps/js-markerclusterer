@@ -39,7 +39,8 @@ export interface MarkerClustererOptions {
 export declare enum MarkerClustererEvents {
     CLUSTERING_BEGIN = "clusteringbegin",
     CLUSTERING_END = "clusteringend",
-    CLUSTER_CLICK = "click"
+    CLUSTER_CLICK = "click",
+    GMP_CLICK = "gmp-click"
 }
 export declare const defaultOnClusterClickHandler: onClusterClickHandler;
 /**

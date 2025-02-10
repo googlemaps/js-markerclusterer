@@ -860,6 +860,7 @@ var MarkerClustererEvents;
     MarkerClustererEvents["CLUSTERING_BEGIN"] = "clusteringbegin";
     MarkerClustererEvents["CLUSTERING_END"] = "clusteringend";
     MarkerClustererEvents["CLUSTER_CLICK"] = "click";
+    MarkerClustererEvents["GMP_CLICK"] = "gmp-click";
 })(MarkerClustererEvents || (MarkerClustererEvents = {}));
 const defaultOnClusterClickHandler = (_, cluster, map) => {
     if (cluster.bounds)
@@ -1011,7 +1012,11 @@ class MarkerClusterer extends OverlayViewSafe {
                 // Make sure all individual markers are removed from the map.
                 cluster.markers.forEach((marker) => MarkerUtils.setMap(marker, null));
                 if (this.onClusterClick) {
-                    cluster.marker.addListener("click", 
+                    // legacy Marker uses 'click' events, whereas AdvancedMarkerElement uses 'gmp-click'
+                    const markerClickEventName = MarkerUtils.isAdvancedMarker(cluster.marker)
+                        ? MarkerClustererEvents.GMP_CLICK
+                        : MarkerClustererEvents.CLUSTER_CLICK;
+                    cluster.marker.addListener(markerClickEventName, 
                     /* istanbul ignore next */
                     (event) => {
                         google.maps.event.trigger(this, MarkerClustererEvents.CLUSTER_CLICK, cluster);
