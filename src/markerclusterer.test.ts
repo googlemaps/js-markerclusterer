@@ -253,7 +253,8 @@ describe.each(markerClasses)(
       clusters.forEach((cluster) => {
         expect(MarkerUtils.setMap).toBeCalledWith(cluster.marker, map);
         expect(cluster.marker?.addListener).toHaveBeenCalledWith(
-          "click",
+          // legacy Marker uses 'click' events, whereas AdvancedMarkerElement uses 'gmp-click'
+          MarkerUtils.isAdvancedMarker(cluster.marker!) ? "gmp-click" : "click",
           expect.any(Function)
         );
       });
