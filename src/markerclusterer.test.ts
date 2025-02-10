@@ -253,10 +253,7 @@ describe.each(markerClasses)(
       clusters.forEach((cluster) => {
         expect(MarkerUtils.setMap).toBeCalledWith(cluster.marker, map);
         expect(cluster.marker?.addListener).toHaveBeenCalledWith(
-          /**
-           * - Standard `google.maps.Marker` uses the `"click"` event.
-             - `AdvancedMarkerElement` requires `"gmp-click"` instead.
-           */
+          // legacy Marker uses 'click' events, whereas AdvancedMarkerElement uses 'gmp-click'
           MarkerUtils.isAdvancedMarker(cluster.marker!) ? "gmp-click" : "click",
           expect.any(Function)
         );
