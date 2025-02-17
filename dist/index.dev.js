@@ -3,9 +3,9 @@ var markerClusterer = (function (exports) {
 
 	var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
-	var esnext_iterator_map = {};
+	var esnext_iterator_constructor = {};
 
-	var es_iterator_map = {};
+	var es_iterator_constructor = {};
 
 	var globalThis_1;
 	var hasRequiredGlobalThis;
@@ -1391,21 +1391,95 @@ var markerClusterer = (function (exports) {
 	  return _export;
 	}
 
-	var getIteratorDirect;
-	var hasRequiredGetIteratorDirect;
-	function requireGetIteratorDirect() {
-	  if (hasRequiredGetIteratorDirect) return getIteratorDirect;
-	  hasRequiredGetIteratorDirect = 1;
-	  // `GetIteratorDirect(obj)` abstract operation
-	  // https://tc39.es/proposal-iterator-helpers/#sec-getiteratordirect
-	  getIteratorDirect = function (obj) {
-	    return {
-	      iterator: obj,
-	      next: obj.next,
-	      done: false
-	    };
+	var anInstance;
+	var hasRequiredAnInstance;
+	function requireAnInstance() {
+	  if (hasRequiredAnInstance) return anInstance;
+	  hasRequiredAnInstance = 1;
+	  var isPrototypeOf = requireObjectIsPrototypeOf();
+	  var $TypeError = TypeError;
+	  anInstance = function (it, Prototype) {
+	    if (isPrototypeOf(Prototype, it)) return it;
+	    throw new $TypeError('Incorrect invocation');
 	  };
-	  return getIteratorDirect;
+	  return anInstance;
+	}
+
+	var correctPrototypeGetter;
+	var hasRequiredCorrectPrototypeGetter;
+	function requireCorrectPrototypeGetter() {
+	  if (hasRequiredCorrectPrototypeGetter) return correctPrototypeGetter;
+	  hasRequiredCorrectPrototypeGetter = 1;
+	  var fails = requireFails();
+	  correctPrototypeGetter = !fails(function () {
+	    function F() {/* empty */}
+	    F.prototype.constructor = null;
+	    // eslint-disable-next-line es/no-object-getprototypeof -- required for testing
+	    return Object.getPrototypeOf(new F()) !== F.prototype;
+	  });
+	  return correctPrototypeGetter;
+	}
+
+	var objectGetPrototypeOf;
+	var hasRequiredObjectGetPrototypeOf;
+	function requireObjectGetPrototypeOf() {
+	  if (hasRequiredObjectGetPrototypeOf) return objectGetPrototypeOf;
+	  hasRequiredObjectGetPrototypeOf = 1;
+	  var hasOwn = requireHasOwnProperty();
+	  var isCallable = requireIsCallable();
+	  var toObject = requireToObject();
+	  var sharedKey = requireSharedKey();
+	  var CORRECT_PROTOTYPE_GETTER = requireCorrectPrototypeGetter();
+	  var IE_PROTO = sharedKey('IE_PROTO');
+	  var $Object = Object;
+	  var ObjectPrototype = $Object.prototype;
+
+	  // `Object.getPrototypeOf` method
+	  // https://tc39.es/ecma262/#sec-object.getprototypeof
+	  // eslint-disable-next-line es/no-object-getprototypeof -- safe
+	  objectGetPrototypeOf = CORRECT_PROTOTYPE_GETTER ? $Object.getPrototypeOf : function (O) {
+	    var object = toObject(O);
+	    if (hasOwn(object, IE_PROTO)) return object[IE_PROTO];
+	    var constructor = object.constructor;
+	    if (isCallable(constructor) && object instanceof constructor) {
+	      return constructor.prototype;
+	    }
+	    return object instanceof $Object ? ObjectPrototype : null;
+	  };
+	  return objectGetPrototypeOf;
+	}
+
+	var defineBuiltInAccessor;
+	var hasRequiredDefineBuiltInAccessor;
+	function requireDefineBuiltInAccessor() {
+	  if (hasRequiredDefineBuiltInAccessor) return defineBuiltInAccessor;
+	  hasRequiredDefineBuiltInAccessor = 1;
+	  var makeBuiltIn = requireMakeBuiltIn();
+	  var defineProperty = requireObjectDefineProperty();
+	  defineBuiltInAccessor = function (target, name, descriptor) {
+	    if (descriptor.get) makeBuiltIn(descriptor.get, name, {
+	      getter: true
+	    });
+	    if (descriptor.set) makeBuiltIn(descriptor.set, name, {
+	      setter: true
+	    });
+	    return defineProperty.f(target, name, descriptor);
+	  };
+	  return defineBuiltInAccessor;
+	}
+
+	var createProperty;
+	var hasRequiredCreateProperty;
+	function requireCreateProperty() {
+	  if (hasRequiredCreateProperty) return createProperty;
+	  hasRequiredCreateProperty = 1;
+	  var DESCRIPTORS = requireDescriptors();
+	  var definePropertyModule = requireObjectDefineProperty();
+	  var createPropertyDescriptor = requireCreatePropertyDescriptor();
+	  createProperty = function (object, key, value) {
+	    if (DESCRIPTORS) definePropertyModule.f(object, key, createPropertyDescriptor(0, value));else object[key] = value;
+	  };
+	  return createProperty;
 	}
 
 	var objectDefineProperties = {};
@@ -1549,63 +1623,6 @@ var markerClusterer = (function (exports) {
 	  return objectCreate;
 	}
 
-	var defineBuiltIns;
-	var hasRequiredDefineBuiltIns;
-	function requireDefineBuiltIns() {
-	  if (hasRequiredDefineBuiltIns) return defineBuiltIns;
-	  hasRequiredDefineBuiltIns = 1;
-	  var defineBuiltIn = requireDefineBuiltIn();
-	  defineBuiltIns = function (target, src, options) {
-	    for (var key in src) defineBuiltIn(target, key, src[key], options);
-	    return target;
-	  };
-	  return defineBuiltIns;
-	}
-
-	var correctPrototypeGetter;
-	var hasRequiredCorrectPrototypeGetter;
-	function requireCorrectPrototypeGetter() {
-	  if (hasRequiredCorrectPrototypeGetter) return correctPrototypeGetter;
-	  hasRequiredCorrectPrototypeGetter = 1;
-	  var fails = requireFails();
-	  correctPrototypeGetter = !fails(function () {
-	    function F() {/* empty */}
-	    F.prototype.constructor = null;
-	    // eslint-disable-next-line es/no-object-getprototypeof -- required for testing
-	    return Object.getPrototypeOf(new F()) !== F.prototype;
-	  });
-	  return correctPrototypeGetter;
-	}
-
-	var objectGetPrototypeOf;
-	var hasRequiredObjectGetPrototypeOf;
-	function requireObjectGetPrototypeOf() {
-	  if (hasRequiredObjectGetPrototypeOf) return objectGetPrototypeOf;
-	  hasRequiredObjectGetPrototypeOf = 1;
-	  var hasOwn = requireHasOwnProperty();
-	  var isCallable = requireIsCallable();
-	  var toObject = requireToObject();
-	  var sharedKey = requireSharedKey();
-	  var CORRECT_PROTOTYPE_GETTER = requireCorrectPrototypeGetter();
-	  var IE_PROTO = sharedKey('IE_PROTO');
-	  var $Object = Object;
-	  var ObjectPrototype = $Object.prototype;
-
-	  // `Object.getPrototypeOf` method
-	  // https://tc39.es/ecma262/#sec-object.getprototypeof
-	  // eslint-disable-next-line es/no-object-getprototypeof -- safe
-	  objectGetPrototypeOf = CORRECT_PROTOTYPE_GETTER ? $Object.getPrototypeOf : function (O) {
-	    var object = toObject(O);
-	    if (hasOwn(object, IE_PROTO)) return object[IE_PROTO];
-	    var constructor = object.constructor;
-	    if (isCallable(constructor) && object instanceof constructor) {
-	      return constructor.prototype;
-	    }
-	    return object instanceof $Object ? ObjectPrototype : null;
-	  };
-	  return objectGetPrototypeOf;
-	}
-
 	var iteratorsCore;
 	var hasRequiredIteratorsCore;
 	function requireIteratorsCore() {
@@ -1654,6 +1671,118 @@ var markerClusterer = (function (exports) {
 	    BUGGY_SAFARI_ITERATORS: BUGGY_SAFARI_ITERATORS
 	  };
 	  return iteratorsCore;
+	}
+
+	var hasRequiredEs_iterator_constructor;
+	function requireEs_iterator_constructor() {
+	  if (hasRequiredEs_iterator_constructor) return es_iterator_constructor;
+	  hasRequiredEs_iterator_constructor = 1;
+	  var $ = require_export();
+	  var globalThis = requireGlobalThis();
+	  var anInstance = requireAnInstance();
+	  var anObject = requireAnObject();
+	  var isCallable = requireIsCallable();
+	  var getPrototypeOf = requireObjectGetPrototypeOf();
+	  var defineBuiltInAccessor = requireDefineBuiltInAccessor();
+	  var createProperty = requireCreateProperty();
+	  var fails = requireFails();
+	  var hasOwn = requireHasOwnProperty();
+	  var wellKnownSymbol = requireWellKnownSymbol();
+	  var IteratorPrototype = requireIteratorsCore().IteratorPrototype;
+	  var DESCRIPTORS = requireDescriptors();
+	  var IS_PURE = requireIsPure();
+	  var CONSTRUCTOR = 'constructor';
+	  var ITERATOR = 'Iterator';
+	  var TO_STRING_TAG = wellKnownSymbol('toStringTag');
+	  var $TypeError = TypeError;
+	  var NativeIterator = globalThis[ITERATOR];
+
+	  // FF56- have non-standard global helper `Iterator`
+	  var FORCED = IS_PURE || !isCallable(NativeIterator) || NativeIterator.prototype !== IteratorPrototype
+	  // FF44- non-standard `Iterator` passes previous tests
+	  || !fails(function () {
+	    NativeIterator({});
+	  });
+	  var IteratorConstructor = function Iterator() {
+	    anInstance(this, IteratorPrototype);
+	    if (getPrototypeOf(this) === IteratorPrototype) throw new $TypeError('Abstract class Iterator not directly constructable');
+	  };
+	  var defineIteratorPrototypeAccessor = function (key, value) {
+	    if (DESCRIPTORS) {
+	      defineBuiltInAccessor(IteratorPrototype, key, {
+	        configurable: true,
+	        get: function () {
+	          return value;
+	        },
+	        set: function (replacement) {
+	          anObject(this);
+	          if (this === IteratorPrototype) throw new $TypeError("You can't redefine this property");
+	          if (hasOwn(this, key)) this[key] = replacement;else createProperty(this, key, replacement);
+	        }
+	      });
+	    } else IteratorPrototype[key] = value;
+	  };
+	  if (!hasOwn(IteratorPrototype, TO_STRING_TAG)) defineIteratorPrototypeAccessor(TO_STRING_TAG, ITERATOR);
+	  if (FORCED || !hasOwn(IteratorPrototype, CONSTRUCTOR) || IteratorPrototype[CONSTRUCTOR] === Object) {
+	    defineIteratorPrototypeAccessor(CONSTRUCTOR, IteratorConstructor);
+	  }
+	  IteratorConstructor.prototype = IteratorPrototype;
+
+	  // `Iterator` constructor
+	  // https://tc39.es/ecma262/#sec-iterator
+	  $({
+	    global: true,
+	    constructor: true,
+	    forced: FORCED
+	  }, {
+	    Iterator: IteratorConstructor
+	  });
+	  return es_iterator_constructor;
+	}
+
+	var hasRequiredEsnext_iterator_constructor;
+	function requireEsnext_iterator_constructor() {
+	  if (hasRequiredEsnext_iterator_constructor) return esnext_iterator_constructor;
+	  hasRequiredEsnext_iterator_constructor = 1;
+	  // TODO: Remove from `core-js@4`
+	  requireEs_iterator_constructor();
+	  return esnext_iterator_constructor;
+	}
+
+	requireEsnext_iterator_constructor();
+
+	var esnext_iterator_map = {};
+
+	var es_iterator_map = {};
+
+	var getIteratorDirect;
+	var hasRequiredGetIteratorDirect;
+	function requireGetIteratorDirect() {
+	  if (hasRequiredGetIteratorDirect) return getIteratorDirect;
+	  hasRequiredGetIteratorDirect = 1;
+	  // `GetIteratorDirect(obj)` abstract operation
+	  // https://tc39.es/proposal-iterator-helpers/#sec-getiteratordirect
+	  getIteratorDirect = function (obj) {
+	    return {
+	      iterator: obj,
+	      next: obj.next,
+	      done: false
+	    };
+	  };
+	  return getIteratorDirect;
+	}
+
+	var defineBuiltIns;
+	var hasRequiredDefineBuiltIns;
+	function requireDefineBuiltIns() {
+	  if (hasRequiredDefineBuiltIns) return defineBuiltIns;
+	  hasRequiredDefineBuiltIns = 1;
+	  var defineBuiltIn = requireDefineBuiltIn();
+	  defineBuiltIns = function (target, src, options) {
+	    for (var key in src) defineBuiltIn(target, key, src[key], options);
+	    return target;
+	  };
+	  return defineBuiltIns;
 	}
 
 	var createIterResultObject;
@@ -1888,135 +2017,6 @@ var markerClusterer = (function (exports) {
 	  var e = new Error(message);
 	  return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
 	};
-
-	var esnext_iterator_constructor = {};
-
-	var es_iterator_constructor = {};
-
-	var anInstance;
-	var hasRequiredAnInstance;
-	function requireAnInstance() {
-	  if (hasRequiredAnInstance) return anInstance;
-	  hasRequiredAnInstance = 1;
-	  var isPrototypeOf = requireObjectIsPrototypeOf();
-	  var $TypeError = TypeError;
-	  anInstance = function (it, Prototype) {
-	    if (isPrototypeOf(Prototype, it)) return it;
-	    throw new $TypeError('Incorrect invocation');
-	  };
-	  return anInstance;
-	}
-
-	var defineBuiltInAccessor;
-	var hasRequiredDefineBuiltInAccessor;
-	function requireDefineBuiltInAccessor() {
-	  if (hasRequiredDefineBuiltInAccessor) return defineBuiltInAccessor;
-	  hasRequiredDefineBuiltInAccessor = 1;
-	  var makeBuiltIn = requireMakeBuiltIn();
-	  var defineProperty = requireObjectDefineProperty();
-	  defineBuiltInAccessor = function (target, name, descriptor) {
-	    if (descriptor.get) makeBuiltIn(descriptor.get, name, {
-	      getter: true
-	    });
-	    if (descriptor.set) makeBuiltIn(descriptor.set, name, {
-	      setter: true
-	    });
-	    return defineProperty.f(target, name, descriptor);
-	  };
-	  return defineBuiltInAccessor;
-	}
-
-	var createProperty;
-	var hasRequiredCreateProperty;
-	function requireCreateProperty() {
-	  if (hasRequiredCreateProperty) return createProperty;
-	  hasRequiredCreateProperty = 1;
-	  var DESCRIPTORS = requireDescriptors();
-	  var definePropertyModule = requireObjectDefineProperty();
-	  var createPropertyDescriptor = requireCreatePropertyDescriptor();
-	  createProperty = function (object, key, value) {
-	    if (DESCRIPTORS) definePropertyModule.f(object, key, createPropertyDescriptor(0, value));else object[key] = value;
-	  };
-	  return createProperty;
-	}
-
-	var hasRequiredEs_iterator_constructor;
-	function requireEs_iterator_constructor() {
-	  if (hasRequiredEs_iterator_constructor) return es_iterator_constructor;
-	  hasRequiredEs_iterator_constructor = 1;
-	  var $ = require_export();
-	  var globalThis = requireGlobalThis();
-	  var anInstance = requireAnInstance();
-	  var anObject = requireAnObject();
-	  var isCallable = requireIsCallable();
-	  var getPrototypeOf = requireObjectGetPrototypeOf();
-	  var defineBuiltInAccessor = requireDefineBuiltInAccessor();
-	  var createProperty = requireCreateProperty();
-	  var fails = requireFails();
-	  var hasOwn = requireHasOwnProperty();
-	  var wellKnownSymbol = requireWellKnownSymbol();
-	  var IteratorPrototype = requireIteratorsCore().IteratorPrototype;
-	  var DESCRIPTORS = requireDescriptors();
-	  var IS_PURE = requireIsPure();
-	  var CONSTRUCTOR = 'constructor';
-	  var ITERATOR = 'Iterator';
-	  var TO_STRING_TAG = wellKnownSymbol('toStringTag');
-	  var $TypeError = TypeError;
-	  var NativeIterator = globalThis[ITERATOR];
-
-	  // FF56- have non-standard global helper `Iterator`
-	  var FORCED = IS_PURE || !isCallable(NativeIterator) || NativeIterator.prototype !== IteratorPrototype
-	  // FF44- non-standard `Iterator` passes previous tests
-	  || !fails(function () {
-	    NativeIterator({});
-	  });
-	  var IteratorConstructor = function Iterator() {
-	    anInstance(this, IteratorPrototype);
-	    if (getPrototypeOf(this) === IteratorPrototype) throw new $TypeError('Abstract class Iterator not directly constructable');
-	  };
-	  var defineIteratorPrototypeAccessor = function (key, value) {
-	    if (DESCRIPTORS) {
-	      defineBuiltInAccessor(IteratorPrototype, key, {
-	        configurable: true,
-	        get: function () {
-	          return value;
-	        },
-	        set: function (replacement) {
-	          anObject(this);
-	          if (this === IteratorPrototype) throw new $TypeError("You can't redefine this property");
-	          if (hasOwn(this, key)) this[key] = replacement;else createProperty(this, key, replacement);
-	        }
-	      });
-	    } else IteratorPrototype[key] = value;
-	  };
-	  if (!hasOwn(IteratorPrototype, TO_STRING_TAG)) defineIteratorPrototypeAccessor(TO_STRING_TAG, ITERATOR);
-	  if (FORCED || !hasOwn(IteratorPrototype, CONSTRUCTOR) || IteratorPrototype[CONSTRUCTOR] === Object) {
-	    defineIteratorPrototypeAccessor(CONSTRUCTOR, IteratorConstructor);
-	  }
-	  IteratorConstructor.prototype = IteratorPrototype;
-
-	  // `Iterator` constructor
-	  // https://tc39.es/ecma262/#sec-iterator
-	  $({
-	    global: true,
-	    constructor: true,
-	    forced: FORCED
-	  }, {
-	    Iterator: IteratorConstructor
-	  });
-	  return es_iterator_constructor;
-	}
-
-	var hasRequiredEsnext_iterator_constructor;
-	function requireEsnext_iterator_constructor() {
-	  if (hasRequiredEsnext_iterator_constructor) return esnext_iterator_constructor;
-	  hasRequiredEsnext_iterator_constructor = 1;
-	  // TODO: Remove from `core-js@4`
-	  requireEs_iterator_constructor();
-	  return esnext_iterator_constructor;
-	}
-
-	requireEsnext_iterator_constructor();
 
 	var esnext_iterator_filter = {};
 
