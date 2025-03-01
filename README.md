@@ -70,11 +70,15 @@ import { MarkerClusterer } from "@googlemaps/markerclusterer";
 const markerCluster = new MarkerClusterer({ map, markers });
 ```
 
-View the package in action:
+To run the examples:
+- Install dependencies: ```npm install```
+- Start the development server in the root folder: ```npm run dev```
+- Navigate to [http://localhost:8080/](http://localhost:8080/) in your web browser.
+- Provide a valid Google Maps Platform API key.
+
+Examples details:
 
 - [Algorithm Comparisons](https://googlemaps.github.io/js-markerclusterer/public/algorithms) - This example demonstrates the different algorithms. Please note that spacing and many other options can be changed for each algorithm.
-
-
 
 - [Renderer Usage](https://googlemaps.github.io/js-markerclusterer/public/renderers) - This example demonstrates different renderers similar to the image below.
 

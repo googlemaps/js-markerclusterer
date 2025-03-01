@@ -58,7 +58,10 @@ export class MarkerUtils {
           return marker.position;
         }
         // since we can't cast to LatLngLiteral for reasons =(
-        if (marker.position.lat && marker.position.lng) {
+        if (
+          Number.isFinite(marker.position.lat) &&
+          Number.isFinite(marker.position.lng)
+        ) {
           return new google.maps.LatLng(
             marker.position.lat,
             marker.position.lng

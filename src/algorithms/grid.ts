@@ -27,7 +27,7 @@ import {
 } from "./utils";
 
 import { Cluster } from "../cluster";
-import equal from "fast-deep-equal";
+import { deepEqual } from "fast-equals";
 import { MarkerUtils, Marker } from "../marker-utils";
 import { assertNotNull } from "../utils";
 
@@ -74,7 +74,7 @@ export class GridAlgorithm extends AbstractViewportAlgorithm {
     if (this.state.zoom >= this.maxZoom && newState.zoom >= this.maxZoom) {
       // still at or beyond maxZoom, no change
     } else {
-      changed = !equal(this.state, newState);
+      changed = !deepEqual(this.state, newState);
     }
 
     this.state = newState;
