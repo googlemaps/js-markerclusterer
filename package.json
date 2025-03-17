@@ -71,7 +71,7 @@
     "rollup-plugin-copy": "^3.4.0",
     "rollup-plugin-serve": "^3.0.0",
     "ts-jest": "^29.1.1",
-    "typedoc": "^0.27.6",
+    "typedoc": "^0.28.0",
     "typescript": "5.5"
   },
   "publishConfig": {
