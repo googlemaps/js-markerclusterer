@@ -72,7 +72,7 @@
     "rollup-plugin-serve": "^3.0.0",
     "ts-jest": "^29.1.1",
     "typedoc": "^0.28.0",
-    "typescript": "5.5"
+    "typescript": "5.8"
   },
   "publishConfig": {
     "access": "public",
