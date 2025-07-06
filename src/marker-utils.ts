@@ -15,7 +15,7 @@
  */
 
 /**
- * Supports markers of either either "legacy" or "advanced" types.
+ * Supports markers of either "legacy" or "advanced" types.
  */
 export type Marker =
   | google.maps.Marker
