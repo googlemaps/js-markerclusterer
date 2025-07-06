@@ -492,8 +492,9 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
     }
     calculate(input) {
         let changed = false;
-        const zoom = input.map.getZoom();
+        let zoom = input.map.getZoom();
         assertNotNull(zoom);
+        zoom = Math.round(zoom);
         const state = { zoom: zoom };
         if (!deepEqual(input.markers, this.markers)) {
             changed = true;
@@ -915,7 +916,7 @@ const DEFAULT_KEY = "AIzaSyDhRjl83cPVWeaEer-SnKIw7GTjBuqWxXI";
 const getLoaderOptions = () => {
     var _a;
     return ({
-        apiKey: (_a = localStorage.getItem("gmaps-key")) !== null && _a !== undefined ? _a : DEFAULT_KEY,
+        apiKey: (_a = localStorage.getItem("gmaps-key")) !== null && _a !== void 0 ? _a : DEFAULT_KEY,
         version: "weekly",
         libraries: ["marker"],
     });

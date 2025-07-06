@@ -89,7 +89,7 @@ const DEFAULT_KEY = "AIzaSyDhRjl83cPVWeaEer-SnKIw7GTjBuqWxXI";
 const getLoaderOptions = () => {
     var _a;
     return ({
-        apiKey: (_a = localStorage.getItem("gmaps-key")) !== null && _a !== undefined ? _a : DEFAULT_KEY,
+        apiKey: (_a = localStorage.getItem("gmaps-key")) !== null && _a !== void 0 ? _a : DEFAULT_KEY,
         version: "weekly",
         libraries: ["marker"],
     });
@@ -285,8 +285,9 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
     }
     calculate(input) {
         let changed = false;
-        const zoom = input.map.getZoom();
+        let zoom = input.map.getZoom();
         assertNotNull(zoom);
+        zoom = Math.round(zoom);
         const state = { zoom: zoom };
         if (!deepEqual(input.markers, this.markers)) {
             changed = true;
@@ -12711,7 +12712,7 @@ const mapOptions = {
     zoom: 12,
     mapId: MAP_ID,
 };
-new Loader(getLoaderOptions()).load().then(() => __awaiter(undefined, undefined, undefined, function* () {
+new Loader(getLoaderOptions()).load().then(() => __awaiter(void 0, void 0, void 0, function* () {
     const element = document.getElementById("map");
     const map = new google.maps.Map(element, mapOptions);
     const markers = trees.map(({ geometry }) => createMarker(map, geometry.coordinates[1], geometry.coordinates[0]));

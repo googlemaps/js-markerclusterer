@@ -505,10 +505,10 @@ var markerClusterer = (function (exports) {
 	  var SHARED = '__core-js_shared__';
 	  var store = sharedStore.exports = globalThis[SHARED] || defineGlobalProperty(SHARED, {});
 	  (store.versions || (store.versions = [])).push({
-	    version: '3.40.0',
+	    version: '3.43.0',
 	    mode: IS_PURE ? 'pure' : 'global',
 	    copyright: '© 2014-2025 Denis Pushkarev (zloirock.ru)',
-	    license: 'https://github.com/zloirock/core-js/blob/v3.40.0/LICENSE',
+	    license: 'https://github.com/zloirock/core-js/blob/v3.43.0/LICENSE',
 	    source: 'https://github.com/zloirock/core-js'
 	  });
 	  return sharedStore.exports;
@@ -568,7 +568,7 @@ var markerClusterer = (function (exports) {
 	  var uncurryThis = requireFunctionUncurryThis();
 	  var id = 0;
 	  var postfix = Math.random();
-	  var toString = uncurryThis(1.0.toString);
+	  var toString = uncurryThis(1.1.toString);
 	  uid = function (key) {
 	    return 'Symbol(' + (key === undefined ? '' : key) + ')_' + toString(++id + postfix, 36);
 	  };
@@ -1831,6 +1831,28 @@ var markerClusterer = (function (exports) {
 	  return iteratorClose;
 	}
 
+	var iteratorCloseAll;
+	var hasRequiredIteratorCloseAll;
+	function requireIteratorCloseAll() {
+	  if (hasRequiredIteratorCloseAll) return iteratorCloseAll;
+	  hasRequiredIteratorCloseAll = 1;
+	  var iteratorClose = requireIteratorClose();
+	  iteratorCloseAll = function (iters, kind, value) {
+	    for (var i = iters.length - 1; i >= 0; i--) {
+	      if (iters[i] === undefined) continue;
+	      try {
+	        value = iteratorClose(iters[i].iterator, kind, value);
+	      } catch (error) {
+	        kind = 'throw';
+	        value = error;
+	      }
+	    }
+	    if (kind === 'throw') throw value;
+	    return value;
+	  };
+	  return iteratorCloseAll;
+	}
+
 	var iteratorCreateProxy;
 	var hasRequiredIteratorCreateProxy;
 	function requireIteratorCreateProxy() {
@@ -1846,9 +1868,12 @@ var markerClusterer = (function (exports) {
 	  var IteratorPrototype = requireIteratorsCore().IteratorPrototype;
 	  var createIterResultObject = requireCreateIterResultObject();
 	  var iteratorClose = requireIteratorClose();
+	  var iteratorCloseAll = requireIteratorCloseAll();
 	  var TO_STRING_TAG = wellKnownSymbol('toStringTag');
 	  var ITERATOR_HELPER = 'IteratorHelper';
 	  var WRAP_FOR_VALID_ITERATOR = 'WrapForValidIterator';
+	  var NORMAL = 'normal';
+	  var THROW = 'throw';
 	  var setInternalState = InternalStateModule.set;
 	  var createIteratorProxyPrototype = function (IS_ITERATOR) {
 	    var getInternalState = InternalStateModule.getterFor(IS_ITERATOR ? WRAP_FOR_VALID_ITERATOR : ITERATOR_HELPER);
@@ -1877,11 +1902,16 @@ var markerClusterer = (function (exports) {
 	          return returnMethod ? call(returnMethod, iterator) : createIterResultObject(undefined, true);
 	        }
 	        if (state.inner) try {
-	          iteratorClose(state.inner.iterator, 'normal');
+	          iteratorClose(state.inner.iterator, NORMAL);
 	        } catch (error) {
-	          return iteratorClose(iterator, 'throw', error);
+	          return iteratorClose(iterator, THROW, error);
 	        }
-	        if (iterator) iteratorClose(iterator, 'normal');
+	        if (state.openIters) try {
+	          iteratorCloseAll(state.openIters, NORMAL);
+	        } catch (error) {
+	          return iteratorClose(iterator, THROW, error);
+	        }
+	        if (iterator) iteratorClose(iterator, NORMAL);
 	        return createIterResultObject(undefined, true);
 	      }
 	    });
@@ -1927,17 +1957,78 @@ var markerClusterer = (function (exports) {
 	  return callWithSafeIterationClosing;
 	}
 
-	var iteratorMap;
-	var hasRequiredIteratorMap;
-	function requireIteratorMap() {
-	  if (hasRequiredIteratorMap) return iteratorMap;
-	  hasRequiredIteratorMap = 1;
+	var iteratorHelperThrowsOnInvalidIterator;
+	var hasRequiredIteratorHelperThrowsOnInvalidIterator;
+	function requireIteratorHelperThrowsOnInvalidIterator() {
+	  if (hasRequiredIteratorHelperThrowsOnInvalidIterator) return iteratorHelperThrowsOnInvalidIterator;
+	  hasRequiredIteratorHelperThrowsOnInvalidIterator = 1;
+	  // Should throw an error on invalid iterator
+	  // https://issues.chromium.org/issues/336839115
+	  iteratorHelperThrowsOnInvalidIterator = function (methodName, argument) {
+	    // eslint-disable-next-line es/no-iterator -- required for testing
+	    var method = typeof Iterator == 'function' && Iterator.prototype[methodName];
+	    if (method) try {
+	      method.call({
+	        next: null
+	      }, argument).next();
+	    } catch (error) {
+	      return true;
+	    }
+	  };
+	  return iteratorHelperThrowsOnInvalidIterator;
+	}
+
+	var iteratorHelperWithoutClosingOnEarlyError;
+	var hasRequiredIteratorHelperWithoutClosingOnEarlyError;
+	function requireIteratorHelperWithoutClosingOnEarlyError() {
+	  if (hasRequiredIteratorHelperWithoutClosingOnEarlyError) return iteratorHelperWithoutClosingOnEarlyError;
+	  hasRequiredIteratorHelperWithoutClosingOnEarlyError = 1;
+	  var globalThis = requireGlobalThis();
+
+	  // https://github.com/tc39/ecma262/pull/3467
+	  iteratorHelperWithoutClosingOnEarlyError = function (METHOD_NAME, ExpectedError) {
+	    var Iterator = globalThis.Iterator;
+	    var IteratorPrototype = Iterator && Iterator.prototype;
+	    var method = IteratorPrototype && IteratorPrototype[METHOD_NAME];
+	    var CLOSED = false;
+	    if (method) try {
+	      method.call({
+	        next: function () {
+	          return {
+	            done: true
+	          };
+	        },
+	        'return': function () {
+	          CLOSED = true;
+	        }
+	      }, -1);
+	    } catch (error) {
+	      // https://bugs.webkit.org/show_bug.cgi?id=291195
+	      if (!(error instanceof ExpectedError)) CLOSED = false;
+	    }
+	    if (!CLOSED) return method;
+	  };
+	  return iteratorHelperWithoutClosingOnEarlyError;
+	}
+
+	var hasRequiredEs_iterator_map;
+	function requireEs_iterator_map() {
+	  if (hasRequiredEs_iterator_map) return es_iterator_map;
+	  hasRequiredEs_iterator_map = 1;
+	  var $ = require_export();
 	  var call = requireFunctionCall();
 	  var aCallable = requireACallable();
 	  var anObject = requireAnObject();
 	  var getIteratorDirect = requireGetIteratorDirect();
 	  var createIteratorProxy = requireIteratorCreateProxy();
 	  var callWithSafeIterationClosing = requireCallWithSafeIterationClosing();
+	  var iteratorClose = requireIteratorClose();
+	  var iteratorHelperThrowsOnInvalidIterator = requireIteratorHelperThrowsOnInvalidIterator();
+	  var iteratorHelperWithoutClosingOnEarlyError = requireIteratorHelperWithoutClosingOnEarlyError();
+	  var IS_PURE = requireIsPure();
+	  var MAP_WITHOUT_THROWING_ON_INVALID_ITERATOR = !IS_PURE && !iteratorHelperThrowsOnInvalidIterator('map', function () {/* empty */});
+	  var mapWithoutClosingOnEarlyError = !IS_PURE && !MAP_WITHOUT_THROWING_ON_INVALID_ITERATOR && iteratorHelperWithoutClosingOnEarlyError('map', TypeError);
+	  var FORCED = IS_PURE || MAP_WITHOUT_THROWING_ON_INVALID_ITERATOR || mapWithoutClosingOnEarlyError;
 	  var IteratorProxy = createIteratorProxy(function () {
 	    var iterator = this.iterator;
 	    var result = anObject(call(this.next, iterator));
@@ -1946,34 +2037,25 @@ var markerClusterer = (function (exports) {
 	  });
 
 	  // `Iterator.prototype.map` method
-	  // https://github.com/tc39/proposal-iterator-helpers
-	  iteratorMap = function map(mapper) {
-	    anObject(this);
-	    aCallable(mapper);
-	    return new IteratorProxy(getIteratorDirect(this), {
-	      mapper: mapper
-	    });
-	  };
-	  return iteratorMap;
-	}
-
-	var hasRequiredEs_iterator_map;
-	function requireEs_iterator_map() {
-	  if (hasRequiredEs_iterator_map) return es_iterator_map;
-	  hasRequiredEs_iterator_map = 1;
-	  var $ = require_export();
-	  var map = requireIteratorMap();
-	  var IS_PURE = requireIsPure();
-
-	  // `Iterator.prototype.map` method
 	  // https://tc39.es/ecma262/#sec-iterator.prototype.map
 	  $({
 	    target: 'Iterator',
 	    proto: true,
 	    real: true,
-	    forced: IS_PURE
+	    forced: FORCED
 	  }, {
-	    map: map
+	    map: function map(mapper) {
+	      anObject(this);
+	      try {
+	        aCallable(mapper);
+	      } catch (error) {
+	        iteratorClose(this, 'throw', error);
+	      }
+	      if (mapWithoutClosingOnEarlyError) return call(mapWithoutClosingOnEarlyError, this, mapper);
+	      return new IteratorProxy(getIteratorDirect(this), {
+	        mapper: mapper
+	      });
+	    }
 	  });
 	  return es_iterator_map;
 	}
@@ -2003,7 +2085,7 @@ var markerClusterer = (function (exports) {
 	OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 	PERFORMANCE OF THIS SOFTWARE.
 	***************************************************************************** */
-	/* global Reflect, Promise, SuppressedError, Symbol */
+	/* global Reflect, Promise, SuppressedError, Symbol, Iterator */
 
 	function __rest(s, e) {
 	  var t = {};
@@ -2034,6 +2116,12 @@ var markerClusterer = (function (exports) {
 	  var createIteratorProxy = requireIteratorCreateProxy();
 	  var callWithSafeIterationClosing = requireCallWithSafeIterationClosing();
 	  var IS_PURE = requireIsPure();
+	  var iteratorClose = requireIteratorClose();
+	  var iteratorHelperThrowsOnInvalidIterator = requireIteratorHelperThrowsOnInvalidIterator();
+	  var iteratorHelperWithoutClosingOnEarlyError = requireIteratorHelperWithoutClosingOnEarlyError();
+	  var FILTER_WITHOUT_THROWING_ON_INVALID_ITERATOR = !IS_PURE && !iteratorHelperThrowsOnInvalidIterator('filter', function () {/* empty */});
+	  var filterWithoutClosingOnEarlyError = !IS_PURE && !FILTER_WITHOUT_THROWING_ON_INVALID_ITERATOR && iteratorHelperWithoutClosingOnEarlyError('filter', TypeError);
+	  var FORCED = IS_PURE || FILTER_WITHOUT_THROWING_ON_INVALID_ITERATOR || filterWithoutClosingOnEarlyError;
 	  var IteratorProxy = createIteratorProxy(function () {
 	    var iterator = this.iterator;
 	    var predicate = this.predicate;
@@ -2054,11 +2142,16 @@ var markerClusterer = (function (exports) {
 	    target: 'Iterator',
 	    proto: true,
 	    real: true,
-	    forced: IS_PURE
+	    forced: FORCED
 	  }, {
 	    filter: function filter(predicate) {
 	      anObject(this);
-	      aCallable(predicate);
+	      try {
+	        aCallable(predicate);
+	      } catch (error) {
+	        iteratorClose(this, 'throw', error);
+	      }
+	      if (filterWithoutClosingOnEarlyError) return call(filterWithoutClosingOnEarlyError, this, predicate);
 	      return new IteratorProxy(getIteratorDirect(this), {
 	        predicate: predicate
 	      });
@@ -2591,7 +2684,7 @@ var markerClusterer = (function (exports) {
 	    var fn = bind(unboundFunction, that);
 	    var iterator, iterFn, index, length, result, next, step;
 	    var stop = function (condition) {
-	      if (iterator) iteratorClose(iterator, 'normal', condition);
+	      if (iterator) iteratorClose(iterator, 'normal');
 	      return new Result(true, condition);
 	    };
 	    var callFn = function (value) {
@@ -2637,21 +2730,31 @@ var markerClusterer = (function (exports) {
 	  if (hasRequiredEs_iterator_forEach) return es_iterator_forEach;
 	  hasRequiredEs_iterator_forEach = 1;
 	  var $ = require_export();
+	  var call = requireFunctionCall();
 	  var iterate = requireIterate();
 	  var aCallable = requireACallable();
 	  var anObject = requireAnObject();
 	  var getIteratorDirect = requireGetIteratorDirect();
+	  var iteratorClose = requireIteratorClose();
+	  var iteratorHelperWithoutClosingOnEarlyError = requireIteratorHelperWithoutClosingOnEarlyError();
+	  var forEachWithoutClosingOnEarlyError = iteratorHelperWithoutClosingOnEarlyError('forEach', TypeError);
 
 	  // `Iterator.prototype.forEach` method
 	  // https://tc39.es/ecma262/#sec-iterator.prototype.foreach
 	  $({
 	    target: 'Iterator',
 	    proto: true,
-	    real: true
+	    real: true,
+	    forced: forEachWithoutClosingOnEarlyError
 	  }, {
 	    forEach: function forEach(fn) {
 	      anObject(this);
-	      aCallable(fn);
+	      try {
+	        aCallable(fn);
+	      } catch (error) {
+	        iteratorClose(this, 'throw', error);
+	      }
+	      if (forEachWithoutClosingOnEarlyError) return call(forEachWithoutClosingOnEarlyError, this, fn);
 	      var record = getIteratorDirect(this);
 	      var counter = 0;
 	      iterate(record, function (value) {
@@ -3181,7 +3284,7 @@ var markerClusterer = (function (exports) {
 	    var circular = _a.circular, comparator = _a.comparator, createState = _a.createState, equals = _a.equals, strict = _a.strict;
 	    if (createState) {
 	        return function isEqual(a, b) {
-	            var _a = createState(), _b = _a.cache, cache = _b === undefined ? circular ? new WeakMap() : undefined : _b, meta = _a.meta;
+	            var _a = createState(), _b = _a.cache, cache = _b === void 0 ? circular ? new WeakMap() : undefined : _b, meta = _a.meta;
 	            return comparator(a, b, {
 	                cache: cache,
 	                equals: equals,
@@ -3269,8 +3372,8 @@ var markerClusterer = (function (exports) {
 	 * `RegExp.prototype.flags` out of the box.
 	 */
 	function createCustomEqual(options) {
-	    if (options === undefined) { options = {}; }
-	    var _a = options.circular, circular = _a === undefined ? false : _a, createCustomInternalComparator = options.createInternalComparator, createState = options.createState, _b = options.strict, strict = _b === undefined ? false : _b;
+	    if (options === void 0) { options = {}; }
+	    var _a = options.circular, circular = _a === void 0 ? false : _a, createCustomInternalComparator = options.createInternalComparator, createState = options.createState, _b = options.strict, strict = _b === void 0 ? false : _b;
 	    var config = createEqualityComparatorConfig(options);
 	    var comparator = createEqualityComparator(config);
 	    var equals = createCustomInternalComparator
@@ -4126,8 +4229,9 @@ var markerClusterer = (function (exports) {
 	  }
 	  calculate(input) {
 	    let changed = false;
-	    const zoom = input.map.getZoom();
+	    let zoom = input.map.getZoom();
 	    assertNotNull(zoom);
+	    zoom = Math.round(zoom);
 	    const state = {
 	      zoom: zoom
 	    };
@@ -4300,6 +4404,23 @@ var markerClusterer = (function (exports) {
 
 	var es_iterator_reduce = {};
 
+	var functionApply;
+	var hasRequiredFunctionApply;
+	function requireFunctionApply() {
+	  if (hasRequiredFunctionApply) return functionApply;
+	  hasRequiredFunctionApply = 1;
+	  var NATIVE_BIND = requireFunctionBindNative();
+	  var FunctionPrototype = Function.prototype;
+	  var apply = FunctionPrototype.apply;
+	  var call = FunctionPrototype.call;
+
+	  // eslint-disable-next-line es/no-function-prototype-bind, es/no-reflect -- safe
+	  functionApply = typeof Reflect == 'object' && Reflect.apply || (NATIVE_BIND ? call.bind(apply) : function () {
+	    return call.apply(apply, arguments);
+	  });
+	  return functionApply;
+	}
+
 	var hasRequiredEs_iterator_reduce;
 	function requireEs_iterator_reduce() {
 	  if (hasRequiredEs_iterator_reduce) return es_iterator_reduce;
@@ -4309,21 +4430,40 @@ var markerClusterer = (function (exports) {
 	  var aCallable = requireACallable();
 	  var anObject = requireAnObject();
 	  var getIteratorDirect = requireGetIteratorDirect();
+	  var iteratorClose = requireIteratorClose();
+	  var iteratorHelperWithoutClosingOnEarlyError = requireIteratorHelperWithoutClosingOnEarlyError();
+	  var apply = requireFunctionApply();
+	  var fails = requireFails();
 	  var $TypeError = TypeError;
+
+	  // https://bugs.webkit.org/show_bug.cgi?id=291651
+	  var FAILS_ON_INITIAL_UNDEFINED = fails(function () {
+	    // eslint-disable-next-line es/no-iterator-prototype-reduce, es/no-array-prototype-keys, array-callback-return -- required for testing
+	    [].keys().reduce(function () {/* empty */}, undefined);
+	  });
+	  var reduceWithoutClosingOnEarlyError = !FAILS_ON_INITIAL_UNDEFINED && iteratorHelperWithoutClosingOnEarlyError('reduce', $TypeError);
 
 	  // `Iterator.prototype.reduce` method
 	  // https://tc39.es/ecma262/#sec-iterator.prototype.reduce
 	  $({
 	    target: 'Iterator',
 	    proto: true,
-	    real: true
+	    real: true,
+	    forced: FAILS_ON_INITIAL_UNDEFINED || reduceWithoutClosingOnEarlyError
 	  }, {
 	    reduce: function reduce(reducer /* , initialValue */) {
 	      anObject(this);
-	      aCallable(reducer);
-	      var record = getIteratorDirect(this);
+	      try {
+	        aCallable(reducer);
+	      } catch (error) {
+	        iteratorClose(this, 'throw', error);
+	      }
 	      var noInitial = arguments.length < 2;
 	      var accumulator = noInitial ? undefined : arguments[1];
+	      if (reduceWithoutClosingOnEarlyError) {
+	        return apply(reduceWithoutClosingOnEarlyError, this, noInitial ? [reducer] : [reducer, accumulator]);
+	      }
+	      var record = getIteratorDirect(this);
 	      var counter = 0;
 	      iterate(record, function (value) {
 	        if (noInitial) {

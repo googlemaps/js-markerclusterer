@@ -15,7 +15,7 @@ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 ***************************************************************************** */
-/* global Reflect, Promise, SuppressedError, Symbol */
+/* global Reflect, Promise, SuppressedError, Symbol, Iterator */
 
 
 function __rest(s, e) {
@@ -536,8 +536,9 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
     }
     calculate(input) {
         let changed = false;
-        const zoom = input.map.getZoom();
+        let zoom = input.map.getZoom();
         assertNotNull(zoom);
+        zoom = Math.round(zoom);
         const state = { zoom: zoom };
         if (!deepEqual(input.markers, this.markers)) {
             changed = true;
