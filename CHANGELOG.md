@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.1](https://github.com/googlemaps/js-markerclusterer/compare/v2.6.0...v2.6.1) (2025-07-07)
+
+
+### Miscellaneous Chores
+
+* trigger release-please ([#1008](https://github.com/googlemaps/js-markerclusterer/issues/1008)) ([b0a7afd](https://github.com/googlemaps/js-markerclusterer/commit/b0a7afd0348d1b79ca67ca4b3583b9462ea42fa1))
+
 ## [2.6.0](https://github.com/googlemaps/js-markerclusterer/compare/v2.5.4...v2.6.0) (2025-07-06)
 
 
