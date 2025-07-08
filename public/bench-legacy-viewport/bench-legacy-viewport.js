@@ -395,10 +395,7 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
                 const coordinates = [position.lng(), position.lat()];
                 return {
                     type: "Feature",
-                    geometry: {
-                        type: "Point",
-                        coordinates,
-                    },
+                    geometry: { type: "Point", coordinates },
                     properties: { marker },
                 };
             });
@@ -410,6 +407,11 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
             }
         }
         this.state = state;
+        // when input is empty, return right away
+        if (input.markers.length === 0) {
+            this.clusters = [];
+            return { clusters: this.clusters, changed };
+        }
         if (changed) {
             this.clusters = this.cluster(input);
         }

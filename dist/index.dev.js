@@ -4261,6 +4261,14 @@ var markerClusterer = (function (exports) {
 	      }
 	    }
 	    this.state = state;
+	    // when input is empty, return right away
+	    if (input.markers.length === 0) {
+	      this.clusters = [];
+	      return {
+	        clusters: this.clusters,
+	        changed
+	      };
+	    }
 	    if (changed) {
 	      this.clusters = this.cluster(input);
 	    }
