@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.2](https://github.com/googlemaps/js-markerclusterer/compare/v2.6.1...v2.6.2) (2025-07-08)
+
+
+### Bug Fixes
+
+* skip clustering for when list of markers is empty ([#1014](https://github.com/googlemaps/js-markerclusterer/issues/1014)) ([27e2516](https://github.com/googlemaps/js-markerclusterer/commit/27e2516d89573f11f22a4c94688826e4096502d9)), closes [#991](https://github.com/googlemaps/js-markerclusterer/issues/991)
+
 ## [2.6.1](https://github.com/googlemaps/js-markerclusterer/compare/v2.6.0...v2.6.1) (2025-07-07)
 
 
