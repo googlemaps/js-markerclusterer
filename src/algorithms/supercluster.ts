@@ -68,13 +68,10 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
         const position = MarkerUtils.getPosition(marker);
         const coordinates = [position.lng(), position.lat()];
         return {
-          type: "Feature" as const,
-          geometry: {
-            type: "Point" as const,
-            coordinates,
-          },
+          type: "Feature",
+          geometry: { type: "Point", coordinates },
           properties: { marker },
-        };
+        } as const;
       });
       this.superCluster.load(points);
     }
@@ -86,6 +83,13 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
     }
 
     this.state = state;
+
+    // when input is empty, return right away
+    if (input.markers.length === 0) {
+      this.clusters = [];
+
+      return { clusters: this.clusters, changed };
+    }
 
     if (changed) {
       this.clusters = this.cluster(input);
