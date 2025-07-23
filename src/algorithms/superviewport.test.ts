@@ -394,7 +394,7 @@ describe.each(markerClasses)(
       });
       algorithm.cluster = jest.fn().mockReturnValue([]);
 
-      const result = algorithm.calculate({
+      algorithm.calculate({
         markers,
         map,
         mapCanvasProjection,
