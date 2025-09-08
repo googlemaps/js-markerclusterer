@@ -39,7 +39,7 @@ Install the [@googlemaps/markerclusterer NPM package][npm-pkg] with:
 npm i @googlemaps/markerclusterer
 ```
 
-Alternativly you may add the umd package directly to the html document using the unpkg link.
+Alternatively you may add the umd package directly to the html document using the unpkg link.
 
 ```html
 <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
