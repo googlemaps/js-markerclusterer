@@ -67,6 +67,12 @@ function createIsCircular(areItemsEqual) {
     };
 }
 /**
+ * Get the `@@toStringTag` of the value, if it exists.
+ */
+function getShortTag(value) {
+    return value != null ? value[Symbol.toStringTag] : undefined;
+}
+/**
  * Get the properties to strictly examine, which include both own properties that are
  * not enumerable and symbol properties.
  */
@@ -342,7 +348,7 @@ var getTag = Object.prototype.toString.call.bind(Object.prototype.toString);
  * Create a comparator method based on the type-specific equality comparators passed.
  */
 function createEqualityComparator(_a) {
-    var areArraysEqual = _a.areArraysEqual, areDatesEqual = _a.areDatesEqual, areErrorsEqual = _a.areErrorsEqual, areFunctionsEqual = _a.areFunctionsEqual, areMapsEqual = _a.areMapsEqual, areNumbersEqual = _a.areNumbersEqual, areObjectsEqual = _a.areObjectsEqual, arePrimitiveWrappersEqual = _a.arePrimitiveWrappersEqual, areRegExpsEqual = _a.areRegExpsEqual, areSetsEqual = _a.areSetsEqual, areTypedArraysEqual = _a.areTypedArraysEqual, areUrlsEqual = _a.areUrlsEqual;
+    var areArraysEqual = _a.areArraysEqual, areDatesEqual = _a.areDatesEqual, areErrorsEqual = _a.areErrorsEqual, areFunctionsEqual = _a.areFunctionsEqual, areMapsEqual = _a.areMapsEqual, areNumbersEqual = _a.areNumbersEqual, areObjectsEqual = _a.areObjectsEqual, arePrimitiveWrappersEqual = _a.arePrimitiveWrappersEqual, areRegExpsEqual = _a.areRegExpsEqual, areSetsEqual = _a.areSetsEqual, areTypedArraysEqual = _a.areTypedArraysEqual, areUrlsEqual = _a.areUrlsEqual, unknownTagComparators = _a.unknownTagComparators;
     /**
      * compare the value of the two objects and return true if they are equivalent in values
      */
@@ -462,6 +468,20 @@ function createEqualityComparator(_a) {
         if (tag === BOOLEAN_TAG || tag === NUMBER_TAG || tag === STRING_TAG) {
             return arePrimitiveWrappersEqual(a, b, state);
         }
+        if (unknownTagComparators) {
+            var unknownTagComparator = unknownTagComparators[tag];
+            if (!unknownTagComparator) {
+                var shortTag = getShortTag(a);
+                if (shortTag) {
+                    unknownTagComparator = unknownTagComparators[shortTag];
+                }
+            }
+            // If the custom config has an unknown tag comparator that matches the captured tag or the
+            // @@toStringTag, it is the source of truth for whether the values are equal.
+            if (unknownTagComparator) {
+                return unknownTagComparator(a, b, state);
+            }
+        }
         // If not matching any tags that require a specific type of comparison, then we hard-code false because
         // the only thing remaining is strict equality, which has already been compared. This is for a few reasons:
         //   - Certain types that cannot be introspected (e.g., `WeakMap`). For these types, this is the only
@@ -504,6 +524,7 @@ function createEqualityComparatorConfig(_a) {
             ? areObjectsEqualStrict
             : areTypedArraysEqual,
         areUrlsEqual: areUrlsEqual,
+        unknownTagComparators: undefined,
     };
     if (createCustomConfig) {
         config = assign({}, config, createCustomConfig(config));
