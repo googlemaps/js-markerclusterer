@@ -41,9 +41,10 @@ export const filterMarkersToPaddedViewport = (
     viewportPaddingPixels
   );
 
-  return markers.filter((marker) =>
-    extendedMapBounds.contains(MarkerUtils.getPosition(marker))
-  );
+  return markers.filter((marker) => {
+    const position = MarkerUtils.getPosition(marker);
+    return position ? extendedMapBounds.contains(position) : false;
+  });
 };
 
 /**

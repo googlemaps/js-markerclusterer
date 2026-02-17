@@ -50,7 +50,7 @@ export class MarkerUtils {
     }
   }
 
-  public static getPosition(marker: Marker): google.maps.LatLng {
+  public static getPosition(marker: Marker): google.maps.LatLng | null {
     // SuperClusterAlgorithm.calculate expects a LatLng instance so we fake it for Adv Markers
     if (this.isAdvancedMarker(marker)) {
       if (marker.position) {
@@ -69,8 +69,7 @@ export class MarkerUtils {
         }
       }
 
-      // @ts-ignore
-      return new google.maps.LatLng(null);
+      return null;
     }
 
     return marker.getPosition()!;
@@ -79,13 +78,14 @@ export class MarkerUtils {
   public static getVisible(marker: Marker) {
     if (this.isAdvancedMarker(marker)) {
       /**
-       * Always return true for Advanced Markers because the clusterer
-       * uses getVisible as a way to count legacy markers not as an actual
-       * indicator of visibility for some reason. Even when markers are hidden
-       * Marker.getVisible returns `true` and this is used to set the marker count
-       * on the cluster. See the behavior of Cluster.count
+       * As per google.maps.marker.AdvancedMarkerElement documentation:
+       * An AdvancedMarkerElement may be constructed without a position,
+       * but will not be displayed until its position is provided.
+       *
+       * The same goes for the map property. But in case of clustering this
+       * is always set to null as we don't want to show the marker on the map.
        */
-      return true;
+      return marker.position !== null;
     }
     return marker.getVisible();
   }
