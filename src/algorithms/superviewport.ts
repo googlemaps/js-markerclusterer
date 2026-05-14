@@ -71,9 +71,9 @@ export class SuperClusterViewportAlgorithm extends AbstractViewportAlgorithm {
   public calculate(input: AlgorithmInput): AlgorithmOutput {
     const state = this.getViewportState(input);
 
-    let changed = !deepEqual(this.state, state);
+    let markerChanged = false;
     if (!deepEqual(input.markers, this.markers)) {
-      changed = true;
+      markerChanged = true;
       // TODO use proxy to avoid copy?
       this.markers = [...input.markers];
 
@@ -92,12 +92,19 @@ export class SuperClusterViewportAlgorithm extends AbstractViewportAlgorithm {
       this.superCluster.load(points);
     }
 
-    if (changed) {
-      this.clusters = this.cluster(input);
-      this.state = state;
+    const newClusters = this.cluster(input);
+
+    const clustersChanged =
+      !this.areClusterArraysEqual(this.clusters, newClusters) || markerChanged;
+
+    this.state = state;
+
+    if (clustersChanged) {
+      this.clusters = newClusters;
+      return { clusters: this.clusters, changed: true };
     }
 
-    return { clusters: this.clusters, changed };
+    return { clusters: this.clusters, changed: false };
   }
 
   public cluster(input: AlgorithmInput): Cluster[] {
@@ -149,5 +156,27 @@ export class SuperClusterViewportAlgorithm extends AbstractViewportAlgorithm {
         this.viewportPadding
       ),
     };
+  }
+
+  private areClusterArraysEqual(
+    clustersA: Cluster[],
+    clustersB: Cluster[]
+  ): boolean {
+    if (!clustersA || !clustersB) return clustersA === clustersB;
+    if (clustersA.length !== clustersB.length) return false;
+
+    for (let i = 0; i < clustersA.length; i++) {
+      const a = clustersA[i];
+      const b = clustersB[i];
+
+      if (a.markers.length !== b.markers.length) return false;
+
+      const posA = a.position;
+      const posB = b.position;
+
+      if (posA.lat() !== posB.lat() || posA.lng() !== posB.lng()) return false;
+    }
+
+    return true;
   }
 }
