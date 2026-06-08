@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import { AbstractAlgorithm, AlgorithmInput, AlgorithmOutput } from "./core";
 import SuperCluster, { ClusterFeature } from "supercluster";
+import { deepEqual } from "fast-equals";
+import { AbstractAlgorithm, AlgorithmInput, AlgorithmOutput } from "./core";
 import { MarkerUtils, Marker } from "../marker-utils";
 import { Cluster } from "../cluster";
-import { deepEqual } from "fast-equals";
 import { assertNotNull } from "../utils";
+import { areClustersEqual, areMarkersEqual } from "./utils";
 
 export type SuperClusterOptions = SuperCluster.Options<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -50,7 +50,7 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
   }
 
   public calculate(input: AlgorithmInput): AlgorithmOutput {
-    let changed = false;
+    let inputsChanged = false;
     let zoom = input.map.getZoom();
 
     assertNotNull(zoom);
@@ -59,14 +59,15 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
 
     const state = { zoom: zoom };
 
-    if (!deepEqual(input.markers, this.markers)) {
-      changed = true;
-      // TODO use proxy to avoid copy?
+    if (!areMarkersEqual(input.markers, this.markers)) {
+      inputsChanged = true;
+
       this.markers = [...input.markers];
 
       const points = this.markers.map((marker) => {
         const position = MarkerUtils.getPosition(marker);
         const coordinates = [position.lng(), position.lat()];
+
         return {
           type: "Feature",
           geometry: { type: "Point", coordinates },
@@ -76,9 +77,9 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
       this.superCluster.load(points);
     }
 
-    if (!changed) {
+    if (!inputsChanged) {
       if (this.state.zoom <= this.maxZoom || state.zoom <= this.maxZoom) {
-        changed = !deepEqual(this.state, state);
+        inputsChanged = !deepEqual(this.state, state);
       }
     }
 
@@ -88,14 +89,19 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
     if (input.markers.length === 0) {
       this.clusters = [];
 
-      return { clusters: this.clusters, changed };
+      return { clusters: this.clusters, changed: inputsChanged };
     }
 
-    if (changed) {
-      this.clusters = this.cluster(input);
+    let clustersChanged = false;
+    if (inputsChanged) {
+      const newClusters = this.cluster(input);
+
+      clustersChanged = !areClustersEqual(this.clusters, newClusters);
+
+      this.clusters = newClusters;
     }
 
-    return { clusters: this.clusters, changed };
+    return { clusters: this.clusters, changed: clustersChanged };
   }
 
   public cluster({ map }: AlgorithmInput): Cluster[] {

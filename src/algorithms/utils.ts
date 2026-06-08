@@ -16,6 +16,7 @@
 
 import { MarkerUtils, Marker } from "../marker-utils";
 import { assertNotNull } from "../utils";
+import { Cluster } from "../cluster";
 
 /**
  * Returns the markers visible in a padded map viewport
@@ -155,4 +156,42 @@ export const pixelBoundsToLatLngBounds = (
   const sw = projection.fromDivPixelToLatLng(southWest);
   const ne = projection.fromDivPixelToLatLng(northEast);
   return new google.maps.LatLngBounds(sw, ne);
+};
+
+export const areClustersEqual = (
+  clustersA: Cluster[],
+  clustersB: Cluster[]
+) => {
+  if (!clustersA || !clustersB) return clustersA === clustersB;
+  if (clustersA.length !== clustersB.length) return false;
+
+  for (let i = 0; i < clustersA.length; i++) {
+    const a = clustersA[i];
+    const b = clustersB[i];
+
+    if (a.markers.length !== b.markers.length) return false;
+
+    const posA = a.position;
+    const posB = b.position;
+
+    if (!posA.equals(posB)) return false;
+  }
+
+  return true;
+};
+
+export const areMarkersEqual = (markersA: Marker[], markersB: Marker[]) => {
+  if (!markersA || !markersB) return markersA === markersB;
+  if (markersA.length !== markersB.length) return false;
+
+  for (let i = 0; i < markersA.length; i++) {
+    if (markersA[i] !== markersB[i]) {
+      const posA = MarkerUtils.getPosition(markersA[i]);
+      const posB = MarkerUtils.getPosition(markersB[i]);
+
+      if (!posA.equals(posB)) return false;
+    }
+  }
+
+  return true;
 };
