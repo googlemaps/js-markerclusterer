@@ -23,7 +23,7 @@ import {
 } from "../src";
 import { MAP_ID, createMarker, getLoaderOptions, sync } from "./config";
 
-import { Loader } from "@googlemaps/js-api-loader";
+import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
 // @ts-ignore
 import trees from "./trees.json";
 
@@ -33,7 +33,11 @@ const mapOptions: google.maps.MapOptions = {
   mapId: MAP_ID,
 };
 
-new Loader(getLoaderOptions()).load().then(() => {
+async function main() {
+  setOptions(getLoaderOptions());
+
+  const { Map } = await importLibrary("maps");
+  const { ControlPosition } = await importLibrary("core");
   const maps: google.maps.Map[] = [];
 
   const panels: [HTMLElement, AbstractAlgorithm, string][] = [
@@ -55,14 +59,14 @@ new Loader(getLoaderOptions()).load().then(() => {
   ];
 
   panels.forEach(([element, algorithm, text]) => {
-    const map = new google.maps.Map(element, mapOptions);
+    const map = new Map(element, mapOptions);
     maps.push(map);
 
     const textElement = document.createElement("pre");
     textElement.innerText = text;
     textElement.classList.add("description");
 
-    map.controls[google.maps.ControlPosition.LEFT_TOP].push(textElement);
+    map.controls[ControlPosition.LEFT_TOP].push(textElement);
 
     const markers = trees.map(({ geometry }) =>
       createMarker(map, geometry.coordinates[1], geometry.coordinates[0])
@@ -76,4 +80,6 @@ new Loader(getLoaderOptions()).load().then(() => {
   });
 
   sync(...maps);
-});
+}
+
+main().catch((err) => console.error(err));

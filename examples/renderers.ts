@@ -23,7 +23,7 @@ import {
 } from "../src";
 import { MAP_ID, createMarker, getLoaderOptions, sync } from "./config";
 
-import { Loader } from "@googlemaps/js-api-loader";
+import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
 import { interpolateRgb } from "d3-interpolate";
 import trees from "./trees.json";
 
@@ -66,7 +66,10 @@ const interpolatedRenderer = {
   },
 };
 
-new Loader(getLoaderOptions()).load().then(() => {
+async function main() {
+  setOptions(getLoaderOptions());
+
+  const { Map } = await importLibrary("maps");
   const maps: google.maps.Map[] = [];
 
   const panels: [HTMLElement, Renderer, string | null][] = [
@@ -96,7 +99,7 @@ new Loader(getLoaderOptions()).load().then(() => {
     if (!text) {
       text = renderer.render.toString();
     }
-    const map = new google.maps.Map(element, mapOptions);
+    const map = new Map(element, mapOptions);
     maps.push(map);
 
     const textElement = document.createElement("pre");
@@ -120,4 +123,6 @@ new Loader(getLoaderOptions()).load().then(() => {
   });
 
   sync(...maps);
-});
+}
+
+main().catch((err) => console.error(err));

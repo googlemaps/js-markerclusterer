@@ -89,7 +89,11 @@ describe.each(markerClasses)(
       markerClusterer["renderClusters"] = jest.fn();
       markerClusterer.render();
 
-      expect(calculate).toBeCalledWith({ map, markers, mapCanvasProjection });
+      expect(calculate).toHaveBeenCalledWith({
+        map,
+        markers,
+        mapCanvasProjection,
+      });
       expect(markerClusterer["reset"]).toHaveBeenCalledTimes(0);
       expect(markerClusterer["renderClusters"]).toHaveBeenCalledTimes(1);
     });
@@ -231,7 +235,7 @@ describe.each(markerClasses)(
       markerClusterer["renderClusters"]();
 
       expect(clusters[0].marker).toBe(markers[0]);
-      expect(MarkerUtils.setMap).toBeCalledWith(markers[0], map);
+      expect(MarkerUtils.setMap).toHaveBeenCalledWith(markers[0], map);
     });
 
     test("markerClusterer renderClusters calls renderer", () => {
@@ -251,14 +255,14 @@ describe.each(markerClasses)(
       markerClusterer["renderClusters"]();
 
       clusters.forEach((cluster) => {
-        expect(MarkerUtils.setMap).toBeCalledWith(cluster.marker, map);
+        expect(MarkerUtils.setMap).toHaveBeenCalledWith(cluster.marker, map);
         expect(cluster.marker?.addListener).toHaveBeenCalledWith(
           "click",
           expect.any(Function)
         );
       });
 
-      expect(renderer.render).toBeCalledWith(
+      expect(renderer.render).toHaveBeenCalledWith(
         clusters[0],
         expect.any(ClusterStats),
         map
@@ -283,8 +287,8 @@ describe.each(markerClasses)(
       markerClusterer["clusters"] = clusters;
       markerClusterer["renderClusters"]();
 
-      expect(MarkerUtils.setMap).toBeCalledWith(marker1, null);
-      expect(MarkerUtils.setMap).toBeCalledWith(marker2, null);
+      expect(MarkerUtils.setMap).toHaveBeenCalledWith(marker1, null);
+      expect(MarkerUtils.setMap).toHaveBeenCalledWith(marker2, null);
     });
 
     test("markerClusterer renderClusters does not set click handler", () => {
@@ -303,7 +307,7 @@ describe.each(markerClasses)(
       markerClusterer["renderClusters"]();
 
       clusters.forEach((cluster) => {
-        expect(cluster.marker?.addListener).toBeCalledTimes(0);
+        expect(cluster.marker?.addListener).toHaveBeenCalledTimes(0);
       });
     });
 
@@ -316,8 +320,11 @@ describe.each(markerClasses)(
       markerClusterer.render = jest.fn();
       markerClusterer.onAdd();
 
-      expect(map.addListener).toBeCalledWith("idle", expect.any(Function));
-      expect(markerClusterer.render).toBeCalledTimes(1);
+      expect(map.addListener).toHaveBeenCalledWith(
+        "idle",
+        expect.any(Function)
+      );
+      expect(markerClusterer.render).toHaveBeenCalledTimes(1);
     });
 
     test("markerClusterer onRemove calls reset and removes listener", () => {
@@ -330,7 +337,7 @@ describe.each(markerClasses)(
 
       markerClusterer.onRemove();
 
-      expect(markerClusterer["reset"]).toBeCalledTimes(1);
+      expect(markerClusterer["reset"]).toHaveBeenCalledTimes(1);
       expect(markerClusterer["idleListener"]).toBeNull();
     });
 
@@ -342,7 +349,7 @@ describe.each(markerClasses)(
       markerClusterer.render = jest.fn();
 
       markerClusterer.addMarker(new markerClass());
-      expect(markerClusterer.render).toBeCalledTimes(1);
+      expect(markerClusterer.render).toHaveBeenCalledTimes(1);
       expect(markerClusterer["markers"]).toHaveLength(1);
     });
 
@@ -366,7 +373,7 @@ describe.each(markerClasses)(
       markerClusterer.render = jest.fn();
 
       markerClusterer.addMarkers([new markerClass(), new markerClass()]);
-      expect(markerClusterer.render).toBeCalledTimes(1);
+      expect(markerClusterer.render).toHaveBeenCalledTimes(1);
       expect(markerClusterer["markers"]).toHaveLength(2);
 
       markerClusterer.addMarkers(
@@ -376,7 +383,7 @@ describe.each(markerClasses)(
         ],
         true
       );
-      expect(markerClusterer.render).toBeCalledTimes(1);
+      expect(markerClusterer.render).toHaveBeenCalledTimes(1);
     });
 
     test("markerClusterer removeMarker if present", () => {
@@ -388,7 +395,7 @@ describe.each(markerClasses)(
       markerClusterer.render = jest.fn();
 
       expect(markerClusterer.removeMarker(markers[0])).toBe(true);
-      expect(markerClusterer.render).toBeCalledTimes(1);
+      expect(markerClusterer.render).toHaveBeenCalledTimes(1);
       expect(markerClusterer["markers"]).toHaveLength(0);
     });
 
@@ -408,7 +415,7 @@ describe.each(markerClasses)(
           new google.maps.marker.AdvancedMarkerElement()
         )
       ).toBe(false);
-      expect(markerClusterer.render).toBeCalledTimes(0);
+      expect(markerClusterer.render).toHaveBeenCalledTimes(0);
       expect(markerClusterer["markers"]).toHaveLength(1);
     });
 
@@ -421,7 +428,7 @@ describe.each(markerClasses)(
       markerClusterer.render = jest.fn();
 
       expect(markerClusterer.removeMarkers(markers)).toBe(true);
-      expect(markerClusterer.render).toBeCalledTimes(1);
+      expect(markerClusterer.render).toHaveBeenCalledTimes(1);
       expect(markerClusterer["markers"]).toHaveLength(0);
     });
 
@@ -441,7 +448,7 @@ describe.each(markerClasses)(
           new google.maps.marker.AdvancedMarkerElement(),
         ])
       ).toBe(false);
-      expect(markerClusterer.render).toBeCalledTimes(0);
+      expect(markerClusterer.render).toHaveBeenCalledTimes(0);
       expect(markerClusterer["markers"]).toHaveLength(1);
     });
 
@@ -460,7 +467,7 @@ describe.each(markerClasses)(
           new google.maps.marker.AdvancedMarkerElement(),
         ])
       ).toBe(true);
-      expect(markerClusterer.render).toBeCalledTimes(1);
+      expect(markerClusterer.render).toHaveBeenCalledTimes(1);
       expect(markerClusterer["markers"]).toHaveLength(0);
     });
 
@@ -473,11 +480,11 @@ describe.each(markerClasses)(
       markerClusterer.render = jest.fn();
 
       markerClusterer.clearMarkers();
-      expect(markerClusterer.render).toBeCalledTimes(1);
+      expect(markerClusterer.render).toHaveBeenCalledTimes(1);
       expect(markerClusterer["markers"]).toHaveLength(0);
 
       markerClusterer.clearMarkers(true);
-      expect(markerClusterer.render).toBeCalledTimes(1);
+      expect(markerClusterer.render).toHaveBeenCalledTimes(1);
       expect(markerClusterer["markers"]).toHaveLength(0);
     });
 
@@ -496,7 +503,7 @@ describe.each(markerClasses)(
         map
       );
 
-      expect(map.fitBounds).toBeCalledWith(bounds);
+      expect(map.fitBounds).toHaveBeenCalledWith(bounds);
     });
 
     test("markerClusterer calls setMap from constructor", () => {
@@ -505,7 +512,7 @@ describe.each(markerClasses)(
         map,
       });
 
-      expect(MarkerClusterer.prototype.setMap).toBeCalledWith(map);
+      expect(MarkerClusterer.prototype.setMap).toHaveBeenCalledWith(map);
     });
   }
 );

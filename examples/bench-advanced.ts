@@ -15,7 +15,7 @@
  */
 
 import { MAP_ID, getLoaderOptions } from "./config";
-import { Loader } from "@googlemaps/js-api-loader";
+import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
 import { MarkerClusterer } from "../src";
 
 import points from "./realworld.json";
@@ -28,14 +28,18 @@ const mapOptions: google.maps.MapOptions = {
   mapId: MAP_ID,
 };
 
-new Loader(getLoaderOptions()).load().then(() => {
+async function main() {
+  setOptions(getLoaderOptions());
+
+  const { Map } = await importLibrary("maps");
+  const { AdvancedMarkerElement } = await importLibrary("marker");
   const element = document.getElementById("map")!;
 
-  const map = new google.maps.Map(element, mapOptions);
+  const map = new Map(element, mapOptions);
 
   const markers = (points as [number, number, string][]).map(
     ([lat, lng, title]) =>
-      new google.maps.marker.AdvancedMarkerElement({
+      new AdvancedMarkerElement({
         position: { lat, lng },
         map,
         title,
@@ -48,4 +52,6 @@ new Loader(getLoaderOptions()).load().then(() => {
   });
 
   markerCluster.setMap(map);
-});
+}
+
+main().catch((err) => console.error(err));
