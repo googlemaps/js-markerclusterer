@@ -1,19 +1,18 @@
 {
   "compilerOptions": {
-    "declaration": true,
-    "declarationDir": "./dist",
     "noImplicitAny": true,
-    "outDir": "./dist",
     "esModuleInterop": true,
     "lib": ["DOM", "ESNext"],
     "target": "es2016",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "allowJs": true,
     "module": "esnext",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "skipLibCheck": true
+    "types": ["google.maps", "jest"],
+    "skipLibCheck": true,
+    "noEmit": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["./dist"]
+  "include": ["src/**/*", "examples/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

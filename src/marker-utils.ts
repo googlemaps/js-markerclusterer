@@ -69,7 +69,7 @@ export class MarkerUtils {
         }
       }
 
-      // @ts-ignore
+      // @ts-expect-error - LatLng constructor expects numbers
       return new google.maps.LatLng(null);
     }
 

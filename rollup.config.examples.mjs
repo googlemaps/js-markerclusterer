@@ -28,10 +28,6 @@ import copy from "rollup-plugin-copy";
 
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
-const typescriptOptions = {
-  tsconfig: "tsconfig.examples.json",
-};
-
 const isWatchMode = process.argv.includes("--watch");
 
 const examples = fs
@@ -47,7 +43,13 @@ const getTemplate = (name) => {
 export default examples.map((name, index) => ({
   input: `examples/${name}.ts`,
   plugins: [
-    typescript(typescriptOptions),
+    typescript({
+      tsconfig: "./tsconfig.json",
+      compilerOptions: {
+        noEmit: false,
+        outDir: `public/${name}`,
+      },
+    }),
     commonjs(),
     nodeResolve(),
     jsonNodeResolve(),
@@ -55,7 +57,7 @@ export default examples.map((name, index) => ({
       targets: [{ src: "examples/index.html", dest: "public/" }],
     }),
     isWatchMode &&
-      index == 0 &&
+      index === 0 &&
       serve({
         contentBase: "public",
         port: 8080,

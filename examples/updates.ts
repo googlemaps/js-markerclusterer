@@ -15,7 +15,7 @@
  */
 
 import { MAP_ID, createMarker, getLoaderOptions } from "./config";
-import { Loader } from "@googlemaps/js-api-loader";
+import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
 import { MarkerClusterer } from "../src";
 import trees from "./trees.json";
 
@@ -25,10 +25,13 @@ const mapOptions: google.maps.MapOptions = {
   mapId: MAP_ID,
 };
 
-new Loader(getLoaderOptions()).load().then(async () => {
+async function main() {
+  setOptions(getLoaderOptions());
+
+  const { Map } = await importLibrary("maps");
   const element = document.getElementById("map")!;
 
-  const map = new google.maps.Map(element, mapOptions);
+  const map = new Map(element, mapOptions);
 
   const markers = trees.map(({ geometry }) =>
     createMarker(map, geometry.coordinates[1], geometry.coordinates[0])
@@ -86,4 +89,6 @@ new Loader(getLoaderOptions()).load().then(async () => {
       resolve(null);
     }, 2000);
   });
-});
+}
+
+main().catch((err) => console.error(err));

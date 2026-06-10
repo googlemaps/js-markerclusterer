@@ -28,8 +28,7 @@ import { areClustersEqual, areMarkersEqual, getPaddedViewport } from "./utils";
 import { assertNotNull } from "../utils";
 
 export interface SuperClusterViewportOptions
-  extends SuperClusterOptions,
-    ViewportAlgorithmOptions {}
+  extends SuperClusterOptions, ViewportAlgorithmOptions {}
 
 export interface SuperClusterViewportState {
   /* The current zoom level */
