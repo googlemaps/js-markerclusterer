@@ -15,7 +15,7 @@
  */
 
 import { getLoaderOptions } from "./config";
-import { Loader } from "@googlemaps/js-api-loader";
+import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
 import { MarkerClusterer, SuperClusterViewportAlgorithm } from "../src";
 import points from "./realworld.json";
 
@@ -26,10 +26,13 @@ const mapOptions: google.maps.MapOptions = {
   maxZoom: 18,
 };
 
-new Loader(getLoaderOptions()).load().then(() => {
+async function main() {
+  setOptions(getLoaderOptions());
+
+  const { Map } = await importLibrary("maps");
   const element = document.getElementById("map")!;
 
-  const map = new google.maps.Map(element, mapOptions);
+  const map = new Map(element, mapOptions);
 
   const markers = (points as [number, number, string][]).map(
     ([lat, lng, label]) =>
@@ -45,4 +48,6 @@ new Loader(getLoaderOptions()).load().then(() => {
   });
 
   markerCluster.setMap(map);
-});
+}
+
+main().catch((err) => console.error(err));

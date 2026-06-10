@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import { LoaderOptions } from "@googlemaps/js-api-loader";
-import { MarkerUtils } from "../src/marker-utils";
+import { APIOptions } from "@googlemaps/js-api-loader";
+import { MarkerUtils } from "../src";
 
 export const MAP_ID = "DEMO_MAP_ID";
 
 const DEFAULT_KEY = "AIzaSyDhRjl83cPVWeaEer-SnKIw7GTjBuqWxXI";
 
-export const getLoaderOptions = (): LoaderOptions => ({
-  apiKey: localStorage.getItem("gmaps-key") ?? DEFAULT_KEY,
-  version: "weekly",
+export const getLoaderOptions = (): APIOptions => ({
+  key: localStorage.getItem("gmaps-key") ?? DEFAULT_KEY,
+  v: "weekly",
   libraries: ["marker"],
 });
 
