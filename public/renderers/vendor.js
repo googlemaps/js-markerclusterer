@@ -27,13 +27,24 @@ function __rest(s, e) {
     return t;
 }
 
+function __awaiter(thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+}
+
 typeof SuppressedError === "function" ? SuppressedError : function (error, suppressed, message) {
     var e = new Error(message);
     return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
 };
 
-var getOwnPropertyNames = Object.getOwnPropertyNames, getOwnPropertySymbols = Object.getOwnPropertySymbols;
-var hasOwnProperty = Object.prototype.hasOwnProperty;
+const { getOwnPropertyNames, getOwnPropertySymbols } = Object;
+// eslint-disable-next-line @typescript-eslint/unbound-method
+const { hasOwnProperty } = Object.prototype;
 /**
  * Combine two comparators into a single comparators.
  */
@@ -52,25 +63,19 @@ function createIsCircular(areItemsEqual) {
         if (!a || !b || typeof a !== 'object' || typeof b !== 'object') {
             return areItemsEqual(a, b, state);
         }
-        var cache = state.cache;
-        var cachedA = cache.get(a);
-        var cachedB = cache.get(b);
+        const { cache } = state;
+        const cachedA = cache.get(a);
+        const cachedB = cache.get(b);
         if (cachedA && cachedB) {
             return cachedA === b && cachedB === a;
         }
         cache.set(a, b);
         cache.set(b, a);
-        var result = areItemsEqual(a, b, state);
+        const result = areItemsEqual(a, b, state);
         cache.delete(a);
         cache.delete(b);
         return result;
     };
-}
-/**
- * Get the `@@toStringTag` of the value, if it exists.
- */
-function getShortTag(value) {
-    return value != null ? value[Symbol.toStringTag] : undefined;
 }
 /**
  * Get the properties to strictly examine, which include both own properties that are
@@ -82,26 +87,51 @@ function getStrictProperties(object) {
 /**
  * Whether the object contains the property passed as an own property.
  */
-var hasOwn = Object.hasOwn ||
-    (function (object, property) {
-        return hasOwnProperty.call(object, property);
-    });
-/**
- * Whether the values passed are strictly equal or both NaN.
- */
-function sameValueZeroEqual(a, b) {
-    return a === b || (!a && !b && a !== a && b !== b);
-}
+const hasOwn = 
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+Object.hasOwn || ((object, property) => hasOwnProperty.call(object, property));
 
-var PREACT_VNODE = '__v';
-var PREACT_OWNER = '__o';
-var REACT_OWNER = '_owner';
-var getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor, keys = Object.keys;
+const PREACT_VNODE = '__v';
+const PREACT_OWNER = '__o';
+const REACT_OWNER = '_owner';
+const { getOwnPropertyDescriptor, keys } = Object;
+/**
+ * Whether the values passed are equal based on a [SameValue](https://262.ecma-international.org/7.0/#sec-samevalue) basis.
+ * Simplified, this maps to if the two values are referentially equal to one another (`a === b`) or both are `NaN`.
+ *
+ * @note
+ * When available in the environment, this is just a re-export of the global
+ * [`Object.is`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is) method.
+ */
+const sameValueEqual = 
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+Object.is
+    || function sameValueEqual(a, b) {
+        return a === b ? a !== 0 || 1 / a === 1 / b : a !== a && b !== b;
+    };
+/**
+ * Whether the values passed are equal based on a
+ * [Strict Equality Comparison](https://262.ecma-international.org/7.0/#sec-strict-equality-comparison) basis.
+ * Simplified, this maps to if the two values are referentially equal to one another (`a === b`).
+ *
+ * @note
+ * This is mainly available as a convenience function, such as being a default when a function to determine equality between
+ * two objects is used.
+ */
+function strictEqual(a, b) {
+    return a === b;
+}
+/**
+ * Whether the array buffers are equal in value.
+ */
+function areArrayBuffersEqual(a, b) {
+    return a.byteLength === b.byteLength && areTypedArraysEqual(new Uint8Array(a), new Uint8Array(b));
+}
 /**
  * Whether the arrays are equal in value.
  */
 function areArraysEqual(a, b, state) {
-    var index = a.length;
+    let index = a.length;
     if (b.length !== index) {
         return false;
     }
@@ -113,49 +143,49 @@ function areArraysEqual(a, b, state) {
     return true;
 }
 /**
+ * Whether the dataviews are equal in value.
+ */
+function areDataViewsEqual(a, b) {
+    return (a.byteLength === b.byteLength
+        && areTypedArraysEqual(new Uint8Array(a.buffer, a.byteOffset, a.byteLength), new Uint8Array(b.buffer, b.byteOffset, b.byteLength)));
+}
+/**
  * Whether the dates passed are equal in value.
  */
 function areDatesEqual(a, b) {
-    return sameValueZeroEqual(a.getTime(), b.getTime());
+    return sameValueEqual(a.getTime(), b.getTime());
 }
 /**
  * Whether the errors passed are equal in value.
  */
 function areErrorsEqual(a, b) {
-    return (a.name === b.name &&
-        a.message === b.message &&
-        a.cause === b.cause &&
-        a.stack === b.stack);
-}
-/**
- * Whether the functions passed are equal in value.
- */
-function areFunctionsEqual(a, b) {
-    return a === b;
+    return a.name === b.name && a.message === b.message && a.cause === b.cause && a.stack === b.stack;
 }
 /**
  * Whether the `Map`s are equal in value.
  */
 function areMapsEqual(a, b, state) {
-    var size = a.size;
+    const size = a.size;
     if (size !== b.size) {
         return false;
     }
     if (!size) {
         return true;
     }
-    var matchedIndices = new Array(size);
-    var aIterable = a.entries();
-    var aResult;
-    var bResult;
-    var index = 0;
+    const matchedIndices = new Array(size);
+    const aIterable = a.entries();
+    let aResult;
+    let bResult;
+    let index = 0;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     while ((aResult = aIterable.next())) {
         if (aResult.done) {
             break;
         }
-        var bIterable = b.entries();
-        var hasMatch = false;
-        var matchIndex = 0;
+        const bIterable = b.entries();
+        let hasMatch = false;
+        let matchIndex = 0;
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         while ((bResult = bIterable.next())) {
             if (bResult.done) {
                 break;
@@ -164,10 +194,10 @@ function areMapsEqual(a, b, state) {
                 matchIndex++;
                 continue;
             }
-            var aEntry = aResult.value;
-            var bEntry = bResult.value;
-            if (state.equals(aEntry[0], bEntry[0], index, matchIndex, a, b, state) &&
-                state.equals(aEntry[1], bEntry[1], aEntry[0], bEntry[0], a, b, state)) {
+            const aEntry = aResult.value;
+            const bEntry = bResult.value;
+            if (state.equals(aEntry[0], bEntry[0], index, matchIndex, a, b, state)
+                && state.equals(aEntry[1], bEntry[1], aEntry[0], bEntry[0], a, b, state)) {
                 hasMatch = matchedIndices[matchIndex] = true;
                 break;
             }
@@ -181,15 +211,11 @@ function areMapsEqual(a, b, state) {
     return true;
 }
 /**
- * Whether the numbers are equal in value.
- */
-var areNumbersEqual = sameValueZeroEqual;
-/**
  * Whether the objects are equal in value.
  */
 function areObjectsEqual(a, b, state) {
-    var properties = keys(a);
-    var index = properties.length;
+    const properties = keys(a);
+    let index = properties.length;
     if (keys(b).length !== index) {
         return false;
     }
@@ -208,14 +234,14 @@ function areObjectsEqual(a, b, state) {
  * Whether the objects are equal in value with strict property checking.
  */
 function areObjectsEqualStrict(a, b, state) {
-    var properties = getStrictProperties(a);
-    var index = properties.length;
+    const properties = getStrictProperties(a);
+    let index = properties.length;
     if (getStrictProperties(b).length !== index) {
         return false;
     }
-    var property;
-    var descriptorA;
-    var descriptorB;
+    let property;
+    let descriptorA;
+    let descriptorB;
     // Decrementing `while` showed faster results than either incrementing or
     // decrementing `for` loop and than an incrementing `while` loop. Declarative
     // methods like `some` / `every` were not used to avoid incurring the garbage
@@ -227,12 +253,12 @@ function areObjectsEqualStrict(a, b, state) {
         }
         descriptorA = getOwnPropertyDescriptor(a, property);
         descriptorB = getOwnPropertyDescriptor(b, property);
-        if ((descriptorA || descriptorB) &&
-            (!descriptorA ||
-                !descriptorB ||
-                descriptorA.configurable !== descriptorB.configurable ||
-                descriptorA.enumerable !== descriptorB.enumerable ||
-                descriptorA.writable !== descriptorB.writable)) {
+        if ((descriptorA || descriptorB)
+            && (!descriptorA
+                || !descriptorB
+                || descriptorA.configurable !== descriptorB.configurable
+                || descriptorA.enumerable !== descriptorB.enumerable
+                || descriptorA.writable !== descriptorB.writable)) {
             return false;
         }
     }
@@ -242,7 +268,7 @@ function areObjectsEqualStrict(a, b, state) {
  * Whether the primitive wrappers passed are equal in value.
  */
 function arePrimitiveWrappersEqual(a, b) {
-    return sameValueZeroEqual(a.valueOf(), b.valueOf());
+    return sameValueEqual(a.valueOf(), b.valueOf());
 }
 /**
  * Whether the regexps passed are equal in value.
@@ -254,30 +280,32 @@ function areRegExpsEqual(a, b) {
  * Whether the `Set`s are equal in value.
  */
 function areSetsEqual(a, b, state) {
-    var size = a.size;
+    const size = a.size;
     if (size !== b.size) {
         return false;
     }
     if (!size) {
         return true;
     }
-    var matchedIndices = new Array(size);
-    var aIterable = a.values();
-    var aResult;
-    var bResult;
+    const matchedIndices = new Array(size);
+    const aIterable = a.values();
+    let aResult;
+    let bResult;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     while ((aResult = aIterable.next())) {
         if (aResult.done) {
             break;
         }
-        var bIterable = b.values();
-        var hasMatch = false;
-        var matchIndex = 0;
+        const bIterable = b.values();
+        let hasMatch = false;
+        let matchIndex = 0;
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         while ((bResult = bIterable.next())) {
             if (bResult.done) {
                 break;
             }
-            if (!matchedIndices[matchIndex] &&
-                state.equals(aResult.value, bResult.value, aResult.value, bResult.value, a, b, state)) {
+            if (!matchedIndices[matchIndex]
+                && state.equals(aResult.value, bResult.value, aResult.value, bResult.value, a, b, state)) {
                 hasMatch = matchedIndices[matchIndex] = true;
                 break;
             }
@@ -293,8 +321,8 @@ function areSetsEqual(a, b, state) {
  * Whether the TypedArray instances are equal in value.
  */
 function areTypedArraysEqual(a, b) {
-    var index = a.length;
-    if (b.length !== index) {
+    let index = a.byteLength;
+    if (b.byteLength !== index || a.byteOffset !== b.byteOffset) {
         return false;
     }
     while (index-- > 0) {
@@ -308,47 +336,30 @@ function areTypedArraysEqual(a, b) {
  * Whether the URL instances are equal in value.
  */
 function areUrlsEqual(a, b) {
-    return (a.hostname === b.hostname &&
-        a.pathname === b.pathname &&
-        a.protocol === b.protocol &&
-        a.port === b.port &&
-        a.hash === b.hash &&
-        a.username === b.username &&
-        a.password === b.password);
+    return (a.hostname === b.hostname
+        && a.pathname === b.pathname
+        && a.protocol === b.protocol
+        && a.port === b.port
+        && a.hash === b.hash
+        && a.username === b.username
+        && a.password === b.password);
 }
 function isPropertyEqual(a, b, state, property) {
-    if ((property === REACT_OWNER ||
-        property === PREACT_OWNER ||
-        property === PREACT_VNODE) &&
-        (a.$$typeof || b.$$typeof)) {
+    if ((property === REACT_OWNER || property === PREACT_OWNER || property === PREACT_VNODE)
+        && (a.$$typeof || b.$$typeof)) {
         return true;
     }
-    return (hasOwn(b, property) &&
-        state.equals(a[property], b[property], property, property, a, b, state));
+    return hasOwn(b, property) && state.equals(a[property], b[property], property, property, a, b, state);
 }
 
-var ARGUMENTS_TAG = '[object Arguments]';
-var BOOLEAN_TAG = '[object Boolean]';
-var DATE_TAG = '[object Date]';
-var ERROR_TAG = '[object Error]';
-var MAP_TAG = '[object Map]';
-var NUMBER_TAG = '[object Number]';
-var OBJECT_TAG = '[object Object]';
-var REG_EXP_TAG = '[object RegExp]';
-var SET_TAG = '[object Set]';
-var STRING_TAG = '[object String]';
-var URL_TAG = '[object URL]';
-var isArray = Array.isArray;
-var isTypedArray = typeof ArrayBuffer === 'function' && ArrayBuffer.isView
-    ? ArrayBuffer.isView
-    : null;
-var assign = Object.assign;
-var getTag = Object.prototype.toString.call.bind(Object.prototype.toString);
+// eslint-disable-next-line @typescript-eslint/unbound-method
+const toString = Object.prototype.toString;
 /**
  * Create a comparator method based on the type-specific equality comparators passed.
  */
-function createEqualityComparator(_a) {
-    var areArraysEqual = _a.areArraysEqual, areDatesEqual = _a.areDatesEqual, areErrorsEqual = _a.areErrorsEqual, areFunctionsEqual = _a.areFunctionsEqual, areMapsEqual = _a.areMapsEqual, areNumbersEqual = _a.areNumbersEqual, areObjectsEqual = _a.areObjectsEqual, arePrimitiveWrappersEqual = _a.arePrimitiveWrappersEqual, areRegExpsEqual = _a.areRegExpsEqual, areSetsEqual = _a.areSetsEqual, areTypedArraysEqual = _a.areTypedArraysEqual, areUrlsEqual = _a.areUrlsEqual, unknownTagComparators = _a.unknownTagComparators;
+function createEqualityComparator(config) {
+    const supportedComparatorMap = createSupportedComparatorMap(config);
+    const { areArraysEqual, areDatesEqual, areFunctionsEqual, areMapsEqual, areNumbersEqual, areObjectsEqual, areRegExpsEqual, areSetsEqual, getUnsupportedCustomComparator, } = config;
     /**
      * compare the value of the two objects and return true if they are equivalent in values
      */
@@ -362,12 +373,12 @@ function createEqualityComparator(_a) {
         if (a == null || b == null) {
             return false;
         }
-        var type = typeof a;
+        const type = typeof a;
         if (type !== typeof b) {
             return false;
         }
         if (type !== 'object') {
-            if (type === 'number') {
+            if (type === 'number' || type === 'bigint') {
                 return areNumbersEqual(a, b, state);
             }
             if (type === 'function') {
@@ -376,7 +387,7 @@ function createEqualityComparator(_a) {
             // If a primitive value that is not strictly equal, it must be unequal.
             return false;
         }
-        var constructor = a.constructor;
+        const constructor = a.constructor;
         // Checks are listed in order of commonality of use-case:
         //   1. Common complex object types (plain object, array)
         //   2. Common data values (date, regexp)
@@ -390,27 +401,17 @@ function createEqualityComparator(_a) {
         if (constructor !== b.constructor) {
             return false;
         }
-        // `isPlainObject` only checks against the object's own realm. Cross-realm
-        // comparisons are rare, and will be handled in the ultimate fallback, so
-        // we can avoid capturing the string tag.
-        if (constructor === Object) {
-            return areObjectsEqual(a, b, state);
-        }
-        // `isArray()` works on subclasses and is cross-realm, so we can avoid capturing
-        // the string tag or doing an `instanceof` check.
-        if (isArray(a)) {
-            return areArraysEqual(a, b, state);
-        }
-        // `isTypedArray()` works on all possible TypedArray classes, so we can avoid
-        // capturing the string tag or comparing against all possible constructors.
-        if (isTypedArray != null && isTypedArray(a)) {
-            return areTypedArraysEqual(a, b, state);
-        }
         // Try to fast-path equality checks for other complex object types in the
         // same realm to avoid capturing the string tag. Strict equality is used
         // instead of `instanceof` because it is more performant for the common
-        // use-case. If someone is subclassing a native class, it will be handled
-        // with the string tag comparison.
+        // use-case. If someone is creating a subclass from a native class, it will be
+        // handled with the string tag comparison.
+        if (constructor === Object) {
+            return areObjectsEqual(a, b, state);
+        }
+        if (constructor === Array) {
+            return areArraysEqual(a, b, state);
+        }
         if (constructor === Date) {
             return areDatesEqual(a, b, state);
         }
@@ -423,72 +424,31 @@ function createEqualityComparator(_a) {
         if (constructor === Set) {
             return areSetsEqual(a, b, state);
         }
-        // Since this is a custom object, capture the string tag to determing its type.
+        if (constructor === Promise) {
+            // Avoid tag checks for promise values, since we know if they are not referentially equal
+            // then they are not equal.
+            return false;
+        }
+        // `isArray()` works on subclasses and is cross-realm, so we can avoid capturing
+        // the string tag or doing an `instanceof` in edge cases.
+        if (Array.isArray(a)) {
+            return areArraysEqual(a, b, state);
+        }
+        // Since this is a custom object, capture the string tag to determining its type.
         // This is reasonably performant in modern environments like v8 and SpiderMonkey.
-        var tag = getTag(a);
-        if (tag === DATE_TAG) {
-            return areDatesEqual(a, b, state);
+        const tag = toString.call(a);
+        const supportedComparator = supportedComparatorMap[tag];
+        if (supportedComparator) {
+            return supportedComparator(a, b, state);
         }
-        // For RegExp, the properties are not enumerable, and therefore will give false positives if
-        // tested like a standard object.
-        if (tag === REG_EXP_TAG) {
-            return areRegExpsEqual(a, b, state);
-        }
-        if (tag === MAP_TAG) {
-            return areMapsEqual(a, b, state);
-        }
-        if (tag === SET_TAG) {
-            return areSetsEqual(a, b, state);
-        }
-        if (tag === OBJECT_TAG) {
-            // The exception for value comparison is custom `Promise`-like class instances. These should
-            // be treated the same as standard `Promise` objects, which means strict equality, and if
-            // it reaches this point then that strict equality comparison has already failed.
-            return (typeof a.then !== 'function' &&
-                typeof b.then !== 'function' &&
-                areObjectsEqual(a, b, state));
-        }
-        // If a URL tag, it should be tested explicitly. Like RegExp, the properties are not
-        // enumerable, and therefore will give false positives if tested like a standard object.
-        if (tag === URL_TAG) {
-            return areUrlsEqual(a, b, state);
-        }
-        // If an error tag, it should be tested explicitly. Like RegExp, the properties are not
-        // enumerable, and therefore will give false positives if tested like a standard object.
-        if (tag === ERROR_TAG) {
-            return areErrorsEqual(a, b, state);
-        }
-        // If an arguments tag, it should be treated as a standard object.
-        if (tag === ARGUMENTS_TAG) {
-            return areObjectsEqual(a, b, state);
-        }
-        // As the penultimate fallback, check if the values passed are primitive wrappers. This
-        // is very rare in modern JS, which is why it is deprioritized compared to all other object
-        // types.
-        if (tag === BOOLEAN_TAG || tag === NUMBER_TAG || tag === STRING_TAG) {
-            return arePrimitiveWrappersEqual(a, b, state);
-        }
-        if (unknownTagComparators) {
-            var unknownTagComparator = unknownTagComparators[tag];
-            if (!unknownTagComparator) {
-                var shortTag = getShortTag(a);
-                if (shortTag) {
-                    unknownTagComparator = unknownTagComparators[shortTag];
-                }
-            }
-            // If the custom config has an unknown tag comparator that matches the captured tag or the
-            // @@toStringTag, it is the source of truth for whether the values are equal.
-            if (unknownTagComparator) {
-                return unknownTagComparator(a, b, state);
-            }
+        const unsupportedCustomComparator = getUnsupportedCustomComparator && getUnsupportedCustomComparator(a, b, state, tag);
+        if (unsupportedCustomComparator) {
+            return unsupportedCustomComparator(a, b, state);
         }
         // If not matching any tags that require a specific type of comparison, then we hard-code false because
         // the only thing remaining is strict equality, which has already been compared. This is for a few reasons:
         //   - Certain types that cannot be introspected (e.g., `WeakMap`). For these types, this is the only
         //     comparison that can be made.
-        //   - For types that can be introspected, but rarely have requirements to be compared
-        //     (`ArrayBuffer`, `DataView`, etc.), the cost is avoided to prioritize the common
-        //     use-cases (may be included in a future release, if requested enough).
         //   - For types that can be introspected but do not have an objective definition of what
         //     equality is (`Error`, etc.), the subjective decision is to be conservative and strictly compare.
         // In all cases, these decisions should be reevaluated based on changes to the language and
@@ -499,46 +459,39 @@ function createEqualityComparator(_a) {
 /**
  * Create the configuration object used for building comparators.
  */
-function createEqualityComparatorConfig(_a) {
-    var circular = _a.circular, createCustomConfig = _a.createCustomConfig, strict = _a.strict;
-    var config = {
-        areArraysEqual: strict
-            ? areObjectsEqualStrict
-            : areArraysEqual,
+function createEqualityComparatorConfig({ circular, createCustomConfig, strict, }) {
+    let config = {
+        areArrayBuffersEqual,
+        areArraysEqual: strict ? areObjectsEqualStrict : areArraysEqual,
+        areDataViewsEqual,
         areDatesEqual: areDatesEqual,
         areErrorsEqual: areErrorsEqual,
-        areFunctionsEqual: areFunctionsEqual,
-        areMapsEqual: strict
-            ? combineComparators(areMapsEqual, areObjectsEqualStrict)
-            : areMapsEqual,
-        areNumbersEqual: areNumbersEqual,
-        areObjectsEqual: strict
-            ? areObjectsEqualStrict
-            : areObjectsEqual,
+        areFunctionsEqual: strictEqual,
+        areMapsEqual: strict ? combineComparators(areMapsEqual, areObjectsEqualStrict) : areMapsEqual,
+        areNumbersEqual: sameValueEqual,
+        areObjectsEqual: strict ? areObjectsEqualStrict : areObjectsEqual,
         arePrimitiveWrappersEqual: arePrimitiveWrappersEqual,
         areRegExpsEqual: areRegExpsEqual,
-        areSetsEqual: strict
-            ? combineComparators(areSetsEqual, areObjectsEqualStrict)
-            : areSetsEqual,
+        areSetsEqual: strict ? combineComparators(areSetsEqual, areObjectsEqualStrict) : areSetsEqual,
         areTypedArraysEqual: strict
-            ? areObjectsEqualStrict
+            ? combineComparators(areTypedArraysEqual, areObjectsEqualStrict)
             : areTypedArraysEqual,
         areUrlsEqual: areUrlsEqual,
-        unknownTagComparators: undefined,
+        getUnsupportedCustomComparator: undefined,
     };
     if (createCustomConfig) {
-        config = assign({}, config, createCustomConfig(config));
+        config = Object.assign({}, config, createCustomConfig(config));
     }
     if (circular) {
-        var areArraysEqual$1 = createIsCircular(config.areArraysEqual);
-        var areMapsEqual$1 = createIsCircular(config.areMapsEqual);
-        var areObjectsEqual$1 = createIsCircular(config.areObjectsEqual);
-        var areSetsEqual$1 = createIsCircular(config.areSetsEqual);
-        config = assign({}, config, {
-            areArraysEqual: areArraysEqual$1,
-            areMapsEqual: areMapsEqual$1,
-            areObjectsEqual: areObjectsEqual$1,
-            areSetsEqual: areSetsEqual$1,
+        const areArraysEqual = createIsCircular(config.areArraysEqual);
+        const areMapsEqual = createIsCircular(config.areMapsEqual);
+        const areObjectsEqual = createIsCircular(config.areObjectsEqual);
+        const areSetsEqual = createIsCircular(config.areSetsEqual);
+        config = Object.assign({}, config, {
+            areArraysEqual,
+            areMapsEqual,
+            areObjectsEqual,
+            areSetsEqual,
         });
     }
     return config;
@@ -555,16 +508,15 @@ function createInternalEqualityComparator(compare) {
 /**
  * Create the `isEqual` function used by the consuming application.
  */
-function createIsEqual(_a) {
-    var circular = _a.circular, comparator = _a.comparator, createState = _a.createState, equals = _a.equals, strict = _a.strict;
+function createIsEqual({ circular, comparator, createState, equals, strict }) {
     if (createState) {
         return function isEqual(a, b) {
-            var _a = createState(), _b = _a.cache, cache = _b === void 0 ? circular ? new WeakMap() : undefined : _b, meta = _a.meta;
+            const { cache = circular ? new WeakMap() : undefined, meta } = createState();
             return comparator(a, b, {
-                cache: cache,
-                equals: equals,
-                meta: meta,
-                strict: strict,
+                cache,
+                equals,
+                meta,
+                strict,
             });
         };
     }
@@ -572,27 +524,72 @@ function createIsEqual(_a) {
         return function isEqual(a, b) {
             return comparator(a, b, {
                 cache: new WeakMap(),
-                equals: equals,
+                equals,
                 meta: undefined,
-                strict: strict,
+                strict,
             });
         };
     }
-    var state = {
+    const state = {
         cache: undefined,
-        equals: equals,
+        equals,
         meta: undefined,
-        strict: strict,
+        strict,
     };
     return function isEqual(a, b) {
         return comparator(a, b, state);
+    };
+}
+/**
+ * Create a map of `toString()` values to their respective handlers for `tag`-based lookups.
+ */
+function createSupportedComparatorMap({ areArrayBuffersEqual, areArraysEqual, areDataViewsEqual, areDatesEqual, areErrorsEqual, areFunctionsEqual, areMapsEqual, areNumbersEqual, areObjectsEqual, arePrimitiveWrappersEqual, areRegExpsEqual, areSetsEqual, areTypedArraysEqual, areUrlsEqual, }) {
+    return {
+        '[object Arguments]': areObjectsEqual,
+        '[object Array]': areArraysEqual,
+        '[object ArrayBuffer]': areArrayBuffersEqual,
+        '[object AsyncGeneratorFunction]': areFunctionsEqual,
+        '[object BigInt]': areNumbersEqual,
+        '[object BigInt64Array]': areTypedArraysEqual,
+        '[object BigUint64Array]': areTypedArraysEqual,
+        '[object Boolean]': arePrimitiveWrappersEqual,
+        '[object DataView]': areDataViewsEqual,
+        '[object Date]': areDatesEqual,
+        // If an error tag, it should be tested explicitly. Like RegExp, the properties are not
+        // enumerable, and therefore will give false positives if tested like a standard object.
+        '[object Error]': areErrorsEqual,
+        '[object Float16Array]': areTypedArraysEqual,
+        '[object Float32Array]': areTypedArraysEqual,
+        '[object Float64Array]': areTypedArraysEqual,
+        '[object Function]': areFunctionsEqual,
+        '[object GeneratorFunction]': areFunctionsEqual,
+        '[object Int8Array]': areTypedArraysEqual,
+        '[object Int16Array]': areTypedArraysEqual,
+        '[object Int32Array]': areTypedArraysEqual,
+        '[object Map]': areMapsEqual,
+        '[object Number]': arePrimitiveWrappersEqual,
+        '[object Object]': (a, b, state) => 
+        // The exception for value comparison is custom `Promise`-like class instances. These should
+        // be treated the same as standard `Promise` objects, which means strict equality, and if
+        // it reaches this point then that strict equality comparison has already failed.
+        typeof a.then !== 'function' && typeof b.then !== 'function' && areObjectsEqual(a, b, state),
+        // For RegExp, the properties are not enumerable, and therefore will give false positives if
+        // tested like a standard object.
+        '[object RegExp]': areRegExpsEqual,
+        '[object Set]': areSetsEqual,
+        '[object String]': arePrimitiveWrappersEqual,
+        '[object URL]': areUrlsEqual,
+        '[object Uint8Array]': areTypedArraysEqual,
+        '[object Uint8ClampedArray]': areTypedArraysEqual,
+        '[object Uint16Array]': areTypedArraysEqual,
+        '[object Uint32Array]': areTypedArraysEqual,
     };
 }
 
 /**
  * Whether the items passed are deeply-equal in value.
  */
-var deepEqual = createCustomEqual();
+const deepEqual = createCustomEqual();
 /**
  * Whether the items passed are deeply-equal in value based on strict comparison.
  */
@@ -613,21 +610,21 @@ createCustomEqual({
  * Whether the items passed are shallowly-equal in value.
  */
 createCustomEqual({
-    createInternalComparator: function () { return sameValueZeroEqual; },
+    createInternalComparator: () => sameValueEqual,
 });
 /**
  * Whether the items passed are shallowly-equal in value based on strict comparison
  */
 createCustomEqual({
     strict: true,
-    createInternalComparator: function () { return sameValueZeroEqual; },
+    createInternalComparator: () => sameValueEqual,
 });
 /**
  * Whether the items passed are shallowly-equal in value, including circular references.
  */
 createCustomEqual({
     circular: true,
-    createInternalComparator: function () { return sameValueZeroEqual; },
+    createInternalComparator: () => sameValueEqual,
 });
 /**
  * Whether the items passed are shallowly-equal in value, including circular references,
@@ -635,7 +632,7 @@ createCustomEqual({
  */
 createCustomEqual({
     circular: true,
-    createInternalComparator: function () { return sameValueZeroEqual; },
+    createInternalComparator: () => sameValueEqual,
     strict: true,
 });
 /**
@@ -646,15 +643,14 @@ createCustomEqual({
  * support for legacy environments that do not support expected features like
  * `RegExp.prototype.flags` out of the box.
  */
-function createCustomEqual(options) {
-    if (options === void 0) { options = {}; }
-    var _a = options.circular, circular = _a === void 0 ? false : _a, createCustomInternalComparator = options.createInternalComparator, createState = options.createState, _b = options.strict, strict = _b === void 0 ? false : _b;
-    var config = createEqualityComparatorConfig(options);
-    var comparator = createEqualityComparator(config);
-    var equals = createCustomInternalComparator
+function createCustomEqual(options = {}) {
+    const { circular = false, createInternalComparator: createCustomInternalComparator, createState, strict = false, } = options;
+    const config = createEqualityComparatorConfig(options);
+    const comparator = createEqualityComparator(config);
+    const equals = createCustomInternalComparator
         ? createCustomInternalComparator(comparator)
         : createInternalEqualityComparator(comparator);
-    return createIsEqual({ circular: circular, comparator: comparator, createState: createState, equals: equals, strict: strict });
+    return createIsEqual({ circular, comparator, createState, equals, strict });
 }
 
 const ARRAY_TYPES = [
@@ -663,19 +659,25 @@ const ARRAY_TYPES = [
 ];
 
 /** @typedef {Int8ArrayConstructor | Uint8ArrayConstructor | Uint8ClampedArrayConstructor | Int16ArrayConstructor | Uint16ArrayConstructor | Int32ArrayConstructor | Uint32ArrayConstructor | Float32ArrayConstructor | Float64ArrayConstructor} TypedArrayConstructor */
+/** @typedef {Int8Array | Uint8Array | Uint8ClampedArray | Int16Array | Uint16Array | Int32Array | Uint32Array | Float32Array | Float64Array} TypedArray */
 
 const VERSION = 1; // serialized format version
 const HEADER_SIZE = 8;
+
+// Shared scratch stack for iterative DFS in range/within. Sized for the worst case:
+// 3 ints per frame * (treeHeight + 1), with treeHeight ≤ ceil(log2(2^32 / 3)) ≈ 31.
+const STACK = new Uint32Array(96);
 
 class KDBush {
 
     /**
      * Creates an index from raw `ArrayBuffer` data.
-     * @param {ArrayBuffer} data
+     * @param {ArrayBufferLike} data
      */
     static from(data) {
-        if (!(data instanceof ArrayBuffer)) {
-            throw new Error('Data must be an instance of ArrayBuffer.');
+        // @ts-expect-error duck typing array buffers
+        if (!data || data.byteLength === undefined || data.buffer) {
+            throw new Error('Data must be an instance of ArrayBuffer or SharedArrayBuffer.');
         }
         const [magic, versionAndType] = new Uint8Array(data, 0, 2);
         if (magic !== 0xdb) {
@@ -692,7 +694,7 @@ class KDBush {
         const [nodeSize] = new Uint16Array(data, 2, 1);
         const [numItems] = new Uint32Array(data, 4, 1);
 
-        return new KDBush(numItems, nodeSize, ArrayType, data);
+        return new KDBush(numItems, nodeSize, ArrayType, undefined, data);
     }
 
     /**
@@ -700,10 +702,11 @@ class KDBush {
      * @param {number} numItems
      * @param {number} [nodeSize=64] Size of the KD-tree node (64 by default).
      * @param {TypedArrayConstructor} [ArrayType=Float64Array] The array type used for coordinates storage (`Float64Array` by default).
-     * @param {ArrayBuffer} [data] (For internal use only)
+     * @param {ArrayBufferConstructor | SharedArrayBufferConstructor} [ArrayBufferType=ArrayBuffer] The array buffer type used for storage (`ArrayBuffer` by default).
+     * @param {ArrayBufferLike} [data] (For internal use only)
      */
-    constructor(numItems, nodeSize = 64, ArrayType = Float64Array, data) {
-        if (isNaN(numItems) || numItems < 0) throw new Error(`Unpexpected numItems value: ${numItems}.`);
+    constructor(numItems, nodeSize = 64, ArrayType = Float64Array, ArrayBufferType = ArrayBuffer, data) {
+        if (isNaN(numItems) || numItems < 0) throw new Error(`Unexpected numItems value: ${numItems}.`);
 
         this.numItems = +numItems;
         this.nodeSize = Math.min(Math.max(+nodeSize, 2), 65535);
@@ -719,23 +722,28 @@ class KDBush {
             throw new Error(`Unexpected typed array class: ${ArrayType}.`);
         }
 
-        if (data && (data instanceof ArrayBuffer)) { // reconstruct an index from a buffer
+        if (data) { // reconstruct an index from a buffer
             this.data = data;
-            this.ids = new this.IndexArrayType(this.data, HEADER_SIZE, numItems);
-            this.coords = new this.ArrayType(this.data, HEADER_SIZE + idsByteSize + padCoords, numItems * 2);
+            // @ts-expect-error TS can't handle SharedArrayBuffer overloads
+            this.ids = new this.IndexArrayType(data, HEADER_SIZE, numItems);
+            // @ts-expect-error TS can't handle SharedArrayBuffer overloads
+            this.coords = new ArrayType(data, HEADER_SIZE + idsByteSize + padCoords, numItems * 2);
             this._pos = numItems * 2;
             this._finished = true;
+
         } else { // initialize a new index
-            this.data = new ArrayBuffer(HEADER_SIZE + coordsByteSize + idsByteSize + padCoords);
-            this.ids = new this.IndexArrayType(this.data, HEADER_SIZE, numItems);
-            this.coords = new this.ArrayType(this.data, HEADER_SIZE + idsByteSize + padCoords, numItems * 2);
+            const data = this.data = new ArrayBufferType(HEADER_SIZE + coordsByteSize + idsByteSize + padCoords);
+            // @ts-expect-error TS can't handle SharedArrayBuffer overloads
+            this.ids = new this.IndexArrayType(data, HEADER_SIZE, numItems);
+            // @ts-expect-error TS can't handle SharedArrayBuffer overloads
+            this.coords = new ArrayType(data, HEADER_SIZE + idsByteSize + padCoords, numItems * 2);
             this._pos = 0;
             this._finished = false;
 
             // set header
-            new Uint8Array(this.data, 0, 2).set([0xdb, (VERSION << 4) + arrayTypeIndex]);
-            new Uint16Array(this.data, 2, 1)[0] = nodeSize;
-            new Uint32Array(this.data, 4, 1)[0] = numItems;
+            new Uint8Array(data, 0, 2).set([0xdb, (VERSION << 4) + arrayTypeIndex]);
+            new Uint16Array(data, 2, 1)[0] = nodeSize;
+            new Uint32Array(data, 4, 1)[0] = numItems;
         }
     }
 
@@ -780,14 +788,17 @@ class KDBush {
         if (!this._finished) throw new Error('Data not yet indexed - call index.finish().');
 
         const {ids, coords, nodeSize} = this;
-        const stack = [0, ids.length - 1, 0];
+        STACK[0] = 0;
+        STACK[1] = ids.length - 1;
+        STACK[2] = 0;
+        let sp = 3;
         const result = [];
 
         // recursively search for items in range in the kd-sorted arrays
-        while (stack.length) {
-            const axis = stack.pop() || 0;
-            const right = stack.pop() || 0;
-            const left = stack.pop() || 0;
+        while (sp > 0) {
+            const axis = STACK[--sp];
+            const right = STACK[--sp];
+            const left = STACK[--sp];
 
             // if we reached "tree node", search linearly
             if (right - left <= nodeSize) {
@@ -809,14 +820,14 @@ class KDBush {
 
             // queue search in halves that intersect the query
             if (axis === 0 ? minX <= x : minY <= y) {
-                stack.push(left);
-                stack.push(m - 1);
-                stack.push(1 - axis);
+                STACK[sp++] = left;
+                STACK[sp++] = m - 1;
+                STACK[sp++] = 1 - axis;
             }
             if (axis === 0 ? maxX >= x : maxY >= y) {
-                stack.push(m + 1);
-                stack.push(right);
-                stack.push(1 - axis);
+                STACK[sp++] = m + 1;
+                STACK[sp++] = right;
+                STACK[sp++] = 1 - axis;
             }
         }
 
@@ -831,23 +842,43 @@ class KDBush {
      * @returns {number[]} An array of indices correponding to the found items.
      */
     within(qx, qy, r) {
+        const result = /** @type {number[]} */ ([]);
+        this.withinInto(qx, qy, r, result);
+        return result;
+    }
+
+    /**
+     * Search the index for items within a given radius, writing matching ids into `out`
+     * via indexed assignment (`out[i] = id`). Accepts any indexed-writable container —
+     * a typed array sized to the expected upper bound (allocation-free, fast) or a plain
+     * `Array` (which will grow as needed). Returns the number of matches written.
+     * @param {number} qx
+     * @param {number} qy
+     * @param {number} r Query radius.
+     * @param {number[] | TypedArray} out Container to write matching ids into.
+     * @returns {number} The number of matches written to `out`.
+     */
+    withinInto(qx, qy, r, out) {
         if (!this._finished) throw new Error('Data not yet indexed - call index.finish().');
 
         const {ids, coords, nodeSize} = this;
-        const stack = [0, ids.length - 1, 0];
-        const result = [];
+        STACK[0] = 0;
+        STACK[1] = ids.length - 1;
+        STACK[2] = 0;
+        let sp = 3;
+        let count = 0;
         const r2 = r * r;
 
         // recursively search for items within radius in the kd-sorted arrays
-        while (stack.length) {
-            const axis = stack.pop() || 0;
-            const right = stack.pop() || 0;
-            const left = stack.pop() || 0;
+        while (sp > 0) {
+            const axis = STACK[--sp];
+            const right = STACK[--sp];
+            const left = STACK[--sp];
 
             // if we reached "tree node", search linearly
             if (right - left <= nodeSize) {
                 for (let i = left; i <= right; i++) {
-                    if (sqDist(coords[2 * i], coords[2 * i + 1], qx, qy) <= r2) result.push(ids[i]);
+                    if (sqDist(coords[2 * i], coords[2 * i + 1], qx, qy) <= r2) out[count++] = ids[i];
                 }
                 continue;
             }
@@ -858,28 +889,28 @@ class KDBush {
             // include the middle item if it's in range
             const x = coords[2 * m];
             const y = coords[2 * m + 1];
-            if (sqDist(x, y, qx, qy) <= r2) result.push(ids[m]);
+            if (sqDist(x, y, qx, qy) <= r2) out[count++] = ids[m];
 
             // queue search in halves that intersect the query
             if (axis === 0 ? qx - r <= x : qy - r <= y) {
-                stack.push(left);
-                stack.push(m - 1);
-                stack.push(1 - axis);
+                STACK[sp++] = left;
+                STACK[sp++] = m - 1;
+                STACK[sp++] = 1 - axis;
             }
             if (axis === 0 ? qx + r >= x : qy + r >= y) {
-                stack.push(m + 1);
-                stack.push(right);
-                stack.push(1 - axis);
+                STACK[sp++] = m + 1;
+                STACK[sp++] = right;
+                STACK[sp++] = 1 - axis;
             }
         }
 
-        return result;
+        return count;
     }
 }
 
 /**
  * @param {Uint16Array | Uint32Array} ids
- * @param {InstanceType<TypedArrayConstructor>} coords
+ * @param {TypedArray} coords
  * @param {number} nodeSize
  * @param {number} left
  * @param {number} right
@@ -903,7 +934,7 @@ function sort(ids, coords, nodeSize, left, right, axis) {
  * Custom Floyd-Rivest selection algorithm: sort ids and coords so that
  * [left..k-1] items are smaller than k-th item (on either x or y axis)
  * @param {Uint16Array | Uint32Array} ids
- * @param {InstanceType<TypedArrayConstructor>} coords
+ * @param {TypedArray} coords
  * @param {number} k
  * @param {number} left
  * @param {number} right
@@ -951,7 +982,7 @@ function select(ids, coords, k, left, right, axis) {
 
 /**
  * @param {Uint16Array | Uint32Array} ids
- * @param {InstanceType<TypedArrayConstructor>} coords
+ * @param {TypedArray} coords
  * @param {number} i
  * @param {number} j
  */
@@ -962,7 +993,7 @@ function swapItem(ids, coords, i, j) {
 }
 
 /**
- * @param {InstanceType<TypedArrayConstructor>} arr
+ * @param {TypedArray} arr
  * @param {number} i
  * @param {number} j
  */
@@ -1406,21 +1437,34 @@ function yLat(y) {
     return 360 * Math.atan(Math.exp(y2)) / Math.PI - 90;
 }
 
-/*
- * Copyright 2025 Google LLC
- * SPDX-License-Identifier: Apache-2.0
- */
-
-const MSG_DEPRECATED_LOADER = "The Loader class is no longer available in this version." +
-    "\nPlease use the new functional API: setOptions() and importLibrary()." +
-    "\nFor more information, see the updated documentation at: " +
-    "https://github.com/googlemaps/js-api-loader/blob/main/README.md";
-process.env.NODE_ENV !== "production"
+const MSG_REPEATED_SET_OPTIONS = (options) => `The setOptions() function should only be called once. The options passed ` +
+    `to the additional call (${JSON.stringify(options)}) will be ignored.`;
+const MSG_IMPORT_LIBRARY_EXISTS = (options) => `The google.maps.importLibrary() function is already defined, and ` +
+    `@googlemaps/js-api-loader will use the existing function instead of ` +
+    `overwriting it. The options passed to setOptions ` +
+    `(${JSON.stringify(options)}) will be ignored.`;
+const MSG_SET_OPTIONS_NOT_CALLED = "No options were set before calling importLibrary. Make sure to configure " +
+    "the loader using setOptions().";
+const MSG_SCRIPT_ELEMENT_EXISTS = "There already is a script loading the Google Maps JavaScript " +
+    "API, and no google.maps.importLibrary function is defined. " +
+    "@googlemaps/js-api-loader will proceed to bootstrap the API " +
+    "with the specified options, but the existing script might cause " +
+    "problems using the API. Make sure to remove the script " +
+    "loading the API.";
+const MSG_API_KEY_USED = "The 'apiKey' parameter was used in setOptions(), but 'key' is the correct " +
+    "parameter name. Please update your configuration.";
+const MSG_TRUSTED_TYPES_POLICY_FAILED = (policyName, error) => `Failed to create Trusted Types policy "${policyName}": ${error instanceof Error ? error.message : String(error)}.\n\n` +
+    `If your Content Security Policy uses "require-trusted-types-for 'script'", ` +
+    `allow this policy with "trusted-types ${policyName} google-maps-api-loader google-maps-api#html lit-html". ` +
+    `The "google-maps-api-loader", "lit-html", and "google-maps-api#html" policies are required for full Maps JavaScript API execution. ` +
+    `Falling back to a string script URL.`;
+const __DEV__$1 = process.env.NODE_ENV !== 'production';
+const logDevWarning = __DEV__$1
     ? (message) => {
         console.warn(`[@googlemaps/js-api-loader] ${message}`);
     }
     : () => { };
-process.env.NODE_ENV !== "production"
+const logDevNotice = __DEV__$1
     ? (message) => {
         console.info(`[@googlemaps/js-api-loader] ${message}`);
     }
@@ -1430,14 +1474,142 @@ process.env.NODE_ENV !== "production"
  * Copyright 2025 Google LLC
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
-/**
- * @deprecated Use the new functional API: `setOptions()` and `importLibrary()`.
- * See the migration guide for more details: MIGRATION.md
+const TRUSTED_TYPES_POLICY_NAME = "@googlemaps/js-api-loader";
+const fallbackPolicy = { createScriptURL: (url) => url };
+let policy;
+/*
+ * Tries to create a Trusted Types policy when supported. Falls back to a string passthrough
+ * when Trusted Types is unsupported, blocked by CSP, or already registered.
  */
-class Loader {
-    constructor(...args) {
-        throw new Error(`[@googlemaps/js-api-loader]: ${MSG_DEPRECATED_LOADER}`);
+function getPolicy() {
+    if (policy) {
+        return policy;
+    }
+    const trustedTypes = globalThis.trustedTypes;
+    if (!trustedTypes) {
+        policy = fallbackPolicy;
+        return policy;
+    }
+    try {
+        policy = trustedTypes.createPolicy(TRUSTED_TYPES_POLICY_NAME, {
+            createScriptURL: (url) => url,
+        });
+    }
+    catch (e) {
+        logDevWarning(MSG_TRUSTED_TYPES_POLICY_FAILED(TRUSTED_TYPES_POLICY_NAME, e));
+        policy = fallbackPolicy;
+    }
+    return policy;
+}
+function setScriptSrc(script, src) {
+    script.src = getPolicy().createScriptURL(src);
+}
+
+/*
+ * Copyright 2025 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
+const bootstrap = bootstrapParams => {
+  var bootstrapPromise;
+  var script;
+  var bootstrapParamsKey;
+  var PRODUCT_NAME = "The Google Maps JavaScript API";
+  var GOOGLE = "google";
+  var IMPORT_API_NAME = "importLibrary";
+  var PENDING_BOOTSTRAP_KEY = "__ib__";
+  var doc = document;
+  var global_ = window;
+  var google_ = global_[GOOGLE] || (global_[GOOGLE] = {});
+  var namespace = google_.maps || (google_.maps = {});
+  var libraries = new Set();
+  var searchParams = new URLSearchParams();
+  var triggerBootstrap = () => bootstrapPromise || (bootstrapPromise = new Promise(async(resolve, reject) => {
+    await (script = doc.createElement("script"));
+    searchParams.set("libraries", [...libraries] + "");
+    for (bootstrapParamsKey in bootstrapParams) {
+      searchParams.set(bootstrapParamsKey.replace(/[A-Z]/g, g => "_" + g[0].toLowerCase()), bootstrapParams[bootstrapParamsKey]);
+    }
+    searchParams.set("callback", GOOGLE + ".maps." + PENDING_BOOTSTRAP_KEY);
+    setScriptSrc(script, "https://maps.googleapis.com/maps/api/js?" + searchParams);
+    namespace[PENDING_BOOTSTRAP_KEY] = resolve;
+    script.onerror = () => bootstrapPromise = reject(Error(PRODUCT_NAME + " could not load."));
+    script.nonce = doc.querySelector("script[nonce]")?.nonce || "";
+    doc.head.append(script);
+  }));
+  namespace[IMPORT_API_NAME] ? console.warn(PRODUCT_NAME + " only loads once. Ignoring:", bootstrapParams) : namespace[IMPORT_API_NAME] = (libraryName, ...args) => libraries.add(libraryName) && triggerBootstrap().then(() => namespace[IMPORT_API_NAME](libraryName, ...args));
+};
+
+/*
+ * Copyright 2025 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+const __DEV__ = process.env.NODE_ENV !== "production";
+let setOptionsWasCalled_ = false;
+/**
+ * Sets the options for the Maps JavaScript API.
+ *
+ * Has to be called before any library is loaded.
+ *
+ * See https://developers.google.com/maps/documentation/javascript/load-maps-js-api#required_parameters
+ * for the full documentation of available options.
+ *
+ * @param options The options to set.
+ */
+function setOptions(options) {
+    if (setOptionsWasCalled_) {
+        logDevWarning(MSG_REPEATED_SET_OPTIONS(options));
+        return;
+    }
+    if (options.apiKey) {
+        logDevWarning(MSG_API_KEY_USED);
+        if (!options.key) {
+            options.key = options.apiKey;
+        }
+    }
+    installImportLibrary_(options);
+    setOptionsWasCalled_ = true;
+}
+async function importLibrary(libraryName) {
+    if (!setOptionsWasCalled_) {
+        logDevWarning(MSG_SET_OPTIONS_NOT_CALLED);
+    }
+    if (!window?.google?.maps?.importLibrary) {
+        throw new Error("google.maps.importLibrary is not installed.");
+    }
+    return (await google.maps.importLibrary(libraryName));
+}
+/**
+ * The installImportLibrary_ function makes sure that a usable version of the
+ * `google.maps.importLibrary` function exists.
+ */
+function installImportLibrary_(options) {
+    const importLibraryExists = Boolean(window.google?.maps?.importLibrary);
+    if (importLibraryExists) {
+        logDevNotice(MSG_IMPORT_LIBRARY_EXISTS(options));
+    }
+    else if (__DEV__) {
+        const scriptEl = document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]');
+        if (scriptEl) {
+            logDevWarning(MSG_SCRIPT_ELEMENT_EXISTS);
+        }
+    }
+    // If the google.maps.importLibrary function already exists, bootstrap()
+    // won't do anything, so we won't call it
+    if (!importLibraryExists) {
+        bootstrap(options);
     }
 }
 
@@ -1894,4 +2066,4 @@ var interpolateRgb = (function rgbGamma(y) {
   return rgb$1;
 })(1);
 
-export { Loader as L, Supercluster as S, __rest as _, deepEqual as d, interpolateRgb as i };
+export { Supercluster as S, __rest as _, __awaiter as a, importLibrary as b, deepEqual as d, interpolateRgb as i, setOptions as s };

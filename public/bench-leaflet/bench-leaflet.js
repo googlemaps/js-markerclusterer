@@ -1,3 +1,5 @@
+import { _ as __awaiter } from './vendor.js';
+
 var points = [
 	[
 		-37.8839,
@@ -50016,22 +50018,28 @@ var points = [
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const tiles = L.tileLayer("//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 18,
-    attribution: '&copy; <a href="//openstreetmap.org/copyright">OpenStreetMap</a> contributors, Points &copy 2012 LINZ',
-});
-const map = L.map("map", {
-    center: L.latLng(-37.89, 175.46),
-    zoom: 8,
-    layers: [tiles],
-});
-const mcg = L.markerClusterGroup({
-    chunkedLoading: true,
-    spiderfyOnMaxZoom: false,
-});
-for (const [lat, lng, title] of points) {
-    const marker = L.marker(new L.LatLng(lat, lng), { title });
-    marker.bindPopup(title);
-    mcg.addLayer(marker);
+function main() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const tiles = L.tileLayer("//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 18,
+            // prettier-ignore
+            attribution: "&copy; <a href=\"//openstreetmap.org/copyright\">OpenStreetMap</a> contributors, Points &copy 2012 LINZ",
+        });
+        const map = L.map("map", {
+            center: L.latLng(-37.89, 175.46),
+            zoom: 8,
+            layers: [tiles],
+        });
+        const mcg = L.markerClusterGroup({
+            chunkedLoading: true,
+            spiderfyOnMaxZoom: false,
+        });
+        for (const [lat, lng, title] of points) {
+            const marker = L.marker(new L.LatLng(lat, lng), { title });
+            marker.bindPopup(title);
+            mcg.addLayer(marker);
+        }
+        map.addLayer(mcg);
+    });
 }
-map.addLayer(mcg);
+main().catch((err) => console.error(err));

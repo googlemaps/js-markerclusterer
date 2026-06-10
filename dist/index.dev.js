@@ -505,10 +505,10 @@ var markerClusterer = (function (exports) {
 	  var SHARED = '__core-js_shared__';
 	  var store = sharedStore.exports = globalThis[SHARED] || defineGlobalProperty(SHARED, {});
 	  (store.versions || (store.versions = [])).push({
-	    version: '3.46.0',
+	    version: '3.49.0',
 	    mode: IS_PURE ? 'pure' : 'global',
-	    copyright: '© 2014-2025 Denis Pushkarev (zloirock.ru), 2025 CoreJS Company (core-js.io)',
-	    license: 'https://github.com/zloirock/core-js/blob/v3.46.0/LICENSE',
+	    copyright: '© 2013–2025 Denis Pushkarev (zloirock.ru), 2025–2026 CoreJS Company (core-js.io). All rights reserved.',
+	    license: 'https://github.com/zloirock/core-js/blob/v3.49.0/LICENSE',
 	    source: 'https://github.com/zloirock/core-js'
 	  });
 	  return sharedStore.exports;
@@ -1896,11 +1896,13 @@ var markerClusterer = (function (exports) {
 	      'return': function () {
 	        var state = getInternalState(this);
 	        var iterator = state.iterator;
+	        var done = state.done;
 	        state.done = true;
 	        if (IS_ITERATOR) {
 	          var returnMethod = getMethod(iterator, 'return');
 	          return returnMethod ? call(returnMethod, iterator) : createIterResultObject(undefined, true);
 	        }
+	        if (done) return createIterResultObject(undefined, true);
 	        if (state.inner) try {
 	          iteratorClose(state.inner.iterator, NORMAL);
 	        } catch (error) {
@@ -1909,7 +1911,8 @@ var markerClusterer = (function (exports) {
 	        if (state.openIters) try {
 	          iteratorCloseAll(state.openIters, NORMAL);
 	        } catch (error) {
-	          return iteratorClose(iterator, THROW, error);
+	          if (iterator) return iteratorClose(iterator, THROW, error);
+	          throw error;
 	        }
 	        if (iterator) iteratorClose(iterator, NORMAL);
 	        return createIterResultObject(undefined, true);
@@ -2171,6 +2174,460 @@ var markerClusterer = (function (exports) {
 
 	requireEsnext_iterator_filter();
 
+	var web_domCollections_iterator = {};
+
+	var domIterables;
+	var hasRequiredDomIterables;
+	function requireDomIterables() {
+	  if (hasRequiredDomIterables) return domIterables;
+	  hasRequiredDomIterables = 1;
+	  // iterable DOM collections
+	  // flag - `iterable` interface - 'entries', 'keys', 'values', 'forEach' methods
+	  domIterables = {
+	    CSSRuleList: 0,
+	    CSSStyleDeclaration: 0,
+	    CSSValueList: 0,
+	    ClientRectList: 0,
+	    DOMRectList: 0,
+	    DOMStringList: 0,
+	    DOMTokenList: 1,
+	    DataTransferItemList: 0,
+	    FileList: 0,
+	    HTMLAllCollection: 0,
+	    HTMLCollection: 0,
+	    HTMLFormElement: 0,
+	    HTMLSelectElement: 0,
+	    MediaList: 0,
+	    MimeTypeArray: 0,
+	    NamedNodeMap: 0,
+	    NodeList: 1,
+	    PaintRequestList: 0,
+	    Plugin: 0,
+	    PluginArray: 0,
+	    SVGLengthList: 0,
+	    SVGNumberList: 0,
+	    SVGPathSegList: 0,
+	    SVGPointList: 0,
+	    SVGStringList: 0,
+	    SVGTransformList: 0,
+	    SourceBufferList: 0,
+	    StyleSheetList: 0,
+	    TextTrackCueList: 0,
+	    TextTrackList: 0,
+	    TouchList: 0
+	  };
+	  return domIterables;
+	}
+
+	var domTokenListPrototype;
+	var hasRequiredDomTokenListPrototype;
+	function requireDomTokenListPrototype() {
+	  if (hasRequiredDomTokenListPrototype) return domTokenListPrototype;
+	  hasRequiredDomTokenListPrototype = 1;
+	  // in old WebKit versions, `element.classList` is not an instance of global `DOMTokenList`
+	  var documentCreateElement = requireDocumentCreateElement();
+	  var classList = documentCreateElement('span').classList;
+	  var DOMTokenListPrototype = classList && classList.constructor && classList.constructor.prototype;
+	  domTokenListPrototype = DOMTokenListPrototype === Object.prototype ? undefined : DOMTokenListPrototype;
+	  return domTokenListPrototype;
+	}
+
+	var addToUnscopables;
+	var hasRequiredAddToUnscopables;
+	function requireAddToUnscopables() {
+	  if (hasRequiredAddToUnscopables) return addToUnscopables;
+	  hasRequiredAddToUnscopables = 1;
+	  var wellKnownSymbol = requireWellKnownSymbol();
+	  var create = requireObjectCreate();
+	  var defineProperty = requireObjectDefineProperty().f;
+	  var UNSCOPABLES = wellKnownSymbol('unscopables');
+	  var ArrayPrototype = Array.prototype;
+
+	  // Array.prototype[@@unscopables]
+	  // https://tc39.es/ecma262/#sec-array.prototype-@@unscopables
+	  if (ArrayPrototype[UNSCOPABLES] === undefined) {
+	    defineProperty(ArrayPrototype, UNSCOPABLES, {
+	      configurable: true,
+	      value: create(null)
+	    });
+	  }
+
+	  // add a key to Array.prototype[@@unscopables]
+	  addToUnscopables = function (key) {
+	    ArrayPrototype[UNSCOPABLES][key] = true;
+	  };
+	  return addToUnscopables;
+	}
+
+	var iterators;
+	var hasRequiredIterators;
+	function requireIterators() {
+	  if (hasRequiredIterators) return iterators;
+	  hasRequiredIterators = 1;
+	  iterators = {};
+	  return iterators;
+	}
+
+	var setToStringTag;
+	var hasRequiredSetToStringTag;
+	function requireSetToStringTag() {
+	  if (hasRequiredSetToStringTag) return setToStringTag;
+	  hasRequiredSetToStringTag = 1;
+	  var defineProperty = requireObjectDefineProperty().f;
+	  var hasOwn = requireHasOwnProperty();
+	  var wellKnownSymbol = requireWellKnownSymbol();
+	  var TO_STRING_TAG = wellKnownSymbol('toStringTag');
+	  setToStringTag = function (target, TAG, STATIC) {
+	    if (target && !STATIC) target = target.prototype;
+	    if (target && !hasOwn(target, TO_STRING_TAG)) {
+	      defineProperty(target, TO_STRING_TAG, {
+	        configurable: true,
+	        value: TAG
+	      });
+	    }
+	  };
+	  return setToStringTag;
+	}
+
+	var iteratorCreateConstructor;
+	var hasRequiredIteratorCreateConstructor;
+	function requireIteratorCreateConstructor() {
+	  if (hasRequiredIteratorCreateConstructor) return iteratorCreateConstructor;
+	  hasRequiredIteratorCreateConstructor = 1;
+	  var IteratorPrototype = requireIteratorsCore().IteratorPrototype;
+	  var create = requireObjectCreate();
+	  var createPropertyDescriptor = requireCreatePropertyDescriptor();
+	  var setToStringTag = requireSetToStringTag();
+	  var Iterators = requireIterators();
+	  var returnThis = function () {
+	    return this;
+	  };
+	  iteratorCreateConstructor = function (IteratorConstructor, NAME, next, ENUMERABLE_NEXT) {
+	    var TO_STRING_TAG = NAME + ' Iterator';
+	    IteratorConstructor.prototype = create(IteratorPrototype, {
+	      next: createPropertyDescriptor(+!ENUMERABLE_NEXT, next)
+	    });
+	    setToStringTag(IteratorConstructor, TO_STRING_TAG, false, true);
+	    Iterators[TO_STRING_TAG] = returnThis;
+	    return IteratorConstructor;
+	  };
+	  return iteratorCreateConstructor;
+	}
+
+	var functionUncurryThisAccessor;
+	var hasRequiredFunctionUncurryThisAccessor;
+	function requireFunctionUncurryThisAccessor() {
+	  if (hasRequiredFunctionUncurryThisAccessor) return functionUncurryThisAccessor;
+	  hasRequiredFunctionUncurryThisAccessor = 1;
+	  var uncurryThis = requireFunctionUncurryThis();
+	  var aCallable = requireACallable();
+	  functionUncurryThisAccessor = function (object, key, method) {
+	    try {
+	      // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
+	      return uncurryThis(aCallable(Object.getOwnPropertyDescriptor(object, key)[method]));
+	    } catch (error) {/* empty */}
+	  };
+	  return functionUncurryThisAccessor;
+	}
+
+	var isPossiblePrototype;
+	var hasRequiredIsPossiblePrototype;
+	function requireIsPossiblePrototype() {
+	  if (hasRequiredIsPossiblePrototype) return isPossiblePrototype;
+	  hasRequiredIsPossiblePrototype = 1;
+	  var isObject = requireIsObject();
+	  isPossiblePrototype = function (argument) {
+	    return isObject(argument) || argument === null;
+	  };
+	  return isPossiblePrototype;
+	}
+
+	var aPossiblePrototype;
+	var hasRequiredAPossiblePrototype;
+	function requireAPossiblePrototype() {
+	  if (hasRequiredAPossiblePrototype) return aPossiblePrototype;
+	  hasRequiredAPossiblePrototype = 1;
+	  var isPossiblePrototype = requireIsPossiblePrototype();
+	  var $String = String;
+	  var $TypeError = TypeError;
+	  aPossiblePrototype = function (argument) {
+	    if (isPossiblePrototype(argument)) return argument;
+	    throw new $TypeError("Can't set " + $String(argument) + ' as a prototype');
+	  };
+	  return aPossiblePrototype;
+	}
+
+	var objectSetPrototypeOf;
+	var hasRequiredObjectSetPrototypeOf;
+	function requireObjectSetPrototypeOf() {
+	  if (hasRequiredObjectSetPrototypeOf) return objectSetPrototypeOf;
+	  hasRequiredObjectSetPrototypeOf = 1;
+	  /* eslint-disable no-proto -- safe */
+	  var uncurryThisAccessor = requireFunctionUncurryThisAccessor();
+	  var isObject = requireIsObject();
+	  var requireObjectCoercible = requireRequireObjectCoercible();
+	  var aPossiblePrototype = requireAPossiblePrototype();
+
+	  // `Object.setPrototypeOf` method
+	  // https://tc39.es/ecma262/#sec-object.setprototypeof
+	  // Works with __proto__ only. Old v8 can't work with null proto objects.
+	  // eslint-disable-next-line es/no-object-setprototypeof -- safe
+	  objectSetPrototypeOf = Object.setPrototypeOf || ('__proto__' in {} ? function () {
+	    var CORRECT_SETTER = false;
+	    var test = {};
+	    var setter;
+	    try {
+	      setter = uncurryThisAccessor(Object.prototype, '__proto__', 'set');
+	      setter(test, []);
+	      CORRECT_SETTER = test instanceof Array;
+	    } catch (error) {/* empty */}
+	    return function setPrototypeOf(O, proto) {
+	      requireObjectCoercible(O);
+	      aPossiblePrototype(proto);
+	      if (!isObject(O)) return O;
+	      if (CORRECT_SETTER) setter(O, proto);else O.__proto__ = proto;
+	      return O;
+	    };
+	  }() : undefined);
+	  return objectSetPrototypeOf;
+	}
+
+	var iteratorDefine;
+	var hasRequiredIteratorDefine;
+	function requireIteratorDefine() {
+	  if (hasRequiredIteratorDefine) return iteratorDefine;
+	  hasRequiredIteratorDefine = 1;
+	  var $ = require_export();
+	  var call = requireFunctionCall();
+	  var IS_PURE = requireIsPure();
+	  var FunctionName = requireFunctionName();
+	  var isCallable = requireIsCallable();
+	  var createIteratorConstructor = requireIteratorCreateConstructor();
+	  var getPrototypeOf = requireObjectGetPrototypeOf();
+	  var setPrototypeOf = requireObjectSetPrototypeOf();
+	  var setToStringTag = requireSetToStringTag();
+	  var createNonEnumerableProperty = requireCreateNonEnumerableProperty();
+	  var defineBuiltIn = requireDefineBuiltIn();
+	  var wellKnownSymbol = requireWellKnownSymbol();
+	  var Iterators = requireIterators();
+	  var IteratorsCore = requireIteratorsCore();
+	  var PROPER_FUNCTION_NAME = FunctionName.PROPER;
+	  var CONFIGURABLE_FUNCTION_NAME = FunctionName.CONFIGURABLE;
+	  var IteratorPrototype = IteratorsCore.IteratorPrototype;
+	  var BUGGY_SAFARI_ITERATORS = IteratorsCore.BUGGY_SAFARI_ITERATORS;
+	  var ITERATOR = wellKnownSymbol('iterator');
+	  var KEYS = 'keys';
+	  var VALUES = 'values';
+	  var ENTRIES = 'entries';
+	  var returnThis = function () {
+	    return this;
+	  };
+	  iteratorDefine = function (Iterable, NAME, IteratorConstructor, next, DEFAULT, IS_SET, FORCED) {
+	    createIteratorConstructor(IteratorConstructor, NAME, next);
+	    var getIterationMethod = function (KIND) {
+	      if (KIND === DEFAULT && defaultIterator) return defaultIterator;
+	      if (!BUGGY_SAFARI_ITERATORS && KIND && KIND in IterablePrototype) return IterablePrototype[KIND];
+	      switch (KIND) {
+	        case KEYS:
+	          return function keys() {
+	            return new IteratorConstructor(this, KIND);
+	          };
+	        case VALUES:
+	          return function values() {
+	            return new IteratorConstructor(this, KIND);
+	          };
+	        case ENTRIES:
+	          return function entries() {
+	            return new IteratorConstructor(this, KIND);
+	          };
+	      }
+	      return function () {
+	        return new IteratorConstructor(this);
+	      };
+	    };
+	    var TO_STRING_TAG = NAME + ' Iterator';
+	    var INCORRECT_VALUES_NAME = false;
+	    var IterablePrototype = Iterable.prototype;
+	    var nativeIterator = IterablePrototype[ITERATOR] || IterablePrototype['@@iterator'] || DEFAULT && IterablePrototype[DEFAULT];
+	    var defaultIterator = !BUGGY_SAFARI_ITERATORS && nativeIterator || getIterationMethod(DEFAULT);
+	    var anyNativeIterator = NAME === 'Array' ? IterablePrototype.entries || nativeIterator : nativeIterator;
+	    var CurrentIteratorPrototype, methods, KEY;
+
+	    // fix native
+	    if (anyNativeIterator) {
+	      CurrentIteratorPrototype = getPrototypeOf(anyNativeIterator.call(new Iterable()));
+	      if (CurrentIteratorPrototype !== Object.prototype && CurrentIteratorPrototype.next) {
+	        if (!IS_PURE && getPrototypeOf(CurrentIteratorPrototype) !== IteratorPrototype) {
+	          if (setPrototypeOf) {
+	            setPrototypeOf(CurrentIteratorPrototype, IteratorPrototype);
+	          } else if (!isCallable(CurrentIteratorPrototype[ITERATOR])) {
+	            defineBuiltIn(CurrentIteratorPrototype, ITERATOR, returnThis);
+	          }
+	        }
+	        // Set @@toStringTag to native iterators
+	        setToStringTag(CurrentIteratorPrototype, TO_STRING_TAG, true, true);
+	        if (IS_PURE) Iterators[TO_STRING_TAG] = returnThis;
+	      }
+	    }
+
+	    // fix Array.prototype.{ values, @@iterator }.name in V8 / FF
+	    if (PROPER_FUNCTION_NAME && DEFAULT === VALUES && nativeIterator && nativeIterator.name !== VALUES) {
+	      if (!IS_PURE && CONFIGURABLE_FUNCTION_NAME) {
+	        createNonEnumerableProperty(IterablePrototype, 'name', VALUES);
+	      } else {
+	        INCORRECT_VALUES_NAME = true;
+	        defaultIterator = function values() {
+	          return call(nativeIterator, this);
+	        };
+	      }
+	    }
+
+	    // export additional methods
+	    if (DEFAULT) {
+	      methods = {
+	        values: getIterationMethod(VALUES),
+	        keys: IS_SET ? defaultIterator : getIterationMethod(KEYS),
+	        entries: getIterationMethod(ENTRIES)
+	      };
+	      if (FORCED) for (KEY in methods) {
+	        if (BUGGY_SAFARI_ITERATORS || INCORRECT_VALUES_NAME || !(KEY in IterablePrototype)) {
+	          defineBuiltIn(IterablePrototype, KEY, methods[KEY]);
+	        }
+	      } else $({
+	        target: NAME,
+	        proto: true,
+	        forced: BUGGY_SAFARI_ITERATORS || INCORRECT_VALUES_NAME
+	      }, methods);
+	    }
+
+	    // define iterator
+	    if ((!IS_PURE || FORCED) && IterablePrototype[ITERATOR] !== defaultIterator) {
+	      defineBuiltIn(IterablePrototype, ITERATOR, defaultIterator, {
+	        name: DEFAULT
+	      });
+	    }
+	    Iterators[NAME] = defaultIterator;
+	    return methods;
+	  };
+	  return iteratorDefine;
+	}
+
+	var es_array_iterator;
+	var hasRequiredEs_array_iterator;
+	function requireEs_array_iterator() {
+	  if (hasRequiredEs_array_iterator) return es_array_iterator;
+	  hasRequiredEs_array_iterator = 1;
+	  var toIndexedObject = requireToIndexedObject();
+	  var addToUnscopables = requireAddToUnscopables();
+	  var Iterators = requireIterators();
+	  var InternalStateModule = requireInternalState();
+	  var defineProperty = requireObjectDefineProperty().f;
+	  var defineIterator = requireIteratorDefine();
+	  var createIterResultObject = requireCreateIterResultObject();
+	  var IS_PURE = requireIsPure();
+	  var DESCRIPTORS = requireDescriptors();
+	  var ARRAY_ITERATOR = 'Array Iterator';
+	  var setInternalState = InternalStateModule.set;
+	  var getInternalState = InternalStateModule.getterFor(ARRAY_ITERATOR);
+
+	  // `Array.prototype.entries` method
+	  // https://tc39.es/ecma262/#sec-array.prototype.entries
+	  // `Array.prototype.keys` method
+	  // https://tc39.es/ecma262/#sec-array.prototype.keys
+	  // `Array.prototype.values` method
+	  // https://tc39.es/ecma262/#sec-array.prototype.values
+	  // `Array.prototype[@@iterator]` method
+	  // https://tc39.es/ecma262/#sec-array.prototype-@@iterator
+	  // `CreateArrayIterator` internal method
+	  // https://tc39.es/ecma262/#sec-createarrayiterator
+	  es_array_iterator = defineIterator(Array, 'Array', function (iterated, kind) {
+	    setInternalState(this, {
+	      type: ARRAY_ITERATOR,
+	      target: toIndexedObject(iterated),
+	      // target
+	      index: 0,
+	      // next index
+	      kind: kind // kind
+	    });
+	    // `%ArrayIteratorPrototype%.next` method
+	    // https://tc39.es/ecma262/#sec-%arrayiteratorprototype%.next
+	  }, function () {
+	    var state = getInternalState(this);
+	    var target = state.target;
+	    var index = state.index++;
+	    if (!target || index >= target.length) {
+	      state.target = null;
+	      return createIterResultObject(undefined, true);
+	    }
+	    switch (state.kind) {
+	      case 'keys':
+	        return createIterResultObject(index, false);
+	      case 'values':
+	        return createIterResultObject(target[index], false);
+	    }
+	    return createIterResultObject([index, target[index]], false);
+	  }, 'values');
+
+	  // argumentsList[@@iterator] is %ArrayProto_values%
+	  // https://tc39.es/ecma262/#sec-createunmappedargumentsobject
+	  // https://tc39.es/ecma262/#sec-createmappedargumentsobject
+	  var values = Iterators.Arguments = Iterators.Array;
+
+	  // https://tc39.es/ecma262/#sec-array.prototype-@@unscopables
+	  addToUnscopables('keys');
+	  addToUnscopables('values');
+	  addToUnscopables('entries');
+
+	  // V8 ~ Chrome 45- bug
+	  if (!IS_PURE && DESCRIPTORS && values.name !== 'values') try {
+	    defineProperty(values, 'name', {
+	      value: 'values'
+	    });
+	  } catch (error) {/* empty */}
+	  return es_array_iterator;
+	}
+
+	var hasRequiredWeb_domCollections_iterator;
+	function requireWeb_domCollections_iterator() {
+	  if (hasRequiredWeb_domCollections_iterator) return web_domCollections_iterator;
+	  hasRequiredWeb_domCollections_iterator = 1;
+	  var globalThis = requireGlobalThis();
+	  var DOMIterables = requireDomIterables();
+	  var DOMTokenListPrototype = requireDomTokenListPrototype();
+	  var ArrayIteratorMethods = requireEs_array_iterator();
+	  var createNonEnumerableProperty = requireCreateNonEnumerableProperty();
+	  var setToStringTag = requireSetToStringTag();
+	  var wellKnownSymbol = requireWellKnownSymbol();
+	  var ITERATOR = wellKnownSymbol('iterator');
+	  var ArrayValues = ArrayIteratorMethods.values;
+	  var handlePrototype = function (CollectionPrototype, COLLECTION_NAME) {
+	    if (CollectionPrototype) {
+	      // some Chrome versions have non-configurable methods on DOMTokenList
+	      if (CollectionPrototype[ITERATOR] !== ArrayValues) try {
+	        createNonEnumerableProperty(CollectionPrototype, ITERATOR, ArrayValues);
+	      } catch (error) {
+	        CollectionPrototype[ITERATOR] = ArrayValues;
+	      }
+	      setToStringTag(CollectionPrototype, COLLECTION_NAME, true);
+	      if (DOMIterables[COLLECTION_NAME]) for (var METHOD_NAME in ArrayIteratorMethods) {
+	        // some Chrome versions have non-configurable methods on DOMTokenList
+	        if (CollectionPrototype[METHOD_NAME] !== ArrayIteratorMethods[METHOD_NAME]) try {
+	          createNonEnumerableProperty(CollectionPrototype, METHOD_NAME, ArrayIteratorMethods[METHOD_NAME]);
+	        } catch (error) {
+	          CollectionPrototype[METHOD_NAME] = ArrayIteratorMethods[METHOD_NAME];
+	        }
+	      }
+	    }
+	  };
+	  for (var COLLECTION_NAME in DOMIterables) {
+	    handlePrototype(globalThis[COLLECTION_NAME] && globalThis[COLLECTION_NAME].prototype, COLLECTION_NAME);
+	  }
+	  handlePrototype(DOMTokenListPrototype, 'DOMTokenList');
+	  return web_domCollections_iterator;
+	}
+
+	requireWeb_domCollections_iterator();
+
 	/**
 	 * Copyright 2023 Google LLC
 	 *
@@ -2216,7 +2673,7 @@ var markerClusterer = (function (exports) {
 	          return new google.maps.LatLng(marker.position.lat, marker.position.lng);
 	        }
 	      }
-	      // @ts-ignore
+	      // @ts-expect-error - LatLng constructor expects numbers
 	      return new google.maps.LatLng(null);
 	    }
 	    return marker.getPosition();
@@ -2238,10 +2695,8 @@ var markerClusterer = (function (exports) {
 
 	class Cluster {
 	  constructor(_ref) {
-	    let {
-	      markers,
-	      position
-	    } = _ref;
+	    let markers = _ref.markers,
+	      position = _ref.position;
 	    this.markers = [];
 	    if (markers) this.markers = markers;
 	    if (position) {
@@ -2263,7 +2718,7 @@ var markerClusterer = (function (exports) {
 	    return bounds;
 	  }
 	  get position() {
-	    // @ts-ignore
+	    // @ts-expect-error - position may be undefined
 	    return this._position || this.bounds.getCenter();
 	  }
 	  /**
@@ -2338,10 +2793,9 @@ var markerClusterer = (function (exports) {
 	 * Extends bounds by a number of pixels in each direction
 	 */
 	const extendBoundsToPaddedViewport = (bounds, projection, numPixels) => {
-	  const {
-	    northEast,
-	    southWest
-	  } = latLngBoundsToPixelBounds(bounds, projection);
+	  const _latLngBoundsToPixelB = latLngBoundsToPixelBounds(bounds, projection),
+	    northEast = _latLngBoundsToPixelB.northEast,
+	    southWest = _latLngBoundsToPixelB.southWest;
 	  const extendedPixelBounds = extendPixelBounds({
 	    northEast,
 	    southWest
@@ -2393,10 +2847,8 @@ var markerClusterer = (function (exports) {
 	 * @hidden
 	 */
 	const extendPixelBounds = (_ref, numPixels) => {
-	  let {
-	    northEast,
-	    southWest
-	  } = _ref;
+	  let northEast = _ref.northEast,
+	    southWest = _ref.southWest;
 	  northEast.x += numPixels;
 	  northEast.y -= numPixels;
 	  southWest.x -= numPixels;
@@ -2410,10 +2862,8 @@ var markerClusterer = (function (exports) {
 	 * @hidden
 	 */
 	const pixelBoundsToLatLngBounds = (_ref2, projection) => {
-	  let {
-	    northEast,
-	    southWest
-	  } = _ref2;
+	  let northEast = _ref2.northEast,
+	    southWest = _ref2.southWest;
 	  const sw = projection.fromDivPixelToLatLng(southWest);
 	  const ne = projection.fromDivPixelToLatLng(northEast);
 	  return new google.maps.LatLngBounds(sw, ne);
@@ -2424,9 +2874,8 @@ var markerClusterer = (function (exports) {
 	 */
 	class AbstractAlgorithm {
 	  constructor(_ref) {
-	    let {
-	      maxZoom = 16
-	    } = _ref;
+	    let _ref$maxZoom = _ref.maxZoom,
+	      maxZoom = _ref$maxZoom === void 0 ? 16 : _ref$maxZoom;
 	    this.maxZoom = maxZoom;
 	  }
 	  /**
@@ -2442,9 +2891,7 @@ var markerClusterer = (function (exports) {
 	   * ```
 	   */
 	  noop(_ref2) {
-	    let {
-	      markers
-	    } = _ref2;
+	    let markers = _ref2.markers;
 	    return noop(markers);
 	  }
 	}
@@ -2456,20 +2903,17 @@ var markerClusterer = (function (exports) {
 	 */
 	class AbstractViewportAlgorithm extends AbstractAlgorithm {
 	  constructor(_a) {
-	    var {
-	        viewportPadding = 60
-	      } = _a,
+	    var _a$viewportPadding = _a.viewportPadding,
+	      viewportPadding = _a$viewportPadding === void 0 ? 60 : _a$viewportPadding,
 	      options = __rest(_a, ["viewportPadding"]);
 	    super(options);
 	    this.viewportPadding = 60;
 	    this.viewportPadding = viewportPadding;
 	  }
 	  calculate(_ref3) {
-	    let {
-	      markers,
-	      map,
-	      mapCanvasProjection
-	    } = _ref3;
+	    let markers = _ref3.markers,
+	      map = _ref3.map,
+	      mapCanvasProjection = _ref3.mapCanvasProjection;
 	    const zoom = map.getZoom();
 	    assertNotNull(zoom);
 	    if (zoom >= this.maxZoom) {
@@ -2541,15 +2985,6 @@ var markerClusterer = (function (exports) {
 	  return functionBindContext;
 	}
 
-	var iterators;
-	var hasRequiredIterators;
-	function requireIterators() {
-	  if (hasRequiredIterators) return iterators;
-	  hasRequiredIterators = 1;
-	  iterators = {};
-	  return iterators;
-	}
-
 	var isArrayIteratorMethod;
 	var hasRequiredIsArrayIteratorMethod;
 	function requireIsArrayIteratorMethod() {
@@ -2575,6 +3010,7 @@ var markerClusterer = (function (exports) {
 	  var wellKnownSymbol = requireWellKnownSymbol();
 	  var TO_STRING_TAG = wellKnownSymbol('toStringTag');
 	  var test = {};
+	  // eslint-disable-next-line unicorn/no-immediate-mutation -- ES3 syntax limitation
 	  test[TO_STRING_TAG] = 'z';
 	  toStringTagSupport = String(test) === '[object z]';
 	  return toStringTagSupport;
@@ -2684,7 +3120,9 @@ var markerClusterer = (function (exports) {
 	    var fn = bind(unboundFunction, that);
 	    var iterator, iterFn, index, length, result, next, step;
 	    var stop = function (condition) {
-	      if (iterator) iteratorClose(iterator, 'normal');
+	      var $iterator = iterator;
+	      iterator = undefined;
+	      if ($iterator) iteratorClose($iterator, 'normal');
 	      return new Result(true, condition);
 	    };
 	    var callFn = function (value) {
@@ -2713,10 +3151,12 @@ var markerClusterer = (function (exports) {
 	    }
 	    next = IS_RECORD ? iterable.next : iterator.next;
 	    while (!(step = call(next, iterator)).done) {
+	      // `IteratorValue` errors should propagate without closing the iterator
+	      var value = step.value;
 	      try {
-	        result = callFn(step.value);
+	        result = callFn(value);
 	      } catch (error) {
-	        iteratorClose(iterator, 'throw', error);
+	        if (iterator) iteratorClose(iterator, 'throw', error);else throw error;
 	      }
 	      if (typeof result == 'object' && result && isPrototypeOf(ResultPrototype, result)) return result;
 	    }
@@ -2778,8 +3218,9 @@ var markerClusterer = (function (exports) {
 
 	requireEsnext_iterator_forEach();
 
-	var getOwnPropertyNames = Object.getOwnPropertyNames, getOwnPropertySymbols = Object.getOwnPropertySymbols;
-	var hasOwnProperty = Object.prototype.hasOwnProperty;
+	const { getOwnPropertyNames, getOwnPropertySymbols } = Object;
+	// eslint-disable-next-line @typescript-eslint/unbound-method
+	const { hasOwnProperty } = Object.prototype;
 	/**
 	 * Combine two comparators into a single comparators.
 	 */
@@ -2798,25 +3239,19 @@ var markerClusterer = (function (exports) {
 	        if (!a || !b || typeof a !== 'object' || typeof b !== 'object') {
 	            return areItemsEqual(a, b, state);
 	        }
-	        var cache = state.cache;
-	        var cachedA = cache.get(a);
-	        var cachedB = cache.get(b);
+	        const { cache } = state;
+	        const cachedA = cache.get(a);
+	        const cachedB = cache.get(b);
 	        if (cachedA && cachedB) {
 	            return cachedA === b && cachedB === a;
 	        }
 	        cache.set(a, b);
 	        cache.set(b, a);
-	        var result = areItemsEqual(a, b, state);
+	        const result = areItemsEqual(a, b, state);
 	        cache.delete(a);
 	        cache.delete(b);
 	        return result;
 	    };
-	}
-	/**
-	 * Get the `@@toStringTag` of the value, if it exists.
-	 */
-	function getShortTag(value) {
-	    return value != null ? value[Symbol.toStringTag] : undefined;
 	}
 	/**
 	 * Get the properties to strictly examine, which include both own properties that are
@@ -2828,26 +3263,51 @@ var markerClusterer = (function (exports) {
 	/**
 	 * Whether the object contains the property passed as an own property.
 	 */
-	var hasOwn = Object.hasOwn ||
-	    (function (object, property) {
-	        return hasOwnProperty.call(object, property);
-	    });
-	/**
-	 * Whether the values passed are strictly equal or both NaN.
-	 */
-	function sameValueZeroEqual(a, b) {
-	    return a === b || (!a && !b && a !== a && b !== b);
-	}
+	const hasOwn = 
+	// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+	Object.hasOwn || ((object, property) => hasOwnProperty.call(object, property));
 
-	var PREACT_VNODE = '__v';
-	var PREACT_OWNER = '__o';
-	var REACT_OWNER = '_owner';
-	var getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor, keys = Object.keys;
+	const PREACT_VNODE = '__v';
+	const PREACT_OWNER = '__o';
+	const REACT_OWNER = '_owner';
+	const { getOwnPropertyDescriptor, keys } = Object;
+	/**
+	 * Whether the values passed are equal based on a [SameValue](https://262.ecma-international.org/7.0/#sec-samevalue) basis.
+	 * Simplified, this maps to if the two values are referentially equal to one another (`a === b`) or both are `NaN`.
+	 *
+	 * @note
+	 * When available in the environment, this is just a re-export of the global
+	 * [`Object.is`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is) method.
+	 */
+	const sameValueEqual = 
+	// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+	Object.is
+	    || function sameValueEqual(a, b) {
+	        return a === b ? a !== 0 || 1 / a === 1 / b : a !== a && b !== b;
+	    };
+	/**
+	 * Whether the values passed are equal based on a
+	 * [Strict Equality Comparison](https://262.ecma-international.org/7.0/#sec-strict-equality-comparison) basis.
+	 * Simplified, this maps to if the two values are referentially equal to one another (`a === b`).
+	 *
+	 * @note
+	 * This is mainly available as a convenience function, such as being a default when a function to determine equality between
+	 * two objects is used.
+	 */
+	function strictEqual(a, b) {
+	    return a === b;
+	}
+	/**
+	 * Whether the array buffers are equal in value.
+	 */
+	function areArrayBuffersEqual(a, b) {
+	    return a.byteLength === b.byteLength && areTypedArraysEqual(new Uint8Array(a), new Uint8Array(b));
+	}
 	/**
 	 * Whether the arrays are equal in value.
 	 */
 	function areArraysEqual(a, b, state) {
-	    var index = a.length;
+	    let index = a.length;
 	    if (b.length !== index) {
 	        return false;
 	    }
@@ -2859,49 +3319,49 @@ var markerClusterer = (function (exports) {
 	    return true;
 	}
 	/**
+	 * Whether the dataviews are equal in value.
+	 */
+	function areDataViewsEqual(a, b) {
+	    return (a.byteLength === b.byteLength
+	        && areTypedArraysEqual(new Uint8Array(a.buffer, a.byteOffset, a.byteLength), new Uint8Array(b.buffer, b.byteOffset, b.byteLength)));
+	}
+	/**
 	 * Whether the dates passed are equal in value.
 	 */
 	function areDatesEqual(a, b) {
-	    return sameValueZeroEqual(a.getTime(), b.getTime());
+	    return sameValueEqual(a.getTime(), b.getTime());
 	}
 	/**
 	 * Whether the errors passed are equal in value.
 	 */
 	function areErrorsEqual(a, b) {
-	    return (a.name === b.name &&
-	        a.message === b.message &&
-	        a.cause === b.cause &&
-	        a.stack === b.stack);
-	}
-	/**
-	 * Whether the functions passed are equal in value.
-	 */
-	function areFunctionsEqual(a, b) {
-	    return a === b;
+	    return a.name === b.name && a.message === b.message && a.cause === b.cause && a.stack === b.stack;
 	}
 	/**
 	 * Whether the `Map`s are equal in value.
 	 */
 	function areMapsEqual(a, b, state) {
-	    var size = a.size;
+	    const size = a.size;
 	    if (size !== b.size) {
 	        return false;
 	    }
 	    if (!size) {
 	        return true;
 	    }
-	    var matchedIndices = new Array(size);
-	    var aIterable = a.entries();
-	    var aResult;
-	    var bResult;
-	    var index = 0;
+	    const matchedIndices = new Array(size);
+	    const aIterable = a.entries();
+	    let aResult;
+	    let bResult;
+	    let index = 0;
+	    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 	    while ((aResult = aIterable.next())) {
 	        if (aResult.done) {
 	            break;
 	        }
-	        var bIterable = b.entries();
-	        var hasMatch = false;
-	        var matchIndex = 0;
+	        const bIterable = b.entries();
+	        let hasMatch = false;
+	        let matchIndex = 0;
+	        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 	        while ((bResult = bIterable.next())) {
 	            if (bResult.done) {
 	                break;
@@ -2910,10 +3370,10 @@ var markerClusterer = (function (exports) {
 	                matchIndex++;
 	                continue;
 	            }
-	            var aEntry = aResult.value;
-	            var bEntry = bResult.value;
-	            if (state.equals(aEntry[0], bEntry[0], index, matchIndex, a, b, state) &&
-	                state.equals(aEntry[1], bEntry[1], aEntry[0], bEntry[0], a, b, state)) {
+	            const aEntry = aResult.value;
+	            const bEntry = bResult.value;
+	            if (state.equals(aEntry[0], bEntry[0], index, matchIndex, a, b, state)
+	                && state.equals(aEntry[1], bEntry[1], aEntry[0], bEntry[0], a, b, state)) {
 	                hasMatch = matchedIndices[matchIndex] = true;
 	                break;
 	            }
@@ -2927,15 +3387,11 @@ var markerClusterer = (function (exports) {
 	    return true;
 	}
 	/**
-	 * Whether the numbers are equal in value.
-	 */
-	var areNumbersEqual = sameValueZeroEqual;
-	/**
 	 * Whether the objects are equal in value.
 	 */
 	function areObjectsEqual(a, b, state) {
-	    var properties = keys(a);
-	    var index = properties.length;
+	    const properties = keys(a);
+	    let index = properties.length;
 	    if (keys(b).length !== index) {
 	        return false;
 	    }
@@ -2954,14 +3410,14 @@ var markerClusterer = (function (exports) {
 	 * Whether the objects are equal in value with strict property checking.
 	 */
 	function areObjectsEqualStrict(a, b, state) {
-	    var properties = getStrictProperties(a);
-	    var index = properties.length;
+	    const properties = getStrictProperties(a);
+	    let index = properties.length;
 	    if (getStrictProperties(b).length !== index) {
 	        return false;
 	    }
-	    var property;
-	    var descriptorA;
-	    var descriptorB;
+	    let property;
+	    let descriptorA;
+	    let descriptorB;
 	    // Decrementing `while` showed faster results than either incrementing or
 	    // decrementing `for` loop and than an incrementing `while` loop. Declarative
 	    // methods like `some` / `every` were not used to avoid incurring the garbage
@@ -2973,12 +3429,12 @@ var markerClusterer = (function (exports) {
 	        }
 	        descriptorA = getOwnPropertyDescriptor(a, property);
 	        descriptorB = getOwnPropertyDescriptor(b, property);
-	        if ((descriptorA || descriptorB) &&
-	            (!descriptorA ||
-	                !descriptorB ||
-	                descriptorA.configurable !== descriptorB.configurable ||
-	                descriptorA.enumerable !== descriptorB.enumerable ||
-	                descriptorA.writable !== descriptorB.writable)) {
+	        if ((descriptorA || descriptorB)
+	            && (!descriptorA
+	                || !descriptorB
+	                || descriptorA.configurable !== descriptorB.configurable
+	                || descriptorA.enumerable !== descriptorB.enumerable
+	                || descriptorA.writable !== descriptorB.writable)) {
 	            return false;
 	        }
 	    }
@@ -2988,7 +3444,7 @@ var markerClusterer = (function (exports) {
 	 * Whether the primitive wrappers passed are equal in value.
 	 */
 	function arePrimitiveWrappersEqual(a, b) {
-	    return sameValueZeroEqual(a.valueOf(), b.valueOf());
+	    return sameValueEqual(a.valueOf(), b.valueOf());
 	}
 	/**
 	 * Whether the regexps passed are equal in value.
@@ -3000,30 +3456,32 @@ var markerClusterer = (function (exports) {
 	 * Whether the `Set`s are equal in value.
 	 */
 	function areSetsEqual(a, b, state) {
-	    var size = a.size;
+	    const size = a.size;
 	    if (size !== b.size) {
 	        return false;
 	    }
 	    if (!size) {
 	        return true;
 	    }
-	    var matchedIndices = new Array(size);
-	    var aIterable = a.values();
-	    var aResult;
-	    var bResult;
+	    const matchedIndices = new Array(size);
+	    const aIterable = a.values();
+	    let aResult;
+	    let bResult;
+	    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 	    while ((aResult = aIterable.next())) {
 	        if (aResult.done) {
 	            break;
 	        }
-	        var bIterable = b.values();
-	        var hasMatch = false;
-	        var matchIndex = 0;
+	        const bIterable = b.values();
+	        let hasMatch = false;
+	        let matchIndex = 0;
+	        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 	        while ((bResult = bIterable.next())) {
 	            if (bResult.done) {
 	                break;
 	            }
-	            if (!matchedIndices[matchIndex] &&
-	                state.equals(aResult.value, bResult.value, aResult.value, bResult.value, a, b, state)) {
+	            if (!matchedIndices[matchIndex]
+	                && state.equals(aResult.value, bResult.value, aResult.value, bResult.value, a, b, state)) {
 	                hasMatch = matchedIndices[matchIndex] = true;
 	                break;
 	            }
@@ -3039,8 +3497,8 @@ var markerClusterer = (function (exports) {
 	 * Whether the TypedArray instances are equal in value.
 	 */
 	function areTypedArraysEqual(a, b) {
-	    var index = a.length;
-	    if (b.length !== index) {
+	    let index = a.byteLength;
+	    if (b.byteLength !== index || a.byteOffset !== b.byteOffset) {
 	        return false;
 	    }
 	    while (index-- > 0) {
@@ -3054,47 +3512,30 @@ var markerClusterer = (function (exports) {
 	 * Whether the URL instances are equal in value.
 	 */
 	function areUrlsEqual(a, b) {
-	    return (a.hostname === b.hostname &&
-	        a.pathname === b.pathname &&
-	        a.protocol === b.protocol &&
-	        a.port === b.port &&
-	        a.hash === b.hash &&
-	        a.username === b.username &&
-	        a.password === b.password);
+	    return (a.hostname === b.hostname
+	        && a.pathname === b.pathname
+	        && a.protocol === b.protocol
+	        && a.port === b.port
+	        && a.hash === b.hash
+	        && a.username === b.username
+	        && a.password === b.password);
 	}
 	function isPropertyEqual(a, b, state, property) {
-	    if ((property === REACT_OWNER ||
-	        property === PREACT_OWNER ||
-	        property === PREACT_VNODE) &&
-	        (a.$$typeof || b.$$typeof)) {
+	    if ((property === REACT_OWNER || property === PREACT_OWNER || property === PREACT_VNODE)
+	        && (a.$$typeof || b.$$typeof)) {
 	        return true;
 	    }
-	    return (hasOwn(b, property) &&
-	        state.equals(a[property], b[property], property, property, a, b, state));
+	    return hasOwn(b, property) && state.equals(a[property], b[property], property, property, a, b, state);
 	}
 
-	var ARGUMENTS_TAG = '[object Arguments]';
-	var BOOLEAN_TAG = '[object Boolean]';
-	var DATE_TAG = '[object Date]';
-	var ERROR_TAG = '[object Error]';
-	var MAP_TAG = '[object Map]';
-	var NUMBER_TAG = '[object Number]';
-	var OBJECT_TAG = '[object Object]';
-	var REG_EXP_TAG = '[object RegExp]';
-	var SET_TAG = '[object Set]';
-	var STRING_TAG = '[object String]';
-	var URL_TAG = '[object URL]';
-	var isArray = Array.isArray;
-	var isTypedArray = typeof ArrayBuffer === 'function' && ArrayBuffer.isView
-	    ? ArrayBuffer.isView
-	    : null;
-	var assign = Object.assign;
-	var getTag = Object.prototype.toString.call.bind(Object.prototype.toString);
+	// eslint-disable-next-line @typescript-eslint/unbound-method
+	const toString = Object.prototype.toString;
 	/**
 	 * Create a comparator method based on the type-specific equality comparators passed.
 	 */
-	function createEqualityComparator(_a) {
-	    var areArraysEqual = _a.areArraysEqual, areDatesEqual = _a.areDatesEqual, areErrorsEqual = _a.areErrorsEqual, areFunctionsEqual = _a.areFunctionsEqual, areMapsEqual = _a.areMapsEqual, areNumbersEqual = _a.areNumbersEqual, areObjectsEqual = _a.areObjectsEqual, arePrimitiveWrappersEqual = _a.arePrimitiveWrappersEqual, areRegExpsEqual = _a.areRegExpsEqual, areSetsEqual = _a.areSetsEqual, areTypedArraysEqual = _a.areTypedArraysEqual, areUrlsEqual = _a.areUrlsEqual, unknownTagComparators = _a.unknownTagComparators;
+	function createEqualityComparator(config) {
+	    const supportedComparatorMap = createSupportedComparatorMap(config);
+	    const { areArraysEqual, areDatesEqual, areFunctionsEqual, areMapsEqual, areNumbersEqual, areObjectsEqual, areRegExpsEqual, areSetsEqual, getUnsupportedCustomComparator, } = config;
 	    /**
 	     * compare the value of the two objects and return true if they are equivalent in values
 	     */
@@ -3108,12 +3549,12 @@ var markerClusterer = (function (exports) {
 	        if (a == null || b == null) {
 	            return false;
 	        }
-	        var type = typeof a;
+	        const type = typeof a;
 	        if (type !== typeof b) {
 	            return false;
 	        }
 	        if (type !== 'object') {
-	            if (type === 'number') {
+	            if (type === 'number' || type === 'bigint') {
 	                return areNumbersEqual(a, b, state);
 	            }
 	            if (type === 'function') {
@@ -3122,7 +3563,7 @@ var markerClusterer = (function (exports) {
 	            // If a primitive value that is not strictly equal, it must be unequal.
 	            return false;
 	        }
-	        var constructor = a.constructor;
+	        const constructor = a.constructor;
 	        // Checks are listed in order of commonality of use-case:
 	        //   1. Common complex object types (plain object, array)
 	        //   2. Common data values (date, regexp)
@@ -3136,27 +3577,17 @@ var markerClusterer = (function (exports) {
 	        if (constructor !== b.constructor) {
 	            return false;
 	        }
-	        // `isPlainObject` only checks against the object's own realm. Cross-realm
-	        // comparisons are rare, and will be handled in the ultimate fallback, so
-	        // we can avoid capturing the string tag.
-	        if (constructor === Object) {
-	            return areObjectsEqual(a, b, state);
-	        }
-	        // `isArray()` works on subclasses and is cross-realm, so we can avoid capturing
-	        // the string tag or doing an `instanceof` check.
-	        if (isArray(a)) {
-	            return areArraysEqual(a, b, state);
-	        }
-	        // `isTypedArray()` works on all possible TypedArray classes, so we can avoid
-	        // capturing the string tag or comparing against all possible constructors.
-	        if (isTypedArray != null && isTypedArray(a)) {
-	            return areTypedArraysEqual(a, b, state);
-	        }
 	        // Try to fast-path equality checks for other complex object types in the
 	        // same realm to avoid capturing the string tag. Strict equality is used
 	        // instead of `instanceof` because it is more performant for the common
-	        // use-case. If someone is subclassing a native class, it will be handled
-	        // with the string tag comparison.
+	        // use-case. If someone is creating a subclass from a native class, it will be
+	        // handled with the string tag comparison.
+	        if (constructor === Object) {
+	            return areObjectsEqual(a, b, state);
+	        }
+	        if (constructor === Array) {
+	            return areArraysEqual(a, b, state);
+	        }
 	        if (constructor === Date) {
 	            return areDatesEqual(a, b, state);
 	        }
@@ -3169,72 +3600,31 @@ var markerClusterer = (function (exports) {
 	        if (constructor === Set) {
 	            return areSetsEqual(a, b, state);
 	        }
-	        // Since this is a custom object, capture the string tag to determing its type.
+	        if (constructor === Promise) {
+	            // Avoid tag checks for promise values, since we know if they are not referentially equal
+	            // then they are not equal.
+	            return false;
+	        }
+	        // `isArray()` works on subclasses and is cross-realm, so we can avoid capturing
+	        // the string tag or doing an `instanceof` in edge cases.
+	        if (Array.isArray(a)) {
+	            return areArraysEqual(a, b, state);
+	        }
+	        // Since this is a custom object, capture the string tag to determining its type.
 	        // This is reasonably performant in modern environments like v8 and SpiderMonkey.
-	        var tag = getTag(a);
-	        if (tag === DATE_TAG) {
-	            return areDatesEqual(a, b, state);
+	        const tag = toString.call(a);
+	        const supportedComparator = supportedComparatorMap[tag];
+	        if (supportedComparator) {
+	            return supportedComparator(a, b, state);
 	        }
-	        // For RegExp, the properties are not enumerable, and therefore will give false positives if
-	        // tested like a standard object.
-	        if (tag === REG_EXP_TAG) {
-	            return areRegExpsEqual(a, b, state);
-	        }
-	        if (tag === MAP_TAG) {
-	            return areMapsEqual(a, b, state);
-	        }
-	        if (tag === SET_TAG) {
-	            return areSetsEqual(a, b, state);
-	        }
-	        if (tag === OBJECT_TAG) {
-	            // The exception for value comparison is custom `Promise`-like class instances. These should
-	            // be treated the same as standard `Promise` objects, which means strict equality, and if
-	            // it reaches this point then that strict equality comparison has already failed.
-	            return (typeof a.then !== 'function' &&
-	                typeof b.then !== 'function' &&
-	                areObjectsEqual(a, b, state));
-	        }
-	        // If a URL tag, it should be tested explicitly. Like RegExp, the properties are not
-	        // enumerable, and therefore will give false positives if tested like a standard object.
-	        if (tag === URL_TAG) {
-	            return areUrlsEqual(a, b, state);
-	        }
-	        // If an error tag, it should be tested explicitly. Like RegExp, the properties are not
-	        // enumerable, and therefore will give false positives if tested like a standard object.
-	        if (tag === ERROR_TAG) {
-	            return areErrorsEqual(a, b, state);
-	        }
-	        // If an arguments tag, it should be treated as a standard object.
-	        if (tag === ARGUMENTS_TAG) {
-	            return areObjectsEqual(a, b, state);
-	        }
-	        // As the penultimate fallback, check if the values passed are primitive wrappers. This
-	        // is very rare in modern JS, which is why it is deprioritized compared to all other object
-	        // types.
-	        if (tag === BOOLEAN_TAG || tag === NUMBER_TAG || tag === STRING_TAG) {
-	            return arePrimitiveWrappersEqual(a, b, state);
-	        }
-	        if (unknownTagComparators) {
-	            var unknownTagComparator = unknownTagComparators[tag];
-	            if (!unknownTagComparator) {
-	                var shortTag = getShortTag(a);
-	                if (shortTag) {
-	                    unknownTagComparator = unknownTagComparators[shortTag];
-	                }
-	            }
-	            // If the custom config has an unknown tag comparator that matches the captured tag or the
-	            // @@toStringTag, it is the source of truth for whether the values are equal.
-	            if (unknownTagComparator) {
-	                return unknownTagComparator(a, b, state);
-	            }
+	        const unsupportedCustomComparator = getUnsupportedCustomComparator && getUnsupportedCustomComparator(a, b, state, tag);
+	        if (unsupportedCustomComparator) {
+	            return unsupportedCustomComparator(a, b, state);
 	        }
 	        // If not matching any tags that require a specific type of comparison, then we hard-code false because
 	        // the only thing remaining is strict equality, which has already been compared. This is for a few reasons:
 	        //   - Certain types that cannot be introspected (e.g., `WeakMap`). For these types, this is the only
 	        //     comparison that can be made.
-	        //   - For types that can be introspected, but rarely have requirements to be compared
-	        //     (`ArrayBuffer`, `DataView`, etc.), the cost is avoided to prioritize the common
-	        //     use-cases (may be included in a future release, if requested enough).
 	        //   - For types that can be introspected but do not have an objective definition of what
 	        //     equality is (`Error`, etc.), the subjective decision is to be conservative and strictly compare.
 	        // In all cases, these decisions should be reevaluated based on changes to the language and
@@ -3245,46 +3635,39 @@ var markerClusterer = (function (exports) {
 	/**
 	 * Create the configuration object used for building comparators.
 	 */
-	function createEqualityComparatorConfig(_a) {
-	    var circular = _a.circular, createCustomConfig = _a.createCustomConfig, strict = _a.strict;
-	    var config = {
-	        areArraysEqual: strict
-	            ? areObjectsEqualStrict
-	            : areArraysEqual,
+	function createEqualityComparatorConfig({ circular, createCustomConfig, strict, }) {
+	    let config = {
+	        areArrayBuffersEqual,
+	        areArraysEqual: strict ? areObjectsEqualStrict : areArraysEqual,
+	        areDataViewsEqual,
 	        areDatesEqual: areDatesEqual,
 	        areErrorsEqual: areErrorsEqual,
-	        areFunctionsEqual: areFunctionsEqual,
-	        areMapsEqual: strict
-	            ? combineComparators(areMapsEqual, areObjectsEqualStrict)
-	            : areMapsEqual,
-	        areNumbersEqual: areNumbersEqual,
-	        areObjectsEqual: strict
-	            ? areObjectsEqualStrict
-	            : areObjectsEqual,
+	        areFunctionsEqual: strictEqual,
+	        areMapsEqual: strict ? combineComparators(areMapsEqual, areObjectsEqualStrict) : areMapsEqual,
+	        areNumbersEqual: sameValueEqual,
+	        areObjectsEqual: strict ? areObjectsEqualStrict : areObjectsEqual,
 	        arePrimitiveWrappersEqual: arePrimitiveWrappersEqual,
 	        areRegExpsEqual: areRegExpsEqual,
-	        areSetsEqual: strict
-	            ? combineComparators(areSetsEqual, areObjectsEqualStrict)
-	            : areSetsEqual,
+	        areSetsEqual: strict ? combineComparators(areSetsEqual, areObjectsEqualStrict) : areSetsEqual,
 	        areTypedArraysEqual: strict
-	            ? areObjectsEqualStrict
+	            ? combineComparators(areTypedArraysEqual, areObjectsEqualStrict)
 	            : areTypedArraysEqual,
 	        areUrlsEqual: areUrlsEqual,
-	        unknownTagComparators: undefined,
+	        getUnsupportedCustomComparator: undefined,
 	    };
 	    if (createCustomConfig) {
-	        config = assign({}, config, createCustomConfig(config));
+	        config = Object.assign({}, config, createCustomConfig(config));
 	    }
 	    if (circular) {
-	        var areArraysEqual$1 = createIsCircular(config.areArraysEqual);
-	        var areMapsEqual$1 = createIsCircular(config.areMapsEqual);
-	        var areObjectsEqual$1 = createIsCircular(config.areObjectsEqual);
-	        var areSetsEqual$1 = createIsCircular(config.areSetsEqual);
-	        config = assign({}, config, {
-	            areArraysEqual: areArraysEqual$1,
-	            areMapsEqual: areMapsEqual$1,
-	            areObjectsEqual: areObjectsEqual$1,
-	            areSetsEqual: areSetsEqual$1,
+	        const areArraysEqual = createIsCircular(config.areArraysEqual);
+	        const areMapsEqual = createIsCircular(config.areMapsEqual);
+	        const areObjectsEqual = createIsCircular(config.areObjectsEqual);
+	        const areSetsEqual = createIsCircular(config.areSetsEqual);
+	        config = Object.assign({}, config, {
+	            areArraysEqual,
+	            areMapsEqual,
+	            areObjectsEqual,
+	            areSetsEqual,
 	        });
 	    }
 	    return config;
@@ -3301,16 +3684,15 @@ var markerClusterer = (function (exports) {
 	/**
 	 * Create the `isEqual` function used by the consuming application.
 	 */
-	function createIsEqual(_a) {
-	    var circular = _a.circular, comparator = _a.comparator, createState = _a.createState, equals = _a.equals, strict = _a.strict;
+	function createIsEqual({ circular, comparator, createState, equals, strict }) {
 	    if (createState) {
 	        return function isEqual(a, b) {
-	            var _a = createState(), _b = _a.cache, cache = _b === void 0 ? circular ? new WeakMap() : undefined : _b, meta = _a.meta;
+	            const { cache = circular ? new WeakMap() : undefined, meta } = createState();
 	            return comparator(a, b, {
-	                cache: cache,
-	                equals: equals,
-	                meta: meta,
-	                strict: strict,
+	                cache,
+	                equals,
+	                meta,
+	                strict,
 	            });
 	        };
 	    }
@@ -3318,27 +3700,72 @@ var markerClusterer = (function (exports) {
 	        return function isEqual(a, b) {
 	            return comparator(a, b, {
 	                cache: new WeakMap(),
-	                equals: equals,
+	                equals,
 	                meta: undefined,
-	                strict: strict,
+	                strict,
 	            });
 	        };
 	    }
-	    var state = {
+	    const state = {
 	        cache: undefined,
-	        equals: equals,
+	        equals,
 	        meta: undefined,
-	        strict: strict,
+	        strict,
 	    };
 	    return function isEqual(a, b) {
 	        return comparator(a, b, state);
+	    };
+	}
+	/**
+	 * Create a map of `toString()` values to their respective handlers for `tag`-based lookups.
+	 */
+	function createSupportedComparatorMap({ areArrayBuffersEqual, areArraysEqual, areDataViewsEqual, areDatesEqual, areErrorsEqual, areFunctionsEqual, areMapsEqual, areNumbersEqual, areObjectsEqual, arePrimitiveWrappersEqual, areRegExpsEqual, areSetsEqual, areTypedArraysEqual, areUrlsEqual, }) {
+	    return {
+	        '[object Arguments]': areObjectsEqual,
+	        '[object Array]': areArraysEqual,
+	        '[object ArrayBuffer]': areArrayBuffersEqual,
+	        '[object AsyncGeneratorFunction]': areFunctionsEqual,
+	        '[object BigInt]': areNumbersEqual,
+	        '[object BigInt64Array]': areTypedArraysEqual,
+	        '[object BigUint64Array]': areTypedArraysEqual,
+	        '[object Boolean]': arePrimitiveWrappersEqual,
+	        '[object DataView]': areDataViewsEqual,
+	        '[object Date]': areDatesEqual,
+	        // If an error tag, it should be tested explicitly. Like RegExp, the properties are not
+	        // enumerable, and therefore will give false positives if tested like a standard object.
+	        '[object Error]': areErrorsEqual,
+	        '[object Float16Array]': areTypedArraysEqual,
+	        '[object Float32Array]': areTypedArraysEqual,
+	        '[object Float64Array]': areTypedArraysEqual,
+	        '[object Function]': areFunctionsEqual,
+	        '[object GeneratorFunction]': areFunctionsEqual,
+	        '[object Int8Array]': areTypedArraysEqual,
+	        '[object Int16Array]': areTypedArraysEqual,
+	        '[object Int32Array]': areTypedArraysEqual,
+	        '[object Map]': areMapsEqual,
+	        '[object Number]': arePrimitiveWrappersEqual,
+	        '[object Object]': (a, b, state) => 
+	        // The exception for value comparison is custom `Promise`-like class instances. These should
+	        // be treated the same as standard `Promise` objects, which means strict equality, and if
+	        // it reaches this point then that strict equality comparison has already failed.
+	        typeof a.then !== 'function' && typeof b.then !== 'function' && areObjectsEqual(a, b, state),
+	        // For RegExp, the properties are not enumerable, and therefore will give false positives if
+	        // tested like a standard object.
+	        '[object RegExp]': areRegExpsEqual,
+	        '[object Set]': areSetsEqual,
+	        '[object String]': arePrimitiveWrappersEqual,
+	        '[object URL]': areUrlsEqual,
+	        '[object Uint8Array]': areTypedArraysEqual,
+	        '[object Uint8ClampedArray]': areTypedArraysEqual,
+	        '[object Uint16Array]': areTypedArraysEqual,
+	        '[object Uint32Array]': areTypedArraysEqual,
 	    };
 	}
 
 	/**
 	 * Whether the items passed are deeply-equal in value.
 	 */
-	var deepEqual = createCustomEqual();
+	const deepEqual = createCustomEqual();
 	/**
 	 * Whether the items passed are deeply-equal in value based on strict comparison.
 	 */
@@ -3359,21 +3786,21 @@ var markerClusterer = (function (exports) {
 	 * Whether the items passed are shallowly-equal in value.
 	 */
 	createCustomEqual({
-	    createInternalComparator: function () { return sameValueZeroEqual; },
+	    createInternalComparator: () => sameValueEqual,
 	});
 	/**
 	 * Whether the items passed are shallowly-equal in value based on strict comparison
 	 */
 	createCustomEqual({
 	    strict: true,
-	    createInternalComparator: function () { return sameValueZeroEqual; },
+	    createInternalComparator: () => sameValueEqual,
 	});
 	/**
 	 * Whether the items passed are shallowly-equal in value, including circular references.
 	 */
 	createCustomEqual({
 	    circular: true,
-	    createInternalComparator: function () { return sameValueZeroEqual; },
+	    createInternalComparator: () => sameValueEqual,
 	});
 	/**
 	 * Whether the items passed are shallowly-equal in value, including circular references,
@@ -3381,7 +3808,7 @@ var markerClusterer = (function (exports) {
 	 */
 	createCustomEqual({
 	    circular: true,
-	    createInternalComparator: function () { return sameValueZeroEqual; },
+	    createInternalComparator: () => sameValueEqual,
 	    strict: true,
 	});
 	/**
@@ -3392,15 +3819,14 @@ var markerClusterer = (function (exports) {
 	 * support for legacy environments that do not support expected features like
 	 * `RegExp.prototype.flags` out of the box.
 	 */
-	function createCustomEqual(options) {
-	    if (options === void 0) { options = {}; }
-	    var _a = options.circular, circular = _a === void 0 ? false : _a, createCustomInternalComparator = options.createInternalComparator, createState = options.createState, _b = options.strict, strict = _b === void 0 ? false : _b;
-	    var config = createEqualityComparatorConfig(options);
-	    var comparator = createEqualityComparator(config);
-	    var equals = createCustomInternalComparator
+	function createCustomEqual(options = {}) {
+	    const { circular = false, createInternalComparator: createCustomInternalComparator, createState, strict = false, } = options;
+	    const config = createEqualityComparatorConfig(options);
+	    const comparator = createEqualityComparator(config);
+	    const equals = createCustomInternalComparator
 	        ? createCustomInternalComparator(comparator)
 	        : createInternalEqualityComparator(comparator);
-	    return createIsEqual({ circular: circular, comparator: comparator, createState: createState, equals: equals, strict: strict });
+	    return createIsEqual({ circular, comparator, createState, equals, strict });
 	}
 
 	/**
@@ -3412,10 +3838,10 @@ var markerClusterer = (function (exports) {
 	 */
 	class GridAlgorithm extends AbstractViewportAlgorithm {
 	  constructor(_a) {
-	    var {
-	        maxDistance = 40000,
-	        gridSize = 40
-	      } = _a,
+	    var _a$maxDistance = _a.maxDistance,
+	      maxDistance = _a$maxDistance === void 0 ? 40000 : _a$maxDistance,
+	      _a$gridSize = _a.gridSize,
+	      gridSize = _a$gridSize === void 0 ? 40 : _a$gridSize,
 	      options = __rest(_a, ["maxDistance", "gridSize"]);
 	    super(options);
 	    this.clusters = [];
@@ -3426,11 +3852,9 @@ var markerClusterer = (function (exports) {
 	    this.gridSize = gridSize;
 	  }
 	  calculate(_ref) {
-	    let {
-	      markers,
-	      map,
-	      mapCanvasProjection
-	    } = _ref;
+	    let markers = _ref.markers,
+	      map = _ref.map,
+	      mapCanvasProjection = _ref.mapCanvasProjection;
 	    const zoom = map.getZoom();
 	    assertNotNull(zoom);
 	    const newState = {
@@ -3458,11 +3882,9 @@ var markerClusterer = (function (exports) {
 	    };
 	  }
 	  cluster(_ref2) {
-	    let {
-	      markers,
-	      map,
-	      mapCanvasProjection
-	    } = _ref2;
+	    let markers = _ref2.markers,
+	      map = _ref2.map,
+	      mapCanvasProjection = _ref2.mapCanvasProjection;
 	    this.clusters = [];
 	    markers.forEach(marker => {
 	      this.addToClosestCluster(marker, map, mapCanvasProjection);
@@ -3509,11 +3931,9 @@ var markerClusterer = (function (exports) {
 	    super(options);
 	  }
 	  calculate(_ref) {
-	    let {
-	      markers,
-	      map,
-	      mapCanvasProjection
-	    } = _ref;
+	    let markers = _ref.markers,
+	      map = _ref.map,
+	      mapCanvasProjection = _ref.mapCanvasProjection;
 	    return {
 	      clusters: this.cluster({
 	        markers,
@@ -3528,20 +3948,72 @@ var markerClusterer = (function (exports) {
 	  }
 	}
 
+	function _arrayLikeToArray(r, a) {
+	  (null == a || a > r.length) && (a = r.length);
+	  for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+	  return n;
+	}
+	function _arrayWithHoles(r) {
+	  if (Array.isArray(r)) return r;
+	}
+	function _iterableToArrayLimit(r, l) {
+	  var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+	  if (null != t) {
+	    var e,
+	      n,
+	      i,
+	      u,
+	      a = [],
+	      f = true,
+	      o = false;
+	    try {
+	      if (i = (t = t.call(r)).next, 0 === l) ; else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0);
+	    } catch (r) {
+	      o = true, n = r;
+	    } finally {
+	      try {
+	        if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+	      } finally {
+	        if (o) throw n;
+	      }
+	    }
+	    return a;
+	  }
+	}
+	function _nonIterableRest() {
+	  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+	}
+	function _slicedToArray(r, e) {
+	  return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest();
+	}
+	function _unsupportedIterableToArray(r, a) {
+	  if (r) {
+	    if ("string" == typeof r) return _arrayLikeToArray(r, a);
+	    var t = {}.toString.call(r).slice(8, -1);
+	    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0;
+	  }
+	}
+
 	const ARRAY_TYPES = [Int8Array, Uint8Array, Uint8ClampedArray, Int16Array, Uint16Array, Int32Array, Uint32Array, Float32Array, Float64Array];
 
 	/** @typedef {Int8ArrayConstructor | Uint8ArrayConstructor | Uint8ClampedArrayConstructor | Int16ArrayConstructor | Uint16ArrayConstructor | Int32ArrayConstructor | Uint32ArrayConstructor | Float32ArrayConstructor | Float64ArrayConstructor} TypedArrayConstructor */
+	/** @typedef {Int8Array | Uint8Array | Uint8ClampedArray | Int16Array | Uint16Array | Int32Array | Uint32Array | Float32Array | Float64Array} TypedArray */
 
 	const VERSION = 1; // serialized format version
 	const HEADER_SIZE = 8;
+
+	// Shared scratch stack for iterative DFS in range/within. Sized for the worst case:
+	// 3 ints per frame * (treeHeight + 1), with treeHeight ≤ ceil(log2(2^32 / 3)) ≈ 31.
+	const STACK = new Uint32Array(96);
 	class KDBush {
 	  /**
 	   * Creates an index from raw `ArrayBuffer` data.
-	   * @param {ArrayBuffer} data
+	   * @param {ArrayBufferLike} data
 	   */
 	  static from(data) {
-	    if (!(data instanceof ArrayBuffer)) {
-	      throw new Error('Data must be an instance of ArrayBuffer.');
+	    // @ts-expect-error duck typing array buffers
+	    if (!data || data.byteLength === undefined || data.buffer) {
+	      throw new Error('Data must be an instance of ArrayBuffer or SharedArrayBuffer.');
 	    }
 	    const [magic, versionAndType] = new Uint8Array(data, 0, 2);
 	    if (magic !== 0xdb) {
@@ -3557,7 +4029,7 @@ var markerClusterer = (function (exports) {
 	    }
 	    const [nodeSize] = new Uint16Array(data, 2, 1);
 	    const [numItems] = new Uint32Array(data, 4, 1);
-	    return new KDBush(numItems, nodeSize, ArrayType, data);
+	    return new KDBush(numItems, nodeSize, ArrayType, undefined, data);
 	  }
 
 	  /**
@@ -3565,10 +4037,11 @@ var markerClusterer = (function (exports) {
 	   * @param {number} numItems
 	   * @param {number} [nodeSize=64] Size of the KD-tree node (64 by default).
 	   * @param {TypedArrayConstructor} [ArrayType=Float64Array] The array type used for coordinates storage (`Float64Array` by default).
-	   * @param {ArrayBuffer} [data] (For internal use only)
+	   * @param {ArrayBufferConstructor | SharedArrayBufferConstructor} [ArrayBufferType=ArrayBuffer] The array buffer type used for storage (`ArrayBuffer` by default).
+	   * @param {ArrayBufferLike} [data] (For internal use only)
 	   */
-	  constructor(numItems, nodeSize = 64, ArrayType = Float64Array, data) {
-	    if (isNaN(numItems) || numItems < 0) throw new Error(`Unpexpected numItems value: ${numItems}.`);
+	  constructor(numItems, nodeSize = 64, ArrayType = Float64Array, ArrayBufferType = ArrayBuffer, data) {
+	    if (isNaN(numItems) || numItems < 0) throw new Error(`Unexpected numItems value: ${numItems}.`);
 	    this.numItems = +numItems;
 	    this.nodeSize = Math.min(Math.max(+nodeSize, 2), 65535);
 	    this.ArrayType = ArrayType;
@@ -3580,25 +4053,29 @@ var markerClusterer = (function (exports) {
 	    if (arrayTypeIndex < 0) {
 	      throw new Error(`Unexpected typed array class: ${ArrayType}.`);
 	    }
-	    if (data && data instanceof ArrayBuffer) {
+	    if (data) {
 	      // reconstruct an index from a buffer
 	      this.data = data;
-	      this.ids = new this.IndexArrayType(this.data, HEADER_SIZE, numItems);
-	      this.coords = new this.ArrayType(this.data, HEADER_SIZE + idsByteSize + padCoords, numItems * 2);
+	      // @ts-expect-error TS can't handle SharedArrayBuffer overloads
+	      this.ids = new this.IndexArrayType(data, HEADER_SIZE, numItems);
+	      // @ts-expect-error TS can't handle SharedArrayBuffer overloads
+	      this.coords = new ArrayType(data, HEADER_SIZE + idsByteSize + padCoords, numItems * 2);
 	      this._pos = numItems * 2;
 	      this._finished = true;
 	    } else {
 	      // initialize a new index
-	      this.data = new ArrayBuffer(HEADER_SIZE + coordsByteSize + idsByteSize + padCoords);
-	      this.ids = new this.IndexArrayType(this.data, HEADER_SIZE, numItems);
-	      this.coords = new this.ArrayType(this.data, HEADER_SIZE + idsByteSize + padCoords, numItems * 2);
+	      const data = this.data = new ArrayBufferType(HEADER_SIZE + coordsByteSize + idsByteSize + padCoords);
+	      // @ts-expect-error TS can't handle SharedArrayBuffer overloads
+	      this.ids = new this.IndexArrayType(data, HEADER_SIZE, numItems);
+	      // @ts-expect-error TS can't handle SharedArrayBuffer overloads
+	      this.coords = new ArrayType(data, HEADER_SIZE + idsByteSize + padCoords, numItems * 2);
 	      this._pos = 0;
 	      this._finished = false;
 
 	      // set header
-	      new Uint8Array(this.data, 0, 2).set([0xdb, (VERSION << 4) + arrayTypeIndex]);
-	      new Uint16Array(this.data, 2, 1)[0] = nodeSize;
-	      new Uint32Array(this.data, 4, 1)[0] = numItems;
+	      new Uint8Array(data, 0, 2).set([0xdb, (VERSION << 4) + arrayTypeIndex]);
+	      new Uint16Array(data, 2, 1)[0] = nodeSize;
+	      new Uint32Array(data, 4, 1)[0] = numItems;
 	    }
 	  }
 
@@ -3645,14 +4122,17 @@ var markerClusterer = (function (exports) {
 	      coords,
 	      nodeSize
 	    } = this;
-	    const stack = [0, ids.length - 1, 0];
+	    STACK[0] = 0;
+	    STACK[1] = ids.length - 1;
+	    STACK[2] = 0;
+	    let sp = 3;
 	    const result = [];
 
 	    // recursively search for items in range in the kd-sorted arrays
-	    while (stack.length) {
-	      const axis = stack.pop() || 0;
-	      const right = stack.pop() || 0;
-	      const left = stack.pop() || 0;
+	    while (sp > 0) {
+	      const axis = STACK[--sp];
+	      const right = STACK[--sp];
+	      const left = STACK[--sp];
 
 	      // if we reached "tree node", search linearly
 	      if (right - left <= nodeSize) {
@@ -3674,14 +4154,14 @@ var markerClusterer = (function (exports) {
 
 	      // queue search in halves that intersect the query
 	      if (axis === 0 ? minX <= x : minY <= y) {
-	        stack.push(left);
-	        stack.push(m - 1);
-	        stack.push(1 - axis);
+	        STACK[sp++] = left;
+	        STACK[sp++] = m - 1;
+	        STACK[sp++] = 1 - axis;
 	      }
 	      if (axis === 0 ? maxX >= x : maxY >= y) {
-	        stack.push(m + 1);
-	        stack.push(right);
-	        stack.push(1 - axis);
+	        STACK[sp++] = m + 1;
+	        STACK[sp++] = right;
+	        STACK[sp++] = 1 - axis;
 	      }
 	    }
 	    return result;
@@ -3695,26 +4175,46 @@ var markerClusterer = (function (exports) {
 	   * @returns {number[]} An array of indices correponding to the found items.
 	   */
 	  within(qx, qy, r) {
+	    const result = /** @type {number[]} */[];
+	    this.withinInto(qx, qy, r, result);
+	    return result;
+	  }
+
+	  /**
+	   * Search the index for items within a given radius, writing matching ids into `out`
+	   * via indexed assignment (`out[i] = id`). Accepts any indexed-writable container —
+	   * a typed array sized to the expected upper bound (allocation-free, fast) or a plain
+	   * `Array` (which will grow as needed). Returns the number of matches written.
+	   * @param {number} qx
+	   * @param {number} qy
+	   * @param {number} r Query radius.
+	   * @param {number[] | TypedArray} out Container to write matching ids into.
+	   * @returns {number} The number of matches written to `out`.
+	   */
+	  withinInto(qx, qy, r, out) {
 	    if (!this._finished) throw new Error('Data not yet indexed - call index.finish().');
 	    const {
 	      ids,
 	      coords,
 	      nodeSize
 	    } = this;
-	    const stack = [0, ids.length - 1, 0];
-	    const result = [];
+	    STACK[0] = 0;
+	    STACK[1] = ids.length - 1;
+	    STACK[2] = 0;
+	    let sp = 3;
+	    let count = 0;
 	    const r2 = r * r;
 
 	    // recursively search for items within radius in the kd-sorted arrays
-	    while (stack.length) {
-	      const axis = stack.pop() || 0;
-	      const right = stack.pop() || 0;
-	      const left = stack.pop() || 0;
+	    while (sp > 0) {
+	      const axis = STACK[--sp];
+	      const right = STACK[--sp];
+	      const left = STACK[--sp];
 
 	      // if we reached "tree node", search linearly
 	      if (right - left <= nodeSize) {
 	        for (let i = left; i <= right; i++) {
-	          if (sqDist(coords[2 * i], coords[2 * i + 1], qx, qy) <= r2) result.push(ids[i]);
+	          if (sqDist(coords[2 * i], coords[2 * i + 1], qx, qy) <= r2) out[count++] = ids[i];
 	        }
 	        continue;
 	      }
@@ -3725,27 +4225,27 @@ var markerClusterer = (function (exports) {
 	      // include the middle item if it's in range
 	      const x = coords[2 * m];
 	      const y = coords[2 * m + 1];
-	      if (sqDist(x, y, qx, qy) <= r2) result.push(ids[m]);
+	      if (sqDist(x, y, qx, qy) <= r2) out[count++] = ids[m];
 
 	      // queue search in halves that intersect the query
 	      if (axis === 0 ? qx - r <= x : qy - r <= y) {
-	        stack.push(left);
-	        stack.push(m - 1);
-	        stack.push(1 - axis);
+	        STACK[sp++] = left;
+	        STACK[sp++] = m - 1;
+	        STACK[sp++] = 1 - axis;
 	      }
 	      if (axis === 0 ? qx + r >= x : qy + r >= y) {
-	        stack.push(m + 1);
-	        stack.push(right);
-	        stack.push(1 - axis);
+	        STACK[sp++] = m + 1;
+	        STACK[sp++] = right;
+	        STACK[sp++] = 1 - axis;
 	      }
 	    }
-	    return result;
+	    return count;
 	  }
 	}
 
 	/**
 	 * @param {Uint16Array | Uint32Array} ids
-	 * @param {InstanceType<TypedArrayConstructor>} coords
+	 * @param {TypedArray} coords
 	 * @param {number} nodeSize
 	 * @param {number} left
 	 * @param {number} right
@@ -3768,7 +4268,7 @@ var markerClusterer = (function (exports) {
 	 * Custom Floyd-Rivest selection algorithm: sort ids and coords so that
 	 * [left..k-1] items are smaller than k-th item (on either x or y axis)
 	 * @param {Uint16Array | Uint32Array} ids
-	 * @param {InstanceType<TypedArrayConstructor>} coords
+	 * @param {TypedArray} coords
 	 * @param {number} k
 	 * @param {number} left
 	 * @param {number} right
@@ -3809,7 +4309,7 @@ var markerClusterer = (function (exports) {
 
 	/**
 	 * @param {Uint16Array | Uint32Array} ids
-	 * @param {InstanceType<TypedArrayConstructor>} coords
+	 * @param {TypedArray} coords
 	 * @param {number} i
 	 * @param {number} j
 	 */
@@ -3820,7 +4320,7 @@ var markerClusterer = (function (exports) {
 	}
 
 	/**
-	 * @param {InstanceType<TypedArrayConstructor>} arr
+	 * @param {TypedArray} arr
 	 * @param {number} i
 	 * @param {number} j
 	 */
@@ -4230,10 +4730,9 @@ var markerClusterer = (function (exports) {
 	 */
 	class SuperClusterAlgorithm extends AbstractAlgorithm {
 	  constructor(_a) {
-	    var {
-	        maxZoom,
-	        radius = 60
-	      } = _a,
+	    var maxZoom = _a.maxZoom,
+	      _a$radius = _a.radius,
+	      radius = _a$radius === void 0 ? 60 : _a$radius,
 	      options = __rest(_a, ["maxZoom", "radius"]);
 	    super({
 	      maxZoom
@@ -4299,20 +4798,16 @@ var markerClusterer = (function (exports) {
 	    };
 	  }
 	  cluster(_ref) {
-	    let {
-	      map
-	    } = _ref;
+	    let map = _ref.map;
 	    const zoom = map.getZoom();
 	    assertNotNull(zoom);
 	    return this.superCluster.getClusters([-180, -90, 180, 90], Math.round(zoom)).map(feature => this.transformCluster(feature));
 	  }
 	  transformCluster(_ref2) {
-	    let {
-	      geometry: {
-	        coordinates: [lng, lat]
-	      },
-	      properties
-	    } = _ref2;
+	    let _ref2$geometry$coordi = _slicedToArray(_ref2.geometry.coordinates, 2),
+	      lng = _ref2$geometry$coordi[0],
+	      lat = _ref2$geometry$coordi[1],
+	      properties = _ref2.properties;
 	    if (properties.cluster) {
 	      return new Cluster({
 	        markers: this.superCluster.getLeaves(properties.cluster_id, Infinity).map(leaf => leaf.properties.marker),
@@ -4337,11 +4832,11 @@ var markerClusterer = (function (exports) {
 	 */
 	class SuperClusterViewportAlgorithm extends AbstractViewportAlgorithm {
 	  constructor(_a) {
-	    var {
-	        maxZoom,
-	        radius = 60,
-	        viewportPadding = 60
-	      } = _a,
+	    var maxZoom = _a.maxZoom,
+	      _a$radius = _a.radius,
+	      radius = _a$radius === void 0 ? 60 : _a$radius,
+	      _a$viewportPadding = _a.viewportPadding,
+	      viewportPadding = _a$viewportPadding === void 0 ? 60 : _a$viewportPadding,
 	      options = __rest(_a, ["maxZoom", "radius", "viewportPadding"]);
 	    super({
 	      maxZoom,
@@ -4396,12 +4891,10 @@ var markerClusterer = (function (exports) {
 	    return this.superCluster.getClusters(state.view, state.zoom).map(feature => this.transformCluster(feature));
 	  }
 	  transformCluster(_ref) {
-	    let {
-	      geometry: {
-	        coordinates: [lng, lat]
-	      },
-	      properties
-	    } = _ref;
+	    let _ref$geometry$coordin = _slicedToArray(_ref.geometry.coordinates, 2),
+	      lng = _ref$geometry$coordin[0],
+	      lat = _ref$geometry$coordin[1],
+	      properties = _ref.properties;
 	    if (properties.cluster) {
 	      return new Cluster({
 	        markers: this.superCluster.getLeaves(properties.cluster_id, Infinity).map(leaf => leaf.properties.marker),
@@ -4428,6 +4921,48 @@ var markerClusterer = (function (exports) {
 	    };
 	  }
 	}
+
+	var es_array_includes = {};
+
+	var hasRequiredEs_array_includes;
+	function requireEs_array_includes() {
+	  if (hasRequiredEs_array_includes) return es_array_includes;
+	  hasRequiredEs_array_includes = 1;
+	  var $ = require_export();
+	  var $includes = requireArrayIncludes().includes;
+	  var fails = requireFails();
+	  var addToUnscopables = requireAddToUnscopables();
+
+	  // FF99+ bug
+	  var BROKEN_ON_SPARSE = fails(function () {
+	    // eslint-disable-next-line es/no-array-prototype-includes -- detection
+	    return !Array(1).includes();
+	  });
+
+	  // Safari 26.4- bug
+	  var BROKEN_ON_SPARSE_WITH_FROM_INDEX = fails(function () {
+	    // eslint-disable-next-line no-sparse-arrays, es/no-array-prototype-includes -- detection
+	    return [, 1].includes(undefined, 1);
+	  });
+
+	  // `Array.prototype.includes` method
+	  // https://tc39.es/ecma262/#sec-array.prototype.includes
+	  $({
+	    target: 'Array',
+	    proto: true,
+	    forced: BROKEN_ON_SPARSE || BROKEN_ON_SPARSE_WITH_FROM_INDEX
+	  }, {
+	    includes: function includes(el /* , fromIndex = 0 */) {
+	      return $includes(this, el, arguments.length > 1 ? arguments[1] : undefined);
+	    }
+	  });
+
+	  // https://tc39.es/ecma262/#sec-array.prototype-@@unscopables
+	  addToUnscopables('includes');
+	  return es_array_includes;
+	}
+
+	requireEs_array_includes();
 
 	var esnext_iterator_reduce = {};
 
@@ -4584,20 +5119,13 @@ var markerClusterer = (function (exports) {
 	   * ```
 	   */
 	  render(_ref, stats, map) {
-	    let {
-	      count,
-	      position
-	    } = _ref;
+	    let count = _ref.count,
+	      position = _ref.position;
 	    // change color if this cluster has more markers than the mean cluster
 	    const color = count > Math.max(10, stats.clusters.markers.mean) ? "#ff0000" : "#0000ff";
 	    // create svg literal with fill color
-	    const svg = `<svg fill="${color}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="50" height="50">
-<circle cx="120" cy="120" opacity=".6" r="70" />
-<circle cx="120" cy="120" opacity=".3" r="90" />
-<circle cx="120" cy="120" opacity=".2" r="110" />
-<text x="50%" y="50%" style="fill:#fff" text-anchor="middle" font-size="50" dominant-baseline="middle" font-family="roboto,arial,sans-serif">${count}</text>
-</svg>`;
-	    const title = `Cluster of ${count} markers`,
+	    const svg = "<svg fill=\"".concat(color, "\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 240 240\" width=\"50\" height=\"50\">\n<circle cx=\"120\" cy=\"120\" opacity=\".6\" r=\"70\" />\n<circle cx=\"120\" cy=\"120\" opacity=\".3\" r=\"90\" />\n<circle cx=\"120\" cy=\"120\" opacity=\".2\" r=\"110\" />\n<text x=\"50%\" y=\"50%\" style=\"fill:#fff\" text-anchor=\"middle\" font-size=\"50\" dominant-baseline=\"middle\" font-family=\"roboto,arial,sans-serif\">").concat(count, "</text>\n</svg>");
+	    const title = "Cluster of ".concat(count, " markers"),
 	      // adjust zIndex to be above other markers
 	      zIndex = Number(google.maps.Marker.MAX_ZINDEX) + count;
 	    if (MarkerUtils.isAdvancedMarkerAvailable(map)) {
@@ -4619,7 +5147,7 @@ var markerClusterer = (function (exports) {
 	      zIndex,
 	      title,
 	      icon: {
-	        url: `data:image/svg+xml;base64,${btoa(svg)}`,
+	        url: "data:image/svg+xml;base64,".concat(btoa(svg)),
 	        anchor: new google.maps.Point(25, 25)
 	      }
 	    };
@@ -4689,14 +5217,17 @@ var markerClusterer = (function (exports) {
 	 */
 	class MarkerClusterer extends OverlayViewSafe {
 	  constructor(_ref) {
-	    let {
-	      map,
-	      markers = [],
-	      algorithmOptions = {},
-	      algorithm = new SuperClusterAlgorithm(algorithmOptions),
-	      renderer = new DefaultRenderer(),
-	      onClusterClick = defaultOnClusterClickHandler
-	    } = _ref;
+	    let map = _ref.map,
+	      _ref$markers = _ref.markers,
+	      markers = _ref$markers === void 0 ? [] : _ref$markers,
+	      _ref$algorithmOptions = _ref.algorithmOptions,
+	      algorithmOptions = _ref$algorithmOptions === void 0 ? {} : _ref$algorithmOptions,
+	      _ref$algorithm = _ref.algorithm,
+	      algorithm = _ref$algorithm === void 0 ? new SuperClusterAlgorithm(algorithmOptions) : _ref$algorithm,
+	      _ref$renderer = _ref.renderer,
+	      renderer = _ref$renderer === void 0 ? new DefaultRenderer() : _ref$renderer,
+	      _ref$onClusterClick = _ref.onClusterClick,
+	      onClusterClick = _ref$onClusterClick === void 0 ? defaultOnClusterClickHandler : _ref$onClusterClick;
 	    super();
 	    /** @see {@link MarkerClustererOptions.map} */
 	    this.map = null;
@@ -4763,32 +5294,31 @@ var markerClusterer = (function (exports) {
 	    const map = this.getMap();
 	    if (map instanceof google.maps.Map && map.getProjection()) {
 	      google.maps.event.trigger(this, exports.MarkerClustererEvents.CLUSTERING_BEGIN, this);
-	      const {
-	        clusters,
-	        changed
-	      } = this.algorithm.calculate({
-	        markers: this.markers,
-	        map,
-	        mapCanvasProjection: this.getProjection()
-	      });
+	      const _this$algorithm$calcu = this.algorithm.calculate({
+	          markers: this.markers,
+	          map,
+	          mapCanvasProjection: this.getProjection()
+	        }),
+	        clusters = _this$algorithm$calcu.clusters,
+	        changed = _this$algorithm$calcu.changed;
 	      // Allow algorithms to return flag on whether the clusters/markers have changed.
-	      if (changed || changed == undefined) {
+	      if (changed || changed === undefined) {
 	        // Accumulate the markers of the clusters composed of a single marker.
 	        // Those clusters directly use the marker.
 	        // Clusters with more than one markers use a group marker generated by a renderer.
 	        const singleMarker = new Set();
 	        for (const cluster of clusters) {
-	          if (cluster.markers.length == 1) {
+	          if (cluster.markers.length === 1) {
 	            singleMarker.add(cluster.markers[0]);
 	          }
 	        }
 	        const groupMarkers = [];
 	        // Iterate the clusters that are currently rendered.
 	        for (const cluster of this.clusters) {
-	          if (cluster.marker == null) {
+	          if (!cluster.marker) {
 	            continue;
 	          }
-	          if (cluster.markers.length == 1) {
+	          if (cluster.markers.length === 1) {
 	            if (!singleMarker.has(cluster.marker)) {
 	              // The marker:
 	              // - was previously rendered because it is from a cluster with 1 marker,
