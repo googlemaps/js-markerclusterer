@@ -466,6 +466,11 @@ class SuperClusterViewportAlgorithm extends AbstractViewportAlgorithm {
             });
             this.superCluster.load(points);
         }
+        // when input is empty, return right away
+        if (input.markers.length === 0) {
+            this.clusters = [];
+            return { clusters: this.clusters, changed };
+        }
         if (changed) {
             this.clusters = this.cluster(input);
             this.state = state;
