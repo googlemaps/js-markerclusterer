@@ -29,19 +29,19 @@ describe("distanceBetweenPoints", () => {
   test("is correct", () => {
     expect(
       distanceBetweenPoints({ lng: 0, lat: 0 }, { lng: 1, lat: 1 })
-    ).toMatchInlineSnapshot(`157.24938127194397`);
+    ).toMatchInlineSnapshot("157.24938127194397");
 
     expect(
       distanceBetweenPoints({ lng: 0, lat: 0 }, { lng: -1, lat: 1 })
-    ).toMatchInlineSnapshot(`157.24938127194397`);
+    ).toMatchInlineSnapshot("157.24938127194397");
 
     expect(
       distanceBetweenPoints({ lng: 0, lat: 0 }, { lng: -1, lat: -1 })
-    ).toMatchInlineSnapshot(`157.24938127194397`);
+    ).toMatchInlineSnapshot("157.24938127194397");
 
     expect(
       distanceBetweenPoints({ lng: 0, lat: 0 }, { lng: 1, lat: -1 })
-    ).toMatchInlineSnapshot(`157.24938127194397`);
+    ).toMatchInlineSnapshot("157.24938127194397");
   });
 });
 
