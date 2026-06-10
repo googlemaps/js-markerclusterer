@@ -24,7 +24,6 @@ import {
 import { MAP_ID, createMarker, getLoaderOptions, sync } from "./config";
 
 import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
-// @ts-ignore
 import trees from "./trees.json";
 
 const mapOptions: google.maps.MapOptions = {
@@ -44,17 +43,17 @@ async function main() {
     [
       document.getElementById("noop")!,
       new NoopAlgorithm({}),
-      `new NoopAlgorithm()`,
+      "new NoopAlgorithm()",
     ],
     [
       document.getElementById("grid")!,
       new GridAlgorithm({ maxDistance: 40000 }),
-      `new GridAlgorithm({})`,
+      "new GridAlgorithm({})",
     ],
     [
       document.getElementById("supercluster")!,
       new SuperClusterAlgorithm({}),
-      `new SuperClusterAlgorithm({})`,
+      "new SuperClusterAlgorithm({})",
     ],
   ];
 

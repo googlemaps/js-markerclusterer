@@ -21,8 +21,9 @@ declare let L: any; /* eslint-disable-line @typescript-eslint/no-explicit-any */
 async function main() {
   const tiles = L.tileLayer("//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 18,
+    // prettier-ignore
     attribution:
-      '&copy; <a href="//openstreetmap.org/copyright">OpenStreetMap</a> contributors, Points &copy 2012 LINZ',
+      "&copy; <a href=\"//openstreetmap.org/copyright\">OpenStreetMap</a> contributors, Points &copy 2012 LINZ",
   });
 
   const map = L.map("map", {

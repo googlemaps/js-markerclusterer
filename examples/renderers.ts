@@ -76,7 +76,7 @@ async function main() {
     [
       document.getElementById("default")!,
       new DefaultRenderer(),
-      `new DefaultRenderer()`,
+      "new DefaultRenderer()",
     ],
     [
       document.getElementById("simple")!,
@@ -103,7 +103,7 @@ async function main() {
     maps.push(map);
 
     const textElement = document.createElement("pre");
-    // @ts-ignore
+    // @ts-expect-error - hljs is not on window
     textElement.innerHTML = window.hljs.highlight(text, {
       language: "typescript",
     }).value;
