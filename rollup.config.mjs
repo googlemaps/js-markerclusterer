@@ -68,7 +68,7 @@ export default [
   },
   {
     input: "src/index.ts",
-    external: ["supercluster", "fast-deep-equal"],
+    external: ["supercluster", "fast-equals"],
     plugins: [typescript({ tsconfig: "./tsconfig.build.json" })],
     output: {
       file: "dist/index.esm.mjs",

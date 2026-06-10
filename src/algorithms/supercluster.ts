@@ -18,7 +18,7 @@ import { AbstractAlgorithm, AlgorithmInput, AlgorithmOutput } from "./core";
 import SuperCluster, { ClusterFeature } from "supercluster";
 import { MarkerUtils, Marker } from "../marker-utils";
 import { Cluster } from "../cluster";
-import equal from "fast-deep-equal";
+import { deepEqual } from "fast-equals";
 import { assertNotNull } from "../utils";
 
 export type SuperClusterOptions = SuperCluster.Options<
@@ -51,13 +51,15 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
 
   public calculate(input: AlgorithmInput): AlgorithmOutput {
     let changed = false;
-    const zoom = input.map.getZoom();
+    let zoom = input.map.getZoom();
 
     assertNotNull(zoom);
 
+    zoom = Math.round(zoom);
+
     const state = { zoom: zoom };
 
-    if (!equal(input.markers, this.markers)) {
+    if (!deepEqual(input.markers, this.markers)) {
       changed = true;
       // TODO use proxy to avoid copy?
       this.markers = [...input.markers];
@@ -66,24 +68,28 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
         const position = MarkerUtils.getPosition(marker);
         const coordinates = [position.lng(), position.lat()];
         return {
-          type: "Feature" as const,
-          geometry: {
-            type: "Point" as const,
-            coordinates,
-          },
+          type: "Feature",
+          geometry: { type: "Point", coordinates },
           properties: { marker },
-        };
+        } as const;
       });
       this.superCluster.load(points);
     }
 
     if (!changed) {
       if (this.state.zoom <= this.maxZoom || state.zoom <= this.maxZoom) {
-        changed = !equal(this.state, state);
+        changed = !deepEqual(this.state, state);
       }
     }
 
     this.state = state;
+
+    // when input is empty, return right away
+    if (input.markers.length === 0) {
+      this.clusters = [];
+
+      return { clusters: this.clusters, changed };
+    }
 
     if (changed) {
       this.clusters = this.cluster(input);
