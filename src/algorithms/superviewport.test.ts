@@ -161,6 +161,24 @@ describe.each(markerClasses)(
       expect(superCluster["state"]).toEqual({ zoom: 21, view: [0, 0, 0, 0] });
     });
 
+    test("should not cluster if markers array is empty", () => {
+      const mapCanvasProjection = new MapCanvasProjection();
+      const markers: Marker[] = [];
+
+      const superCluster = new SuperClusterViewportAlgorithm({});
+      const clusterSpy = jest.spyOn(superCluster, "cluster");
+
+      const { clusters, changed } = superCluster.calculate({
+        markers,
+        map,
+        mapCanvasProjection,
+      });
+
+      expect(changed).toBeTruthy();
+      expect(clusters).toBe(superCluster["clusters"]);
+      expect(clusterSpy).not.toHaveBeenCalled();
+    });
+
     test("should round fractional zoom", () => {
       const mapCanvasProjection = new MapCanvasProjection();
       const markers: Marker[] = [new markerClass(), new markerClass()];
