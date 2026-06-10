@@ -50,7 +50,7 @@ export class Cluster {
   }
 
   public get position(): google.maps.LatLng {
-    // @ts-ignore
+    // @ts-expect-error - position may be undefined
     return this._position || this.bounds.getCenter();
   }
 

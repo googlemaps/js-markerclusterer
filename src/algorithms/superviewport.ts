@@ -29,8 +29,7 @@ import { deepEqual } from "fast-equals";
 import { assertNotNull } from "../utils";
 
 export interface SuperClusterViewportOptions
-  extends SuperClusterOptions,
-    ViewportAlgorithmOptions {}
+  extends SuperClusterOptions, ViewportAlgorithmOptions {}
 
 export interface SuperClusterViewportState {
   /* The current zoom level */

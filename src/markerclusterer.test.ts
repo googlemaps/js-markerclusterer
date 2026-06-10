@@ -17,12 +17,12 @@
 import {
   Cluster,
   ClusterStats,
-  MarkerClusterer,
   defaultOnClusterClickHandler,
+  MarkerClusterer,
 } from ".";
 
 import { initialize } from "@googlemaps/jest-mocks";
-import { MarkerUtils, Marker } from "./marker-utils";
+import { Marker, MarkerUtils } from "./marker-utils";
 
 initialize();
 const markerClasses = [
@@ -283,9 +283,7 @@ describe.each(markerClasses)(
       MarkerUtils.setMap = jest.fn();
       markerClusterer.getMap = jest.fn().mockImplementation(() => map);
 
-      const clusters = [new Cluster({ markers })];
-
-      markerClusterer["clusters"] = clusters;
+      markerClusterer["clusters"] = [new Cluster({ markers })];
       markerClusterer["renderClusters"]();
 
       expect(MarkerUtils.setMap).toHaveBeenCalledWith(marker1, null);

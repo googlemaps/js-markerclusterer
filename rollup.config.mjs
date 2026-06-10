@@ -31,7 +31,7 @@ export default [
   {
     input: "src/index.ts",
     plugins: [
-      typescript({ tsconfig: "./tsconfig.json" }),
+      typescript({ tsconfig: "./tsconfig.build.json" }),
       commonjs(),
       nodeResolve(),
       babel(babelOptions),
@@ -55,7 +55,7 @@ export default [
   {
     input: "src/index.ts",
     plugins: [
-      typescript({ tsconfig: "./tsconfig.json" }),
+      typescript({ tsconfig: "./tsconfig.build.json" }),
       commonjs(),
       nodeResolve(),
       babel(babelOptions),
@@ -69,7 +69,7 @@ export default [
   {
     input: "src/index.ts",
     external: ["supercluster", "fast-equals"],
-    plugins: [typescript({ tsconfig: "./tsconfig.json" })],
+    plugins: [typescript({ tsconfig: "./tsconfig.build.json" })],
     output: {
       file: "dist/index.esm.mjs",
       format: "esm",

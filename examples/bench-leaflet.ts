@@ -18,27 +18,32 @@ import points from "./realworld.json";
 
 declare let L: any; /* eslint-disable-line @typescript-eslint/no-explicit-any */
 
-const tiles = L.tileLayer("//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  maxZoom: 18,
-  attribution:
-    '&copy; <a href="//openstreetmap.org/copyright">OpenStreetMap</a> contributors, Points &copy 2012 LINZ',
-});
+async function main() {
+  const tiles = L.tileLayer("//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 18,
+    // prettier-ignore
+    attribution:
+      "&copy; <a href=\"//openstreetmap.org/copyright\">OpenStreetMap</a> contributors, Points &copy 2012 LINZ",
+  });
 
-const map = L.map("map", {
-  center: L.latLng(-37.89, 175.46),
-  zoom: 8,
-  layers: [tiles],
-});
+  const map = L.map("map", {
+    center: L.latLng(-37.89, 175.46),
+    zoom: 8,
+    layers: [tiles],
+  });
 
-const mcg = L.markerClusterGroup({
-  chunkedLoading: true,
-  spiderfyOnMaxZoom: false,
-});
+  const mcg = L.markerClusterGroup({
+    chunkedLoading: true,
+    spiderfyOnMaxZoom: false,
+  });
 
-for (const [lat, lng, title] of points as [number, number, string][]) {
-  const marker = L.marker(new L.LatLng(lat, lng), { title });
-  marker.bindPopup(title);
-  mcg.addLayer(marker);
+  for (const [lat, lng, title] of points as [number, number, string][]) {
+    const marker = L.marker(new L.LatLng(lat, lng), { title });
+    marker.bindPopup(title);
+    mcg.addLayer(marker);
+  }
+
+  map.addLayer(mcg);
 }
 
-map.addLayer(mcg);
+main().catch((err) => console.error(err));
