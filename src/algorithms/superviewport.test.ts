@@ -15,20 +15,21 @@
  */
 
 import { SuperClusterViewportAlgorithm } from "./superviewport";
-import { initialize, MapCanvasProjection } from "@googlemaps/jest-mocks";
+import {
+  initializeMocks,
+  testMarkerTypes,
+  setupMapBounds,
+} from "../test-helpers";
+import { MapCanvasProjection } from "@googlemaps/jest-mocks";
 import { Marker } from "../marker-utils";
 import { ClusterFeature } from "supercluster";
 import { Cluster } from "../cluster";
 
-initialize();
-const markerClasses = [
-  google.maps.Marker,
-  google.maps.marker.AdvancedMarkerElement,
-];
+initializeMocks();
 
-describe.each(markerClasses)(
-  "SuperCluster works with legacy and Advanced Markers",
-  (markerClass) => {
+describe.each(testMarkerTypes)(
+  "SuperClusterViewportAlgorithm works with %s",
+  (_, markerClass) => {
     let map: google.maps.Map;
     let mapCanvasProjection: MapCanvasProjection;
 
@@ -84,25 +85,7 @@ describe.each(markerClasses)(
       const superCluster = new SuperClusterViewportAlgorithm({});
       map.getZoom = jest.fn().mockReturnValue(0);
 
-      const northEast = {
-        lat: jest.fn().mockReturnValue(-3),
-        lng: jest.fn().mockReturnValue(34),
-      };
-      const southWest = {
-        lat: jest.fn().mockReturnValue(29),
-        lng: jest.fn().mockReturnValue(103),
-      };
-
-      map.getBounds = jest.fn().mockReturnValue({
-        toJSON: () => ({
-          west: -180,
-          south: -90,
-          east: 180,
-          north: 90,
-        }),
-        getNorthEast: jest.fn().mockReturnValue(northEast),
-        getSouthWest: jest.fn().mockReturnValue(southWest),
-      });
+      setupMapBounds(map, { west: 103, south: 29, east: 34, north: -3 });
 
       const { clusters } = superCluster.calculate({
         markers,
@@ -169,18 +152,7 @@ describe.each(markerClasses)(
 
       map.getZoom = jest.fn().mockReturnValue(superCluster["state"].zoom + 1);
 
-      const northEast = {
-        lat: jest.fn().mockReturnValue(0),
-        lng: jest.fn().mockReturnValue(0),
-      };
-      const southWest = {
-        lat: jest.fn().mockReturnValue(0),
-        lng: jest.fn().mockReturnValue(0),
-      };
-      map.getBounds = jest.fn().mockReturnValue({
-        getNorthEast: jest.fn().mockReturnValue(northEast),
-        getSouthWest: jest.fn().mockReturnValue(southWest),
-      });
+      setupMapBounds(map, { west: 0, south: 0, east: 0, north: 0 });
 
       const { clusters, changed } = superCluster.calculate({
         markers,
@@ -215,19 +187,7 @@ describe.each(markerClasses)(
     test("should round fractional zoom", () => {
       const markers: Marker[] = [new markerClass(), new markerClass()];
 
-      const northEast = {
-        lat: jest.fn().mockReturnValue(-3),
-        lng: jest.fn().mockReturnValue(34),
-      };
-      const southWest = {
-        lat: jest.fn().mockReturnValue(29),
-        lng: jest.fn().mockReturnValue(103),
-      };
-
-      map.getBounds = jest.fn().mockReturnValue({
-        getNorthEast: jest.fn().mockReturnValue(northEast),
-        getSouthWest: jest.fn().mockReturnValue(southWest),
-      });
+      setupMapBounds(map, { west: 103, south: 29, east: 34, north: -3 });
 
       const superCluster = new SuperClusterViewportAlgorithm({});
       superCluster["superCluster"].getClusters = jest.fn().mockReturnValue([]);
@@ -258,19 +218,7 @@ describe.each(markerClasses)(
 
       map.getZoom = jest.fn().mockReturnValue(10);
 
-      const initialNorthEast = {
-        lat: jest.fn().mockReturnValue(10),
-        lng: jest.fn().mockReturnValue(10),
-      };
-      const initialSouthWest = {
-        lat: jest.fn().mockReturnValue(0),
-        lng: jest.fn().mockReturnValue(0),
-      };
-      const initialBounds = {
-        getNorthEast: jest.fn().mockReturnValue(initialNorthEast),
-        getSouthWest: jest.fn().mockReturnValue(initialSouthWest),
-      };
-      map.getBounds = jest.fn().mockReturnValue(initialBounds);
+      setupMapBounds(map, { west: 0, south: 0, east: 10, north: 10 });
 
       const algorithm = new SuperClusterViewportAlgorithm({
         viewportPadding: 60,
@@ -293,19 +241,7 @@ describe.each(markerClasses)(
 
       expect(firstResult.changed).toBeTruthy();
 
-      const newNorthEast = {
-        lat: jest.fn().mockReturnValue(15),
-        lng: jest.fn().mockReturnValue(15),
-      };
-      const newSouthWest = {
-        lat: jest.fn().mockReturnValue(5),
-        lng: jest.fn().mockReturnValue(5),
-      };
-      const newBounds = {
-        getNorthEast: jest.fn().mockReturnValue(newNorthEast),
-        getSouthWest: jest.fn().mockReturnValue(newSouthWest),
-      };
-      map.getBounds = jest.fn().mockReturnValue(newBounds);
+      setupMapBounds(map, { west: 5, south: 5, east: 15, north: 15 });
 
       const secondResult = algorithm.calculate({
         markers,
@@ -321,12 +257,7 @@ describe.each(markerClasses)(
       const markers: Marker[] = [new markerClass(), new markerClass()];
 
       map.getZoom = jest.fn().mockReturnValue(10);
-      map.getBounds = jest.fn().mockReturnValue({
-        getNorthEast: jest
-          .fn()
-          .mockReturnValue({ lat: () => 10, lng: () => 10 }),
-        getSouthWest: jest.fn().mockReturnValue({ lat: () => 0, lng: () => 0 }),
-      });
+      setupMapBounds(map, { west: 0, south: 0, east: 10, north: 10 });
 
       const algorithm = new SuperClusterViewportAlgorithm({});
 
@@ -392,20 +323,7 @@ describe.each(markerClasses)(
 
       map.getZoom = jest.fn().mockReturnValue(10);
 
-      const northEast = {
-        lat: jest.fn().mockReturnValue(10),
-        lng: jest.fn().mockReturnValue(20),
-      };
-      const southWest = {
-        lat: jest.fn().mockReturnValue(0),
-        lng: jest.fn().mockReturnValue(10),
-      };
-
-      const bounds = {
-        getNorthEast: jest.fn().mockReturnValue(northEast),
-        getSouthWest: jest.fn().mockReturnValue(southWest),
-      };
-      map.getBounds = jest.fn().mockReturnValue(bounds);
+      setupMapBounds(map, { west: 10, south: 0, east: 20, north: 10 });
 
       const algorithm = new SuperClusterViewportAlgorithm({
         viewportPadding: 60,

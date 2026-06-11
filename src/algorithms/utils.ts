@@ -159,8 +159,8 @@ export const pixelBoundsToLatLngBounds = (
 };
 
 export const areClustersEqual = (
-  clustersA: Cluster[],
-  clustersB: Cluster[]
+  clustersA?: Cluster[],
+  clustersB?: Cluster[]
 ) => {
   if (!clustersA || !clustersB) return clustersA === clustersB;
   if (clustersA.length !== clustersB.length) return false;
@@ -180,7 +180,7 @@ export const areClustersEqual = (
   return true;
 };
 
-export const areMarkersEqual = (markersA: Marker[], markersB: Marker[]) => {
+export const areMarkersEqual = (markersA?: Marker[], markersB?: Marker[]) => {
   if (!markersA || !markersB) return markersA === markersB;
   if (markersA.length !== markersB.length) return false;
 

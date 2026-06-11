@@ -45,8 +45,8 @@ export interface SuperClusterViewportState {
  */
 export class SuperClusterViewportAlgorithm extends AbstractViewportAlgorithm {
   protected superCluster: SuperCluster;
-  protected markers: Marker[] = [];
-  protected clusters: Cluster[] = [];
+  protected markers?: Marker[];
+  protected clusters?: Cluster[];
   protected state: SuperClusterViewportState;
 
   constructor({

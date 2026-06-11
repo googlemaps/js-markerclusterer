@@ -15,21 +15,17 @@
  */
 
 import { MarkerUtils } from "./marker-utils";
-import { initialize } from "@googlemaps/jest-mocks";
+import { initializeMocks, testMarkerTypes } from "./test-helpers";
 
-initialize();
-const markerClasses = [
-  google.maps.Marker,
-  google.maps.marker.AdvancedMarkerElement,
-];
+initializeMocks();
 
 beforeEach(() => {
-  initialize();
+  initializeMocks();
 });
 
-describe.each(markerClasses)(
-  "MarkerUtils works with legacy and Advanced Markers",
-  (markerClass) => {
+describe.each(testMarkerTypes)(
+  "MarkerUtils works with %s",
+  (_, markerClass) => {
     let map: google.maps.Map;
 
     beforeEach(() => {

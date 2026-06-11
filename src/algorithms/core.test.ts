@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-import { initialize } from "@googlemaps/jest-mocks";
+import { initializeMocks, testMarkerTypes } from "../test-helpers";
 import { noop } from "./core";
 
-initialize();
-const markerClasses = [
-  google.maps.Marker,
-  google.maps.marker.AdvancedMarkerElement,
-];
+initializeMocks();
 
-describe.each(markerClasses)(
-  "Core works with legacy and Advanced Markers",
-  (markerClass) => {
-    test("noop should return equivalent number of clusters", () => {
-      expect(noop([]).length).toBe(0);
-      expect(noop([new markerClass({}), new markerClass({})]).length).toBe(2);
-    });
-  }
-);
+describe.each(testMarkerTypes)("Core works with %s", (_, markerClass) => {
+  test("noop should return equivalent number of clusters", () => {
+    expect(noop([]).length).toBe(0);
+    expect(noop([new markerClass({}), new markerClass({})]).length).toBe(2);
+  });
+});
