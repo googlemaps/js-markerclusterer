@@ -15,17 +15,14 @@
  */
 
 import { GridAlgorithm } from "./grid";
-import { initialize, MapCanvasProjection } from "@googlemaps/jest-mocks";
+import { initializeMocks, testMarkerTypes } from "../test-helpers";
+import { MapCanvasProjection } from "@googlemaps/jest-mocks";
 
-initialize();
-const markers = [
-  new google.maps.Marker(),
-  new google.maps.marker.AdvancedMarkerElement(),
-];
+initializeMocks();
 
-describe.each(markers)(
-  "Grid works with legacy and Advanced Markers",
-  (marker) => {
+describe.each(testMarkerTypes)(
+  "GridAlgorithm works with %s",
+  (_, markerClass) => {
     let map: google.maps.Map;
 
     beforeEach(() => {
@@ -34,7 +31,7 @@ describe.each(markers)(
 
     test("calculate should return changed: true for first call when zoom > max zoom", () => {
       const mapCanvasProjection = new MapCanvasProjection();
-      const markers = [marker];
+      const markers = [new markerClass()];
 
       const grid = new GridAlgorithm({ maxZoom: 16 });
       grid["noop"] = jest.fn();
@@ -62,7 +59,7 @@ describe.each(markers)(
     test("calculate should return changed: false when zoom doesn't change", () => {
       const mapCanvasProjection =
         jest.fn() as unknown as google.maps.MapCanvasProjection;
-      const markers = [marker];
+      const markers = [new markerClass()];
 
       const grid = new GridAlgorithm({ maxZoom: 16 });
       grid["noop"] = jest.fn();
@@ -89,7 +86,7 @@ describe.each(markers)(
     test("calculate should return changed: false for next calls at or above max zoom, even if zoom changed", () => {
       const mapCanvasProjection =
         jest.fn() as unknown as google.maps.MapCanvasProjection;
-      const markers = [marker];
+      const markers = [new markerClass()];
 
       const grid = new GridAlgorithm({ maxZoom: 16 });
       grid["noop"] = jest.fn();

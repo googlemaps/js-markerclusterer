@@ -24,8 +24,7 @@ import { SuperClusterOptions } from "./supercluster";
 import SuperCluster, { ClusterFeature } from "supercluster";
 import { MarkerUtils, Marker } from "../marker-utils";
 import { Cluster } from "../cluster";
-import { getPaddedViewport } from "./utils";
-import { deepEqual } from "fast-equals";
+import { areClustersEqual, areMarkersEqual, getPaddedViewport } from "./utils";
 import { assertNotNull } from "../utils";
 
 export interface SuperClusterViewportOptions
@@ -46,8 +45,8 @@ export interface SuperClusterViewportState {
  */
 export class SuperClusterViewportAlgorithm extends AbstractViewportAlgorithm {
   protected superCluster: SuperCluster;
-  protected markers: Marker[] = [];
-  protected clusters: Cluster[] = [];
+  protected markers?: Marker[];
+  protected clusters?: Cluster[];
   protected state: SuperClusterViewportState;
 
   constructor({
@@ -70,15 +69,17 @@ export class SuperClusterViewportAlgorithm extends AbstractViewportAlgorithm {
   public calculate(input: AlgorithmInput): AlgorithmOutput {
     const state = this.getViewportState(input);
 
-    let changed = !deepEqual(this.state, state);
-    if (!deepEqual(input.markers, this.markers)) {
-      changed = true;
-      // TODO use proxy to avoid copy?
+    let markersChanged = false;
+
+    // recompute clusters when the marker inputs have changed
+    if (!areMarkersEqual(input.markers, this.markers)) {
+      markersChanged = true;
       this.markers = [...input.markers];
 
       const points = this.markers.map((marker) => {
         const position = MarkerUtils.getPosition(marker);
         const coordinates = [position.lng(), position.lat()];
+
         return {
           type: "Feature" as const,
           geometry: {
@@ -88,21 +89,24 @@ export class SuperClusterViewportAlgorithm extends AbstractViewportAlgorithm {
           properties: { marker },
         };
       });
+
       this.superCluster.load(points);
     }
 
     // when input is empty, return right away
     if (input.markers.length === 0) {
       this.clusters = [];
-      return { clusters: this.clusters, changed };
+
+      return { clusters: this.clusters, changed: markersChanged };
     }
 
-    if (changed) {
-      this.clusters = this.cluster(input);
-      this.state = state;
-    }
+    const newClusters = this.cluster(input);
+    const clustersChanged = !areClustersEqual(this.clusters, newClusters);
 
-    return { clusters: this.clusters, changed };
+    this.state = state;
+    this.clusters = newClusters;
+
+    return { clusters: this.clusters, changed: clustersChanged };
   }
 
   public cluster(input: AlgorithmInput): Cluster[] {

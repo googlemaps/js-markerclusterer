@@ -15,19 +15,19 @@
  */
 
 import { SuperClusterAlgorithm } from "./supercluster";
-import { initialize } from "@googlemaps/jest-mocks";
+import {
+  initializeMocks,
+  testMarkerTypes,
+  setupMapBounds,
+} from "../test-helpers";
 import { Marker } from "../marker-utils";
 import { ClusterFeature } from "supercluster";
 
-initialize();
-const markerClasses = [
-  google.maps.Marker,
-  google.maps.marker.AdvancedMarkerElement,
-];
+initializeMocks();
 
-describe.each(markerClasses)(
-  "SuperCluster works with legacy and Advanced Markers",
-  (markerClass) => {
+describe.each(testMarkerTypes)(
+  "SuperClusterAlgorithm works with %s",
+  (_, markerClass) => {
     let map: google.maps.Map;
 
     beforeEach(() => {
@@ -62,14 +62,7 @@ describe.each(markerClasses)(
 
       const superCluster = new SuperClusterAlgorithm({});
       map.getZoom = jest.fn().mockReturnValue(0);
-      map.getBounds = jest.fn().mockReturnValue({
-        toJSON: () => ({
-          west: -180,
-          south: -90,
-          east: 180,
-          north: 90,
-        }),
-      });
+      setupMapBounds(map, { west: -180, south: -90, east: 180, north: 90 });
       const { clusters } = superCluster.calculate({
         markers,
         map,

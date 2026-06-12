@@ -16,15 +16,15 @@ module.exports = [
     ...config,
     rules: {
       ...config.rules,
-      "prettier/prettier": [
-        "error",
-        {
-          singleQuote: false,
-          trailingComma: "es5",
-        },
-      ],
+
       quotes: ["warn", "double"],
       eqeqeq: ["error", "always"],
     },
   })),
+  {
+    files: ["**/*.test.ts"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
 ];
