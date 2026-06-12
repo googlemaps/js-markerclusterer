@@ -1443,32 +1443,13 @@ const MSG_IMPORT_LIBRARY_EXISTS = (options) => `The google.maps.importLibrary() 
     `@googlemaps/js-api-loader will use the existing function instead of ` +
     `overwriting it. The options passed to setOptions ` +
     `(${JSON.stringify(options)}) will be ignored.`;
-const MSG_SET_OPTIONS_NOT_CALLED = "No options were set before calling importLibrary. Make sure to configure " +
-    "the loader using setOptions().";
-const MSG_SCRIPT_ELEMENT_EXISTS = "There already is a script loading the Google Maps JavaScript " +
-    "API, and no google.maps.importLibrary function is defined. " +
-    "@googlemaps/js-api-loader will proceed to bootstrap the API " +
-    "with the specified options, but the existing script might cause " +
-    "problems using the API. Make sure to remove the script " +
-    "loading the API.";
-const MSG_API_KEY_USED = "The 'apiKey' parameter was used in setOptions(), but 'key' is the correct " +
-    "parameter name. Please update your configuration.";
 const MSG_TRUSTED_TYPES_POLICY_FAILED = (policyName, error) => `Failed to create Trusted Types policy "${policyName}": ${error instanceof Error ? error.message : String(error)}.\n\n` +
     `If your Content Security Policy uses "require-trusted-types-for 'script'", ` +
     `allow this policy with "trusted-types ${policyName} google-maps-api-loader google-maps-api#html lit-html". ` +
     `The "google-maps-api-loader", "lit-html", and "google-maps-api#html" policies are required for full Maps JavaScript API execution. ` +
     `Falling back to a string script URL.`;
-const __DEV__$1 = process.env.NODE_ENV !== 'production';
-const logDevWarning = __DEV__$1
-    ? (message) => {
-        console.warn(`[@googlemaps/js-api-loader] ${message}`);
-    }
-    : () => { };
-const logDevNotice = __DEV__$1
-    ? (message) => {
-        console.info(`[@googlemaps/js-api-loader] ${message}`);
-    }
-    : () => { };
+const logDevWarning = () => { };
+const logDevNotice = () => { };
 
 /*
  * Copyright 2025 Google LLC
@@ -1540,23 +1521,6 @@ const bootstrap = bootstrapParams => {
   }));
   namespace[IMPORT_API_NAME] ? console.warn(PRODUCT_NAME + " only loads once. Ignoring:", bootstrapParams) : namespace[IMPORT_API_NAME] = (libraryName, ...args) => libraries.add(libraryName) && triggerBootstrap().then(() => namespace[IMPORT_API_NAME](libraryName, ...args));
 };
-
-/*
- * Copyright 2025 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-const __DEV__ = process.env.NODE_ENV !== "production";
 let setOptionsWasCalled_ = false;
 /**
  * Sets the options for the Maps JavaScript API.
@@ -1574,7 +1538,6 @@ function setOptions(options) {
         return;
     }
     if (options.apiKey) {
-        logDevWarning(MSG_API_KEY_USED);
         if (!options.key) {
             options.key = options.apiKey;
         }
@@ -1583,9 +1546,6 @@ function setOptions(options) {
     setOptionsWasCalled_ = true;
 }
 async function importLibrary(libraryName) {
-    if (!setOptionsWasCalled_) {
-        logDevWarning(MSG_SET_OPTIONS_NOT_CALLED);
-    }
     if (!window?.google?.maps?.importLibrary) {
         throw new Error("google.maps.importLibrary is not installed.");
     }
@@ -1599,12 +1559,6 @@ function installImportLibrary_(options) {
     const importLibraryExists = Boolean(window.google?.maps?.importLibrary);
     if (importLibraryExists) {
         logDevNotice(MSG_IMPORT_LIBRARY_EXISTS(options));
-    }
-    else if (__DEV__) {
-        const scriptEl = document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]');
-        if (scriptEl) {
-            logDevWarning(MSG_SCRIPT_ELEMENT_EXISTS);
-        }
     }
     // If the google.maps.importLibrary function already exists, bootstrap()
     // won't do anything, so we won't call it
