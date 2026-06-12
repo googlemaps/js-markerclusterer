@@ -25,6 +25,7 @@ import { nodeResolve } from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 import serve from "rollup-plugin-serve";
 import copy from "rollup-plugin-copy";
+import replace from "@rollup/plugin-replace";
 
 const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 
@@ -43,6 +44,10 @@ const getTemplate = (name) => {
 export default examples.map((name, index) => ({
   input: `examples/${name}.ts`,
   plugins: [
+    replace({
+      "process.env.NODE_ENV": JSON.stringify("production"),
+      preventAssignment: true,
+    }),
     typescript({
       tsconfig: "./tsconfig.json",
       compilerOptions: {
