@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.3](https://github.com/googlemaps/js-markerclusterer/compare/v2.6.2...v2.6.3) (2026-06-12)
+
+
+### Bug Fixes
+
+* **SuperClusterViewportAlgorithm:** skip clustering when markers list is empty ([#1130](https://github.com/googlemaps/js-markerclusterer/issues/1130)) ([4b33685](https://github.com/googlemaps/js-markerclusterer/commit/4b33685e341b204903091ac32764a89b1b49f6fc))
+
 ## [2.6.2](https://github.com/googlemaps/js-markerclusterer/compare/v2.6.1...v2.6.2) (2025-07-08)
 
 
