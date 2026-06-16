@@ -21,18 +21,17 @@ import {
   MarkerClusterer,
 } from ".";
 
-import { initialize } from "@googlemaps/jest-mocks";
+import {
+  initializeMocks,
+  testMarkerTypes as markerClasses,
+} from "./test-helpers";
 import { Marker, MarkerUtils } from "./marker-utils";
 
-initialize();
-const markerClasses = [
-  google.maps.Marker,
-  google.maps.marker.AdvancedMarkerElement,
-];
+initializeMocks();
 
 describe.each(markerClasses)(
-  "MarkerClusterer works with legacy and Advanced Markers",
-  (markerClass) => {
+  "MarkerClusterer works with %p",
+  (_, markerClass) => {
     const calculate = jest.fn().mockReturnValue({ clusters: [] });
     const algorithm = { calculate };
 
@@ -215,7 +214,12 @@ describe.each(markerClasses)(
 
       MarkerUtils.setMap = jest.fn().mockImplementation(() => null);
 
+      jest.useFakeTimers();
+
       markerClusterer["render"]();
+
+      // removal happens delayed
+      jest.advanceTimersByTime(50);
 
       expect(MarkerUtils.setMap).toHaveBeenCalledWith(cluster.marker, null);
     });

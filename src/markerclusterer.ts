@@ -215,9 +215,11 @@ export class MarkerClusterer extends OverlayViewSafe {
         this.renderClusters();
 
         // Delayed removal of the markers of the former groups.
-        requestAnimationFrame(() =>
-          groupMarkers.forEach((marker) => MarkerUtils.setMap(marker, null))
-        );
+        setTimeout(() => {
+          groupMarkers.forEach((marker) => {
+            MarkerUtils.setMap(marker, null);
+          });
+        }, 35);
       }
       google.maps.event.trigger(
         this,
