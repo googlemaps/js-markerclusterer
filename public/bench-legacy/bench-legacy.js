@@ -179,6 +179,54 @@ function assertNotNull(value, message = "assertion failed") {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const areClustersEqual = (clustersA, clustersB) => {
+    if (!clustersA || !clustersB)
+        return clustersA === clustersB;
+    if (clustersA.length !== clustersB.length)
+        return false;
+    for (let i = 0; i < clustersA.length; i++) {
+        const a = clustersA[i];
+        const b = clustersB[i];
+        if (a.markers.length !== b.markers.length)
+            return false;
+        const posA = a.position;
+        const posB = b.position;
+        if (!posA.equals(posB))
+            return false;
+    }
+    return true;
+};
+const areMarkersEqual = (markersA, markersB) => {
+    if (!markersA || !markersB)
+        return markersA === markersB;
+    if (markersA.length !== markersB.length)
+        return false;
+    for (let i = 0; i < markersA.length; i++) {
+        if (markersA[i] !== markersB[i]) {
+            const posA = MarkerUtils.getPosition(markersA[i]);
+            const posB = MarkerUtils.getPosition(markersB[i]);
+            if (!posA.equals(posB))
+                return false;
+        }
+    }
+    return true;
+};
+
+/**
+ * Copyright 2021 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 /**
  * @hidden
  */
@@ -214,21 +262,6 @@ const noop = (markers) => {
 };
 
 /**
- * Copyright 2021 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
  * A very fast JavaScript algorithm for geospatial point clustering using KD trees.
  *
  * @see https://www.npmjs.com/package/supercluster for more information on options.
@@ -243,14 +276,13 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
         this.superCluster = new Supercluster(Object.assign({ maxZoom: this.maxZoom, radius }, options));
     }
     calculate(input) {
-        let changed = false;
+        let inputsChanged = false;
         let zoom = input.map.getZoom();
         assertNotNull(zoom);
         zoom = Math.round(zoom);
         const state = { zoom: zoom };
-        if (!deepEqual(input.markers, this.markers)) {
-            changed = true;
-            // TODO use proxy to avoid copy?
+        if (!areMarkersEqual(input.markers, this.markers)) {
+            inputsChanged = true;
             this.markers = [...input.markers];
             const points = this.markers.map((marker) => {
                 const position = MarkerUtils.getPosition(marker);
@@ -263,21 +295,24 @@ class SuperClusterAlgorithm extends AbstractAlgorithm {
             });
             this.superCluster.load(points);
         }
-        if (!changed) {
+        if (!inputsChanged) {
             if (this.state.zoom <= this.maxZoom || state.zoom <= this.maxZoom) {
-                changed = !deepEqual(this.state, state);
+                inputsChanged = !deepEqual(this.state, state);
             }
         }
         this.state = state;
         // when input is empty, return right away
         if (input.markers.length === 0) {
             this.clusters = [];
-            return { clusters: this.clusters, changed };
+            return { clusters: this.clusters, changed: inputsChanged };
         }
-        if (changed) {
-            this.clusters = this.cluster(input);
+        let clustersChanged = false;
+        if (inputsChanged) {
+            const newClusters = this.cluster(input);
+            clustersChanged = !areClustersEqual(this.clusters, newClusters);
+            this.clusters = newClusters;
         }
-        return { clusters: this.clusters, changed };
+        return { clusters: this.clusters, changed: clustersChanged };
     }
     cluster({ map }) {
         const zoom = map.getZoom();
@@ -598,7 +633,11 @@ class MarkerClusterer extends OverlayViewSafe {
                 this.clusters = clusters;
                 this.renderClusters();
                 // Delayed removal of the markers of the former groups.
-                requestAnimationFrame(() => groupMarkers.forEach((marker) => MarkerUtils.setMap(marker, null)));
+                setTimeout(() => {
+                    groupMarkers.forEach((marker) => {
+                        MarkerUtils.setMap(marker, null);
+                    });
+                }, 35);
             }
             google.maps.event.trigger(this, MarkerClustererEvents.CLUSTERING_END, this);
         }

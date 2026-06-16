@@ -31,8 +31,8 @@ export interface SuperClusterViewportState {
  */
 export declare class SuperClusterViewportAlgorithm extends AbstractViewportAlgorithm {
     protected superCluster: SuperCluster;
-    protected markers: Marker[];
-    protected clusters: Cluster[];
+    protected markers?: Marker[];
+    protected clusters?: Cluster[];
     protected state: SuperClusterViewportState;
     constructor({ maxZoom, radius, viewportPadding, ...options }: SuperClusterViewportOptions);
     calculate(input: AlgorithmInput): AlgorithmOutput;

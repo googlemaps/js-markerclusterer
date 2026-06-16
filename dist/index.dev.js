@@ -2868,6 +2868,31 @@ var markerClusterer = (function (exports) {
 	  const ne = projection.fromDivPixelToLatLng(northEast);
 	  return new google.maps.LatLngBounds(sw, ne);
 	};
+	const areClustersEqual = (clustersA, clustersB) => {
+	  if (!clustersA || !clustersB) return clustersA === clustersB;
+	  if (clustersA.length !== clustersB.length) return false;
+	  for (let i = 0; i < clustersA.length; i++) {
+	    const a = clustersA[i];
+	    const b = clustersB[i];
+	    if (a.markers.length !== b.markers.length) return false;
+	    const posA = a.position;
+	    const posB = b.position;
+	    if (!posA.equals(posB)) return false;
+	  }
+	  return true;
+	};
+	const areMarkersEqual = (markersA, markersB) => {
+	  if (!markersA || !markersB) return markersA === markersB;
+	  if (markersA.length !== markersB.length) return false;
+	  for (let i = 0; i < markersA.length; i++) {
+	    if (markersA[i] !== markersB[i]) {
+	      const posA = MarkerUtils.getPosition(markersA[i]);
+	      const posB = MarkerUtils.getPosition(markersB[i]);
+	      if (!posA.equals(posB)) return false;
+	    }
+	  }
+	  return true;
+	};
 
 	/**
 	 * @hidden
@@ -4748,16 +4773,15 @@ var markerClusterer = (function (exports) {
 	    }, options));
 	  }
 	  calculate(input) {
-	    let changed = false;
+	    let inputsChanged = false;
 	    let zoom = input.map.getZoom();
 	    assertNotNull(zoom);
 	    zoom = Math.round(zoom);
 	    const state = {
 	      zoom: zoom
 	    };
-	    if (!deepEqual(input.markers, this.markers)) {
-	      changed = true;
-	      // TODO use proxy to avoid copy?
+	    if (!areMarkersEqual(input.markers, this.markers)) {
+	      inputsChanged = true;
 	      this.markers = [...input.markers];
 	      const points = this.markers.map(marker => {
 	        const position = MarkerUtils.getPosition(marker);
@@ -4775,9 +4799,9 @@ var markerClusterer = (function (exports) {
 	      });
 	      this.superCluster.load(points);
 	    }
-	    if (!changed) {
+	    if (!inputsChanged) {
 	      if (this.state.zoom <= this.maxZoom || state.zoom <= this.maxZoom) {
-	        changed = !deepEqual(this.state, state);
+	        inputsChanged = !deepEqual(this.state, state);
 	      }
 	    }
 	    this.state = state;
@@ -4786,15 +4810,18 @@ var markerClusterer = (function (exports) {
 	      this.clusters = [];
 	      return {
 	        clusters: this.clusters,
-	        changed
+	        changed: inputsChanged
 	      };
 	    }
-	    if (changed) {
-	      this.clusters = this.cluster(input);
+	    let clustersChanged = false;
+	    if (inputsChanged) {
+	      const newClusters = this.cluster(input);
+	      clustersChanged = !areClustersEqual(this.clusters, newClusters);
+	      this.clusters = newClusters;
 	    }
 	    return {
 	      clusters: this.clusters,
-	      changed
+	      changed: clustersChanged
 	    };
 	  }
 	  cluster(_ref) {
@@ -4842,8 +4869,6 @@ var markerClusterer = (function (exports) {
 	      maxZoom,
 	      viewportPadding
 	    });
-	    this.markers = [];
-	    this.clusters = [];
 	    this.superCluster = new Supercluster(Object.assign({
 	      maxZoom: this.maxZoom,
 	      radius
@@ -4855,10 +4880,10 @@ var markerClusterer = (function (exports) {
 	  }
 	  calculate(input) {
 	    const state = this.getViewportState(input);
-	    let changed = !deepEqual(this.state, state);
-	    if (!deepEqual(input.markers, this.markers)) {
-	      changed = true;
-	      // TODO use proxy to avoid copy?
+	    let markersChanged = false;
+	    // recompute clusters when the marker inputs have changed
+	    if (!areMarkersEqual(input.markers, this.markers)) {
+	      markersChanged = true;
 	      this.markers = [...input.markers];
 	      const points = this.markers.map(marker => {
 	        const position = MarkerUtils.getPosition(marker);
@@ -4881,16 +4906,16 @@ var markerClusterer = (function (exports) {
 	      this.clusters = [];
 	      return {
 	        clusters: this.clusters,
-	        changed
+	        changed: markersChanged
 	      };
 	    }
-	    if (changed) {
-	      this.clusters = this.cluster(input);
-	      this.state = state;
-	    }
+	    const newClusters = this.cluster(input);
+	    const clustersChanged = !areClustersEqual(this.clusters, newClusters);
+	    this.state = state;
+	    this.clusters = newClusters;
 	    return {
 	      clusters: this.clusters,
-	      changed
+	      changed: clustersChanged
 	    };
 	  }
 	  cluster(input) {
@@ -5341,7 +5366,11 @@ var markerClusterer = (function (exports) {
 	        this.clusters = clusters;
 	        this.renderClusters();
 	        // Delayed removal of the markers of the former groups.
-	        requestAnimationFrame(() => groupMarkers.forEach(marker => MarkerUtils.setMap(marker, null)));
+	        setTimeout(() => {
+	          groupMarkers.forEach(marker => {
+	            MarkerUtils.setMap(marker, null);
+	          });
+	        }, 35);
 	      }
 	      google.maps.event.trigger(this, exports.MarkerClustererEvents.CLUSTERING_END, this);
 	    }
@@ -5399,6 +5428,8 @@ var markerClusterer = (function (exports) {
 	exports.NoopAlgorithm = NoopAlgorithm;
 	exports.SuperClusterAlgorithm = SuperClusterAlgorithm;
 	exports.SuperClusterViewportAlgorithm = SuperClusterViewportAlgorithm;
+	exports.areClustersEqual = areClustersEqual;
+	exports.areMarkersEqual = areMarkersEqual;
 	exports.defaultOnClusterClickHandler = defaultOnClusterClickHandler;
 	exports.distanceBetweenPoints = distanceBetweenPoints;
 	exports.extendBoundsToPaddedViewport = extendBoundsToPaddedViewport;

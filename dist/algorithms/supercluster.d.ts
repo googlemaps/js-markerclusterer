@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { AbstractAlgorithm, AlgorithmInput, AlgorithmOutput } from "./core";
 import SuperCluster, { ClusterFeature } from "supercluster";
+import { AbstractAlgorithm, AlgorithmInput, AlgorithmOutput } from "./core";
 import { Marker } from "../marker-utils";
 import { Cluster } from "../cluster";
 export type SuperClusterOptions = SuperCluster.Options<{

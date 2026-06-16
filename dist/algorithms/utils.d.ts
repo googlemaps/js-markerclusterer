@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import { Marker } from "../marker-utils";
+import { Cluster } from "../cluster";
 /**
  * Returns the markers visible in a padded map viewport
  *
@@ -52,4 +53,6 @@ export declare const extendPixelBounds: ({ northEast, southWest }: PixelBounds, 
  * @hidden
  */
 export declare const pixelBoundsToLatLngBounds: ({ northEast, southWest }: PixelBounds, projection: google.maps.MapCanvasProjection) => google.maps.LatLngBounds;
+export declare const areClustersEqual: (clustersA?: Cluster[], clustersB?: Cluster[]) => boolean;
+export declare const areMarkersEqual: (markersA?: Marker[], markersB?: Marker[]) => boolean;
 export {};
