@@ -57,7 +57,7 @@
     "@types/d3-interpolate": "^3.0.1",
     "@types/google.maps": "^3.53.1",
     "@types/jest": "^30.0.0",
-    "@types/node": "^25.9.2",
+    "@types/node": "^26.0.0",
     "@types/supercluster": "^7.1.0",
     "core-js": "^3.6.5",
     "d3-interpolate": "^3.0.1",
