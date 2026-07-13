@@ -82,7 +82,10 @@ function createIsCircular(areItemsEqual) {
  * not enumerable and symbol properties.
  */
 function getStrictProperties(object) {
-    return getOwnPropertyNames(object).concat(getOwnPropertySymbols(object));
+    const symbols = getOwnPropertySymbols(object);
+    return symbols.length
+        ? getOwnPropertyNames(object).concat(symbols)
+        : getOwnPropertyNames(object);
 }
 /**
  * Whether the object contains the property passed as an own property.
@@ -172,7 +175,7 @@ function areMapsEqual(a, b, state) {
     if (!size) {
         return true;
     }
-    const matchedIndices = new Array(size);
+    const matchedIndices = new Uint8Array(size);
     const aIterable = a.entries();
     let aResult;
     let bResult;
@@ -183,7 +186,7 @@ function areMapsEqual(a, b, state) {
             break;
         }
         const bIterable = b.entries();
-        let hasMatch = false;
+        let hasMatch = 0;
         let matchIndex = 0;
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         while ((bResult = bIterable.next())) {
@@ -198,7 +201,7 @@ function areMapsEqual(a, b, state) {
             const bEntry = bResult.value;
             if (state.equals(aEntry[0], bEntry[0], index, matchIndex, a, b, state)
                 && state.equals(aEntry[1], bEntry[1], aEntry[0], bEntry[0], a, b, state)) {
-                hasMatch = matchedIndices[matchIndex] = true;
+                hasMatch = matchedIndices[matchIndex] = 1;
                 break;
             }
             matchIndex++;
@@ -287,7 +290,7 @@ function areSetsEqual(a, b, state) {
     if (!size) {
         return true;
     }
-    const matchedIndices = new Array(size);
+    const matchedIndices = new Uint8Array(size);
     const aIterable = a.values();
     let aResult;
     let bResult;
@@ -297,7 +300,7 @@ function areSetsEqual(a, b, state) {
             break;
         }
         const bIterable = b.values();
-        let hasMatch = false;
+        let hasMatch = 0;
         let matchIndex = 0;
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         while ((bResult = bIterable.next())) {
@@ -306,7 +309,7 @@ function areSetsEqual(a, b, state) {
             }
             if (!matchedIndices[matchIndex]
                 && state.equals(aResult.value, bResult.value, aResult.value, bResult.value, a, b, state)) {
-                hasMatch = matchedIndices[matchIndex] = true;
+                hasMatch = matchedIndices[matchIndex] = 1;
                 break;
             }
             matchIndex++;
@@ -321,8 +324,8 @@ function areSetsEqual(a, b, state) {
  * Whether the TypedArray instances are equal in value.
  */
 function areTypedArraysEqual(a, b) {
-    let index = a.byteLength;
-    if (b.byteLength !== index || a.byteOffset !== b.byteOffset) {
+    let index = a.length;
+    if (b.length !== index || a.byteOffset !== b.byteOffset) {
         return false;
     }
     while (index-- > 0) {
