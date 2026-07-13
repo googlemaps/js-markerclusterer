@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.6.3](https://github.com/googlemaps/js-markerclusterer/compare/v2.6.2...v2.6.3) (2026-07-13)
+
+
+### Bug Fixes
+
+* optimize SuperClusterViewportAlgorithm rendering and eliminate flickering ([#1016](https://github.com/googlemaps/js-markerclusterer/issues/1016)) ([884940d](https://github.com/googlemaps/js-markerclusterer/commit/884940d51c0b0d50e5eda7635e9eccaa513e8304))
+* **SuperClusterViewportAlgorithm:** skip clustering when markers list is empty ([#1130](https://github.com/googlemaps/js-markerclusterer/issues/1130)) ([4b33685](https://github.com/googlemaps/js-markerclusterer/commit/4b33685e341b204903091ac32764a89b1b49f6fc))
+
 ## [2.6.2](https://github.com/googlemaps/js-markerclusterer/compare/v2.6.1...v2.6.2) (2025-07-08)
 
 
