@@ -505,10 +505,10 @@ var markerClusterer = (function (exports) {
 	  var SHARED = '__core-js_shared__';
 	  var store = sharedStore.exports = globalThis[SHARED] || defineGlobalProperty(SHARED, {});
 	  (store.versions || (store.versions = [])).push({
-	    version: '3.49.0',
+	    version: '3.50.0',
 	    mode: IS_PURE ? 'pure' : 'global',
 	    copyright: '© 2013–2025 Denis Pushkarev (zloirock.ru), 2025–2026 CoreJS Company (core-js.io). All rights reserved.',
-	    license: 'https://github.com/zloirock/core-js/blob/v3.49.0/LICENSE',
+	    license: 'https://github.com/zloirock/core-js/blob/v3.50.0/LICENSE',
 	    source: 'https://github.com/zloirock/core-js'
 	  });
 	  return sharedStore.exports;
@@ -520,8 +520,10 @@ var markerClusterer = (function (exports) {
 	  if (hasRequiredShared) return shared;
 	  hasRequiredShared = 1;
 	  var store = requireSharedStore();
+	  // eslint-disable-next-line es/no-object-create -- safe
+	  var create = Object.create || Object;
 	  shared = function (key, value) {
-	    return store[key] || (store[key] = value || {});
+	    return store[key] || (store[key] = value || create(null));
 	  };
 	  return shared;
 	}
@@ -1853,6 +1855,18 @@ var markerClusterer = (function (exports) {
 	  return iteratorCloseAll;
 	}
 
+	var iteratorCleanupState;
+	var hasRequiredIteratorCleanupState;
+	function requireIteratorCleanupState() {
+	  if (hasRequiredIteratorCleanupState) return iteratorCleanupState;
+	  hasRequiredIteratorCleanupState = 1;
+	  // release references held by exhausted / closed iterator helpers to allow GC of the source chain
+	  iteratorCleanupState = function (state) {
+	    state.iterator = state.next = state.nextHandler = state.mapper = state.predicate = state.inner = state.iterables = state.iters = state.openIters = state.padding = state.finishResults = state.buffer = null;
+	  };
+	  return iteratorCleanupState;
+	}
+
 	var iteratorCreateProxy;
 	var hasRequiredIteratorCreateProxy;
 	function requireIteratorCreateProxy() {
@@ -1869,6 +1883,7 @@ var markerClusterer = (function (exports) {
 	  var createIterResultObject = requireCreateIterResultObject();
 	  var iteratorClose = requireIteratorClose();
 	  var iteratorCloseAll = requireIteratorCloseAll();
+	  var cleanupState = requireIteratorCleanupState();
 	  var TO_STRING_TAG = wellKnownSymbol('toStringTag');
 	  var ITERATOR_HELPER = 'IteratorHelper';
 	  var WRAP_FOR_VALID_ITERATOR = 'WrapForValidIterator';
@@ -1887,29 +1902,34 @@ var markerClusterer = (function (exports) {
 	        if (state.done) return createIterResultObject(undefined, true);
 	        try {
 	          var result = state.nextHandler();
+	          if (state.done) cleanupState(state);
 	          return state.returnHandlerResult ? result : createIterResultObject(result, state.done);
 	        } catch (error) {
 	          state.done = true;
+	          cleanupState(state);
 	          throw error;
 	        }
 	      },
 	      'return': function () {
 	        var state = getInternalState(this);
 	        var iterator = state.iterator;
+	        var inner = state.inner;
+	        var openIters = state.openIters;
 	        var done = state.done;
 	        state.done = true;
 	        if (IS_ITERATOR) {
 	          var returnMethod = getMethod(iterator, 'return');
 	          return returnMethod ? call(returnMethod, iterator) : createIterResultObject(undefined, true);
 	        }
+	        cleanupState(state);
 	        if (done) return createIterResultObject(undefined, true);
-	        if (state.inner) try {
-	          iteratorClose(state.inner.iterator, NORMAL);
+	        if (inner) try {
+	          iteratorClose(inner.iterator, NORMAL);
 	        } catch (error) {
 	          return iteratorClose(iterator, THROW, error);
 	        }
-	        if (state.openIters) try {
-	          iteratorCloseAll(state.openIters, NORMAL);
+	        if (openIters) try {
+	          iteratorCloseAll(openIters, NORMAL);
 	        } catch (error) {
 	          if (iterator) return iteratorClose(iterator, THROW, error);
 	          throw error;
@@ -2264,7 +2284,7 @@ var markerClusterer = (function (exports) {
 	function requireIterators() {
 	  if (hasRequiredIterators) return iterators;
 	  hasRequiredIterators = 1;
-	  iterators = {};
+	  iterators = Object.create ? Object.create(null) : {};
 	  return iterators;
 	}
 
@@ -3027,92 +3047,40 @@ var markerClusterer = (function (exports) {
 	  return isArrayIteratorMethod;
 	}
 
-	var toStringTagSupport;
-	var hasRequiredToStringTagSupport;
-	function requireToStringTagSupport() {
-	  if (hasRequiredToStringTagSupport) return toStringTagSupport;
-	  hasRequiredToStringTagSupport = 1;
-	  var wellKnownSymbol = requireWellKnownSymbol();
-	  var TO_STRING_TAG = wellKnownSymbol('toStringTag');
-	  var test = {};
-	  // eslint-disable-next-line unicorn/no-immediate-mutation -- ES3 syntax limitation
-	  test[TO_STRING_TAG] = 'z';
-	  toStringTagSupport = String(test) === '[object z]';
-	  return toStringTagSupport;
-	}
-
-	var classof;
-	var hasRequiredClassof;
-	function requireClassof() {
-	  if (hasRequiredClassof) return classof;
-	  hasRequiredClassof = 1;
-	  var TO_STRING_TAG_SUPPORT = requireToStringTagSupport();
-	  var isCallable = requireIsCallable();
-	  var classofRaw = requireClassofRaw();
-	  var wellKnownSymbol = requireWellKnownSymbol();
-	  var TO_STRING_TAG = wellKnownSymbol('toStringTag');
-	  var $Object = Object;
-
-	  // ES3 wrong here
-	  var CORRECT_ARGUMENTS = classofRaw(function () {
-	    return arguments;
-	  }()) === 'Arguments';
-
-	  // fallback for IE11 Script Access Denied error
-	  var tryGet = function (it, key) {
-	    try {
-	      return it[key];
-	    } catch (error) {/* empty */}
-	  };
-
-	  // getting tag from ES6+ `Object.prototype.toString`
-	  classof = TO_STRING_TAG_SUPPORT ? classofRaw : function (it) {
-	    var O, tag, result;
-	    return it === undefined ? 'Undefined' : it === null ? 'Null'
-	    // @@toStringTag case
-	    : typeof (tag = tryGet(O = $Object(it), TO_STRING_TAG)) == 'string' ? tag
-	    // builtinTag case
-	    : CORRECT_ARGUMENTS ? classofRaw(O)
-	    // ES3 arguments fallback
-	    : (result = classofRaw(O)) === 'Object' && isCallable(O.callee) ? 'Arguments' : result;
-	  };
-	  return classof;
-	}
-
-	var getIteratorMethod;
-	var hasRequiredGetIteratorMethod;
-	function requireGetIteratorMethod() {
-	  if (hasRequiredGetIteratorMethod) return getIteratorMethod;
-	  hasRequiredGetIteratorMethod = 1;
-	  var classof = requireClassof();
-	  var getMethod = requireGetMethod();
+	var getIteratorMethodInternal;
+	var hasRequiredGetIteratorMethodInternal;
+	function requireGetIteratorMethodInternal() {
+	  if (hasRequiredGetIteratorMethodInternal) return getIteratorMethodInternal;
+	  hasRequiredGetIteratorMethodInternal = 1;
+	  var classof = requireClassofRaw();
 	  var isNullOrUndefined = requireIsNullOrUndefined();
-	  var Iterators = requireIterators();
+	  var getMethod = requireGetMethod();
 	  var wellKnownSymbol = requireWellKnownSymbol();
 	  var ITERATOR = wellKnownSymbol('iterator');
-	  getIteratorMethod = function (it) {
-	    if (!isNullOrUndefined(it)) return getMethod(it, ITERATOR) || getMethod(it, '@@iterator') || Iterators[classof(it)];
+	  var ArrayPrototype = Array.prototype;
+	  getIteratorMethodInternal = function (it) {
+	    if (!isNullOrUndefined(it)) return getMethod(it, ITERATOR) || getMethod(it, '@@iterator') || (classof(it) === 'Arguments' ? ArrayPrototype[ITERATOR] : undefined);
 	  };
-	  return getIteratorMethod;
+	  return getIteratorMethodInternal;
 	}
 
-	var getIterator;
-	var hasRequiredGetIterator;
-	function requireGetIterator() {
-	  if (hasRequiredGetIterator) return getIterator;
-	  hasRequiredGetIterator = 1;
+	var getIteratorInternal;
+	var hasRequiredGetIteratorInternal;
+	function requireGetIteratorInternal() {
+	  if (hasRequiredGetIteratorInternal) return getIteratorInternal;
+	  hasRequiredGetIteratorInternal = 1;
 	  var call = requireFunctionCall();
-	  var aCallable = requireACallable();
+	  var isCallable = requireIsCallable();
 	  var anObject = requireAnObject();
 	  var tryToString = requireTryToString();
-	  var getIteratorMethod = requireGetIteratorMethod();
+	  var getIteratorMethod = requireGetIteratorMethodInternal();
 	  var $TypeError = TypeError;
-	  getIterator = function (argument, usingIterator) {
+	  getIteratorInternal = function (argument, usingIterator) {
 	    var iteratorMethod = arguments.length < 2 ? getIteratorMethod(argument) : usingIterator;
-	    if (aCallable(iteratorMethod)) return anObject(call(iteratorMethod, argument));
+	    if (isCallable(iteratorMethod)) return anObject(call(iteratorMethod, argument));
 	    throw new $TypeError(tryToString(argument) + ' is not iterable');
 	  };
-	  return getIterator;
+	  return getIteratorInternal;
 	}
 
 	var iterate;
@@ -3127,8 +3095,8 @@ var markerClusterer = (function (exports) {
 	  var isArrayIteratorMethod = requireIsArrayIteratorMethod();
 	  var lengthOfArrayLike = requireLengthOfArrayLike();
 	  var isPrototypeOf = requireObjectIsPrototypeOf();
-	  var getIterator = requireGetIterator();
-	  var getIteratorMethod = requireGetIteratorMethod();
+	  var getIterator = requireGetIteratorInternal();
+	  var getIteratorMethod = requireGetIteratorMethodInternal();
 	  var iteratorClose = requireIteratorClose();
 	  var $TypeError = TypeError;
 	  var Result = function (stopped, result) {
