@@ -2194,460 +2194,6 @@ var markerClusterer = (function (exports) {
 
 	requireEsnext_iterator_filter();
 
-	var web_domCollections_iterator = {};
-
-	var domIterables;
-	var hasRequiredDomIterables;
-	function requireDomIterables() {
-	  if (hasRequiredDomIterables) return domIterables;
-	  hasRequiredDomIterables = 1;
-	  // iterable DOM collections
-	  // flag - `iterable` interface - 'entries', 'keys', 'values', 'forEach' methods
-	  domIterables = {
-	    CSSRuleList: 0,
-	    CSSStyleDeclaration: 0,
-	    CSSValueList: 0,
-	    ClientRectList: 0,
-	    DOMRectList: 0,
-	    DOMStringList: 0,
-	    DOMTokenList: 1,
-	    DataTransferItemList: 0,
-	    FileList: 0,
-	    HTMLAllCollection: 0,
-	    HTMLCollection: 0,
-	    HTMLFormElement: 0,
-	    HTMLSelectElement: 0,
-	    MediaList: 0,
-	    MimeTypeArray: 0,
-	    NamedNodeMap: 0,
-	    NodeList: 1,
-	    PaintRequestList: 0,
-	    Plugin: 0,
-	    PluginArray: 0,
-	    SVGLengthList: 0,
-	    SVGNumberList: 0,
-	    SVGPathSegList: 0,
-	    SVGPointList: 0,
-	    SVGStringList: 0,
-	    SVGTransformList: 0,
-	    SourceBufferList: 0,
-	    StyleSheetList: 0,
-	    TextTrackCueList: 0,
-	    TextTrackList: 0,
-	    TouchList: 0
-	  };
-	  return domIterables;
-	}
-
-	var domTokenListPrototype;
-	var hasRequiredDomTokenListPrototype;
-	function requireDomTokenListPrototype() {
-	  if (hasRequiredDomTokenListPrototype) return domTokenListPrototype;
-	  hasRequiredDomTokenListPrototype = 1;
-	  // in old WebKit versions, `element.classList` is not an instance of global `DOMTokenList`
-	  var documentCreateElement = requireDocumentCreateElement();
-	  var classList = documentCreateElement('span').classList;
-	  var DOMTokenListPrototype = classList && classList.constructor && classList.constructor.prototype;
-	  domTokenListPrototype = DOMTokenListPrototype === Object.prototype ? undefined : DOMTokenListPrototype;
-	  return domTokenListPrototype;
-	}
-
-	var addToUnscopables;
-	var hasRequiredAddToUnscopables;
-	function requireAddToUnscopables() {
-	  if (hasRequiredAddToUnscopables) return addToUnscopables;
-	  hasRequiredAddToUnscopables = 1;
-	  var wellKnownSymbol = requireWellKnownSymbol();
-	  var create = requireObjectCreate();
-	  var defineProperty = requireObjectDefineProperty().f;
-	  var UNSCOPABLES = wellKnownSymbol('unscopables');
-	  var ArrayPrototype = Array.prototype;
-
-	  // Array.prototype[@@unscopables]
-	  // https://tc39.es/ecma262/#sec-array.prototype-@@unscopables
-	  if (ArrayPrototype[UNSCOPABLES] === undefined) {
-	    defineProperty(ArrayPrototype, UNSCOPABLES, {
-	      configurable: true,
-	      value: create(null)
-	    });
-	  }
-
-	  // add a key to Array.prototype[@@unscopables]
-	  addToUnscopables = function (key) {
-	    ArrayPrototype[UNSCOPABLES][key] = true;
-	  };
-	  return addToUnscopables;
-	}
-
-	var iterators;
-	var hasRequiredIterators;
-	function requireIterators() {
-	  if (hasRequiredIterators) return iterators;
-	  hasRequiredIterators = 1;
-	  iterators = Object.create ? Object.create(null) : {};
-	  return iterators;
-	}
-
-	var setToStringTag;
-	var hasRequiredSetToStringTag;
-	function requireSetToStringTag() {
-	  if (hasRequiredSetToStringTag) return setToStringTag;
-	  hasRequiredSetToStringTag = 1;
-	  var defineProperty = requireObjectDefineProperty().f;
-	  var hasOwn = requireHasOwnProperty();
-	  var wellKnownSymbol = requireWellKnownSymbol();
-	  var TO_STRING_TAG = wellKnownSymbol('toStringTag');
-	  setToStringTag = function (target, TAG, STATIC) {
-	    if (target && !STATIC) target = target.prototype;
-	    if (target && !hasOwn(target, TO_STRING_TAG)) {
-	      defineProperty(target, TO_STRING_TAG, {
-	        configurable: true,
-	        value: TAG
-	      });
-	    }
-	  };
-	  return setToStringTag;
-	}
-
-	var iteratorCreateConstructor;
-	var hasRequiredIteratorCreateConstructor;
-	function requireIteratorCreateConstructor() {
-	  if (hasRequiredIteratorCreateConstructor) return iteratorCreateConstructor;
-	  hasRequiredIteratorCreateConstructor = 1;
-	  var IteratorPrototype = requireIteratorsCore().IteratorPrototype;
-	  var create = requireObjectCreate();
-	  var createPropertyDescriptor = requireCreatePropertyDescriptor();
-	  var setToStringTag = requireSetToStringTag();
-	  var Iterators = requireIterators();
-	  var returnThis = function () {
-	    return this;
-	  };
-	  iteratorCreateConstructor = function (IteratorConstructor, NAME, next, ENUMERABLE_NEXT) {
-	    var TO_STRING_TAG = NAME + ' Iterator';
-	    IteratorConstructor.prototype = create(IteratorPrototype, {
-	      next: createPropertyDescriptor(+!ENUMERABLE_NEXT, next)
-	    });
-	    setToStringTag(IteratorConstructor, TO_STRING_TAG, false, true);
-	    Iterators[TO_STRING_TAG] = returnThis;
-	    return IteratorConstructor;
-	  };
-	  return iteratorCreateConstructor;
-	}
-
-	var functionUncurryThisAccessor;
-	var hasRequiredFunctionUncurryThisAccessor;
-	function requireFunctionUncurryThisAccessor() {
-	  if (hasRequiredFunctionUncurryThisAccessor) return functionUncurryThisAccessor;
-	  hasRequiredFunctionUncurryThisAccessor = 1;
-	  var uncurryThis = requireFunctionUncurryThis();
-	  var aCallable = requireACallable();
-	  functionUncurryThisAccessor = function (object, key, method) {
-	    try {
-	      // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
-	      return uncurryThis(aCallable(Object.getOwnPropertyDescriptor(object, key)[method]));
-	    } catch (error) {/* empty */}
-	  };
-	  return functionUncurryThisAccessor;
-	}
-
-	var isPossiblePrototype;
-	var hasRequiredIsPossiblePrototype;
-	function requireIsPossiblePrototype() {
-	  if (hasRequiredIsPossiblePrototype) return isPossiblePrototype;
-	  hasRequiredIsPossiblePrototype = 1;
-	  var isObject = requireIsObject();
-	  isPossiblePrototype = function (argument) {
-	    return isObject(argument) || argument === null;
-	  };
-	  return isPossiblePrototype;
-	}
-
-	var aPossiblePrototype;
-	var hasRequiredAPossiblePrototype;
-	function requireAPossiblePrototype() {
-	  if (hasRequiredAPossiblePrototype) return aPossiblePrototype;
-	  hasRequiredAPossiblePrototype = 1;
-	  var isPossiblePrototype = requireIsPossiblePrototype();
-	  var $String = String;
-	  var $TypeError = TypeError;
-	  aPossiblePrototype = function (argument) {
-	    if (isPossiblePrototype(argument)) return argument;
-	    throw new $TypeError("Can't set " + $String(argument) + ' as a prototype');
-	  };
-	  return aPossiblePrototype;
-	}
-
-	var objectSetPrototypeOf;
-	var hasRequiredObjectSetPrototypeOf;
-	function requireObjectSetPrototypeOf() {
-	  if (hasRequiredObjectSetPrototypeOf) return objectSetPrototypeOf;
-	  hasRequiredObjectSetPrototypeOf = 1;
-	  /* eslint-disable no-proto -- safe */
-	  var uncurryThisAccessor = requireFunctionUncurryThisAccessor();
-	  var isObject = requireIsObject();
-	  var requireObjectCoercible = requireRequireObjectCoercible();
-	  var aPossiblePrototype = requireAPossiblePrototype();
-
-	  // `Object.setPrototypeOf` method
-	  // https://tc39.es/ecma262/#sec-object.setprototypeof
-	  // Works with __proto__ only. Old v8 can't work with null proto objects.
-	  // eslint-disable-next-line es/no-object-setprototypeof -- safe
-	  objectSetPrototypeOf = Object.setPrototypeOf || ('__proto__' in {} ? function () {
-	    var CORRECT_SETTER = false;
-	    var test = {};
-	    var setter;
-	    try {
-	      setter = uncurryThisAccessor(Object.prototype, '__proto__', 'set');
-	      setter(test, []);
-	      CORRECT_SETTER = test instanceof Array;
-	    } catch (error) {/* empty */}
-	    return function setPrototypeOf(O, proto) {
-	      requireObjectCoercible(O);
-	      aPossiblePrototype(proto);
-	      if (!isObject(O)) return O;
-	      if (CORRECT_SETTER) setter(O, proto);else O.__proto__ = proto;
-	      return O;
-	    };
-	  }() : undefined);
-	  return objectSetPrototypeOf;
-	}
-
-	var iteratorDefine;
-	var hasRequiredIteratorDefine;
-	function requireIteratorDefine() {
-	  if (hasRequiredIteratorDefine) return iteratorDefine;
-	  hasRequiredIteratorDefine = 1;
-	  var $ = require_export();
-	  var call = requireFunctionCall();
-	  var IS_PURE = requireIsPure();
-	  var FunctionName = requireFunctionName();
-	  var isCallable = requireIsCallable();
-	  var createIteratorConstructor = requireIteratorCreateConstructor();
-	  var getPrototypeOf = requireObjectGetPrototypeOf();
-	  var setPrototypeOf = requireObjectSetPrototypeOf();
-	  var setToStringTag = requireSetToStringTag();
-	  var createNonEnumerableProperty = requireCreateNonEnumerableProperty();
-	  var defineBuiltIn = requireDefineBuiltIn();
-	  var wellKnownSymbol = requireWellKnownSymbol();
-	  var Iterators = requireIterators();
-	  var IteratorsCore = requireIteratorsCore();
-	  var PROPER_FUNCTION_NAME = FunctionName.PROPER;
-	  var CONFIGURABLE_FUNCTION_NAME = FunctionName.CONFIGURABLE;
-	  var IteratorPrototype = IteratorsCore.IteratorPrototype;
-	  var BUGGY_SAFARI_ITERATORS = IteratorsCore.BUGGY_SAFARI_ITERATORS;
-	  var ITERATOR = wellKnownSymbol('iterator');
-	  var KEYS = 'keys';
-	  var VALUES = 'values';
-	  var ENTRIES = 'entries';
-	  var returnThis = function () {
-	    return this;
-	  };
-	  iteratorDefine = function (Iterable, NAME, IteratorConstructor, next, DEFAULT, IS_SET, FORCED) {
-	    createIteratorConstructor(IteratorConstructor, NAME, next);
-	    var getIterationMethod = function (KIND) {
-	      if (KIND === DEFAULT && defaultIterator) return defaultIterator;
-	      if (!BUGGY_SAFARI_ITERATORS && KIND && KIND in IterablePrototype) return IterablePrototype[KIND];
-	      switch (KIND) {
-	        case KEYS:
-	          return function keys() {
-	            return new IteratorConstructor(this, KIND);
-	          };
-	        case VALUES:
-	          return function values() {
-	            return new IteratorConstructor(this, KIND);
-	          };
-	        case ENTRIES:
-	          return function entries() {
-	            return new IteratorConstructor(this, KIND);
-	          };
-	      }
-	      return function () {
-	        return new IteratorConstructor(this);
-	      };
-	    };
-	    var TO_STRING_TAG = NAME + ' Iterator';
-	    var INCORRECT_VALUES_NAME = false;
-	    var IterablePrototype = Iterable.prototype;
-	    var nativeIterator = IterablePrototype[ITERATOR] || IterablePrototype['@@iterator'] || DEFAULT && IterablePrototype[DEFAULT];
-	    var defaultIterator = !BUGGY_SAFARI_ITERATORS && nativeIterator || getIterationMethod(DEFAULT);
-	    var anyNativeIterator = NAME === 'Array' ? IterablePrototype.entries || nativeIterator : nativeIterator;
-	    var CurrentIteratorPrototype, methods, KEY;
-
-	    // fix native
-	    if (anyNativeIterator) {
-	      CurrentIteratorPrototype = getPrototypeOf(anyNativeIterator.call(new Iterable()));
-	      if (CurrentIteratorPrototype !== Object.prototype && CurrentIteratorPrototype.next) {
-	        if (!IS_PURE && getPrototypeOf(CurrentIteratorPrototype) !== IteratorPrototype) {
-	          if (setPrototypeOf) {
-	            setPrototypeOf(CurrentIteratorPrototype, IteratorPrototype);
-	          } else if (!isCallable(CurrentIteratorPrototype[ITERATOR])) {
-	            defineBuiltIn(CurrentIteratorPrototype, ITERATOR, returnThis);
-	          }
-	        }
-	        // Set @@toStringTag to native iterators
-	        setToStringTag(CurrentIteratorPrototype, TO_STRING_TAG, true, true);
-	        if (IS_PURE) Iterators[TO_STRING_TAG] = returnThis;
-	      }
-	    }
-
-	    // fix Array.prototype.{ values, @@iterator }.name in V8 / FF
-	    if (PROPER_FUNCTION_NAME && DEFAULT === VALUES && nativeIterator && nativeIterator.name !== VALUES) {
-	      if (!IS_PURE && CONFIGURABLE_FUNCTION_NAME) {
-	        createNonEnumerableProperty(IterablePrototype, 'name', VALUES);
-	      } else {
-	        INCORRECT_VALUES_NAME = true;
-	        defaultIterator = function values() {
-	          return call(nativeIterator, this);
-	        };
-	      }
-	    }
-
-	    // export additional methods
-	    if (DEFAULT) {
-	      methods = {
-	        values: getIterationMethod(VALUES),
-	        keys: IS_SET ? defaultIterator : getIterationMethod(KEYS),
-	        entries: getIterationMethod(ENTRIES)
-	      };
-	      if (FORCED) for (KEY in methods) {
-	        if (BUGGY_SAFARI_ITERATORS || INCORRECT_VALUES_NAME || !(KEY in IterablePrototype)) {
-	          defineBuiltIn(IterablePrototype, KEY, methods[KEY]);
-	        }
-	      } else $({
-	        target: NAME,
-	        proto: true,
-	        forced: BUGGY_SAFARI_ITERATORS || INCORRECT_VALUES_NAME
-	      }, methods);
-	    }
-
-	    // define iterator
-	    if ((!IS_PURE || FORCED) && IterablePrototype[ITERATOR] !== defaultIterator) {
-	      defineBuiltIn(IterablePrototype, ITERATOR, defaultIterator, {
-	        name: DEFAULT
-	      });
-	    }
-	    Iterators[NAME] = defaultIterator;
-	    return methods;
-	  };
-	  return iteratorDefine;
-	}
-
-	var es_array_iterator;
-	var hasRequiredEs_array_iterator;
-	function requireEs_array_iterator() {
-	  if (hasRequiredEs_array_iterator) return es_array_iterator;
-	  hasRequiredEs_array_iterator = 1;
-	  var toIndexedObject = requireToIndexedObject();
-	  var addToUnscopables = requireAddToUnscopables();
-	  var Iterators = requireIterators();
-	  var InternalStateModule = requireInternalState();
-	  var defineProperty = requireObjectDefineProperty().f;
-	  var defineIterator = requireIteratorDefine();
-	  var createIterResultObject = requireCreateIterResultObject();
-	  var IS_PURE = requireIsPure();
-	  var DESCRIPTORS = requireDescriptors();
-	  var ARRAY_ITERATOR = 'Array Iterator';
-	  var setInternalState = InternalStateModule.set;
-	  var getInternalState = InternalStateModule.getterFor(ARRAY_ITERATOR);
-
-	  // `Array.prototype.entries` method
-	  // https://tc39.es/ecma262/#sec-array.prototype.entries
-	  // `Array.prototype.keys` method
-	  // https://tc39.es/ecma262/#sec-array.prototype.keys
-	  // `Array.prototype.values` method
-	  // https://tc39.es/ecma262/#sec-array.prototype.values
-	  // `Array.prototype[@@iterator]` method
-	  // https://tc39.es/ecma262/#sec-array.prototype-@@iterator
-	  // `CreateArrayIterator` internal method
-	  // https://tc39.es/ecma262/#sec-createarrayiterator
-	  es_array_iterator = defineIterator(Array, 'Array', function (iterated, kind) {
-	    setInternalState(this, {
-	      type: ARRAY_ITERATOR,
-	      target: toIndexedObject(iterated),
-	      // target
-	      index: 0,
-	      // next index
-	      kind: kind // kind
-	    });
-	    // `%ArrayIteratorPrototype%.next` method
-	    // https://tc39.es/ecma262/#sec-%arrayiteratorprototype%.next
-	  }, function () {
-	    var state = getInternalState(this);
-	    var target = state.target;
-	    var index = state.index++;
-	    if (!target || index >= target.length) {
-	      state.target = null;
-	      return createIterResultObject(undefined, true);
-	    }
-	    switch (state.kind) {
-	      case 'keys':
-	        return createIterResultObject(index, false);
-	      case 'values':
-	        return createIterResultObject(target[index], false);
-	    }
-	    return createIterResultObject([index, target[index]], false);
-	  }, 'values');
-
-	  // argumentsList[@@iterator] is %ArrayProto_values%
-	  // https://tc39.es/ecma262/#sec-createunmappedargumentsobject
-	  // https://tc39.es/ecma262/#sec-createmappedargumentsobject
-	  var values = Iterators.Arguments = Iterators.Array;
-
-	  // https://tc39.es/ecma262/#sec-array.prototype-@@unscopables
-	  addToUnscopables('keys');
-	  addToUnscopables('values');
-	  addToUnscopables('entries');
-
-	  // V8 ~ Chrome 45- bug
-	  if (!IS_PURE && DESCRIPTORS && values.name !== 'values') try {
-	    defineProperty(values, 'name', {
-	      value: 'values'
-	    });
-	  } catch (error) {/* empty */}
-	  return es_array_iterator;
-	}
-
-	var hasRequiredWeb_domCollections_iterator;
-	function requireWeb_domCollections_iterator() {
-	  if (hasRequiredWeb_domCollections_iterator) return web_domCollections_iterator;
-	  hasRequiredWeb_domCollections_iterator = 1;
-	  var globalThis = requireGlobalThis();
-	  var DOMIterables = requireDomIterables();
-	  var DOMTokenListPrototype = requireDomTokenListPrototype();
-	  var ArrayIteratorMethods = requireEs_array_iterator();
-	  var createNonEnumerableProperty = requireCreateNonEnumerableProperty();
-	  var setToStringTag = requireSetToStringTag();
-	  var wellKnownSymbol = requireWellKnownSymbol();
-	  var ITERATOR = wellKnownSymbol('iterator');
-	  var ArrayValues = ArrayIteratorMethods.values;
-	  var handlePrototype = function (CollectionPrototype, COLLECTION_NAME) {
-	    if (CollectionPrototype) {
-	      // some Chrome versions have non-configurable methods on DOMTokenList
-	      if (CollectionPrototype[ITERATOR] !== ArrayValues) try {
-	        createNonEnumerableProperty(CollectionPrototype, ITERATOR, ArrayValues);
-	      } catch (error) {
-	        CollectionPrototype[ITERATOR] = ArrayValues;
-	      }
-	      setToStringTag(CollectionPrototype, COLLECTION_NAME, true);
-	      if (DOMIterables[COLLECTION_NAME]) for (var METHOD_NAME in ArrayIteratorMethods) {
-	        // some Chrome versions have non-configurable methods on DOMTokenList
-	        if (CollectionPrototype[METHOD_NAME] !== ArrayIteratorMethods[METHOD_NAME]) try {
-	          createNonEnumerableProperty(CollectionPrototype, METHOD_NAME, ArrayIteratorMethods[METHOD_NAME]);
-	        } catch (error) {
-	          CollectionPrototype[METHOD_NAME] = ArrayIteratorMethods[METHOD_NAME];
-	        }
-	      }
-	    }
-	  };
-	  for (var COLLECTION_NAME in DOMIterables) {
-	    handlePrototype(globalThis[COLLECTION_NAME] && globalThis[COLLECTION_NAME].prototype, COLLECTION_NAME);
-	  }
-	  handlePrototype(DOMTokenListPrototype, 'DOMTokenList');
-	  return web_domCollections_iterator;
-	}
-
-	requireWeb_domCollections_iterator();
-
 	/**
 	 * Copyright 2023 Google LLC
 	 *
@@ -2714,9 +2260,10 @@ var markerClusterer = (function (exports) {
 	}
 
 	class Cluster {
-	  constructor(_ref) {
-	    let markers = _ref.markers,
-	      position = _ref.position;
+	  constructor({
+	    markers,
+	    position
+	  }) {
 	    this.markers = [];
 	    if (markers) this.markers = markers;
 	    if (position) {
@@ -2787,8 +2334,7 @@ var markerClusterer = (function (exports) {
 	 * @param value
 	 * @param message
 	 */
-	function assertNotNull(value) {
-	  let message = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "assertion failed";
+	function assertNotNull(value, message = "assertion failed") {
 	  if (value === null || value === undefined) {
 	    throw Error(message);
 	  }
@@ -2813,9 +2359,10 @@ var markerClusterer = (function (exports) {
 	 * Extends bounds by a number of pixels in each direction
 	 */
 	const extendBoundsToPaddedViewport = (bounds, projection, numPixels) => {
-	  const _latLngBoundsToPixelB = latLngBoundsToPixelBounds(bounds, projection),
-	    northEast = _latLngBoundsToPixelB.northEast,
-	    southWest = _latLngBoundsToPixelB.southWest;
+	  const {
+	    northEast,
+	    southWest
+	  } = latLngBoundsToPixelBounds(bounds, projection);
 	  const extendedPixelBounds = extendPixelBounds({
 	    northEast,
 	    southWest
@@ -2866,9 +2413,10 @@ var markerClusterer = (function (exports) {
 	 *
 	 * @hidden
 	 */
-	const extendPixelBounds = (_ref, numPixels) => {
-	  let northEast = _ref.northEast,
-	    southWest = _ref.southWest;
+	const extendPixelBounds = ({
+	  northEast,
+	  southWest
+	}, numPixels) => {
 	  northEast.x += numPixels;
 	  northEast.y -= numPixels;
 	  southWest.x -= numPixels;
@@ -2881,9 +2429,10 @@ var markerClusterer = (function (exports) {
 	/**
 	 * @hidden
 	 */
-	const pixelBoundsToLatLngBounds = (_ref2, projection) => {
-	  let northEast = _ref2.northEast,
-	    southWest = _ref2.southWest;
+	const pixelBoundsToLatLngBounds = ({
+	  northEast,
+	  southWest
+	}, projection) => {
 	  const sw = projection.fromDivPixelToLatLng(southWest);
 	  const ne = projection.fromDivPixelToLatLng(northEast);
 	  return new google.maps.LatLngBounds(sw, ne);
@@ -2918,9 +2467,9 @@ var markerClusterer = (function (exports) {
 	 * @hidden
 	 */
 	class AbstractAlgorithm {
-	  constructor(_ref) {
-	    let _ref$maxZoom = _ref.maxZoom,
-	      maxZoom = _ref$maxZoom === void 0 ? 16 : _ref$maxZoom;
+	  constructor({
+	    maxZoom = 16
+	  }) {
 	    this.maxZoom = maxZoom;
 	  }
 	  /**
@@ -2935,8 +2484,9 @@ var markerClusterer = (function (exports) {
 	   * }
 	   * ```
 	   */
-	  noop(_ref2) {
-	    let markers = _ref2.markers;
+	  noop({
+	    markers
+	  }) {
 	    return noop(markers);
 	  }
 	}
@@ -2948,17 +2498,19 @@ var markerClusterer = (function (exports) {
 	 */
 	class AbstractViewportAlgorithm extends AbstractAlgorithm {
 	  constructor(_a) {
-	    var _a$viewportPadding = _a.viewportPadding,
-	      viewportPadding = _a$viewportPadding === void 0 ? 60 : _a$viewportPadding,
+	    var {
+	        viewportPadding = 60
+	      } = _a,
 	      options = __rest(_a, ["viewportPadding"]);
 	    super(options);
 	    this.viewportPadding = 60;
 	    this.viewportPadding = viewportPadding;
 	  }
-	  calculate(_ref3) {
-	    let markers = _ref3.markers,
-	      map = _ref3.map,
-	      mapCanvasProjection = _ref3.mapCanvasProjection;
+	  calculate({
+	    markers,
+	    map,
+	    mapCanvasProjection
+	  }) {
 	    const zoom = map.getZoom();
 	    assertNotNull(zoom);
 	    if (zoom >= this.maxZoom) {
@@ -3028,6 +2580,15 @@ var markerClusterer = (function (exports) {
 	    };
 	  };
 	  return functionBindContext;
+	}
+
+	var iterators;
+	var hasRequiredIterators;
+	function requireIterators() {
+	  if (hasRequiredIterators) return iterators;
+	  hasRequiredIterators = 1;
+	  iterators = Object.create ? Object.create(null) : {};
+	  return iterators;
 	}
 
 	var isArrayIteratorMethod;
@@ -3834,10 +3395,10 @@ var markerClusterer = (function (exports) {
 	 */
 	class GridAlgorithm extends AbstractViewportAlgorithm {
 	  constructor(_a) {
-	    var _a$maxDistance = _a.maxDistance,
-	      maxDistance = _a$maxDistance === void 0 ? 40000 : _a$maxDistance,
-	      _a$gridSize = _a.gridSize,
-	      gridSize = _a$gridSize === void 0 ? 40 : _a$gridSize,
+	    var {
+	        maxDistance = 40000,
+	        gridSize = 40
+	      } = _a,
 	      options = __rest(_a, ["maxDistance", "gridSize"]);
 	    super(options);
 	    this.clusters = [];
@@ -3847,10 +3408,11 @@ var markerClusterer = (function (exports) {
 	    this.maxDistance = maxDistance;
 	    this.gridSize = gridSize;
 	  }
-	  calculate(_ref) {
-	    let markers = _ref.markers,
-	      map = _ref.map,
-	      mapCanvasProjection = _ref.mapCanvasProjection;
+	  calculate({
+	    markers,
+	    map,
+	    mapCanvasProjection
+	  }) {
 	    const zoom = map.getZoom();
 	    assertNotNull(zoom);
 	    const newState = {
@@ -3877,10 +3439,11 @@ var markerClusterer = (function (exports) {
 	      })
 	    };
 	  }
-	  cluster(_ref2) {
-	    let markers = _ref2.markers,
-	      map = _ref2.map,
-	      mapCanvasProjection = _ref2.mapCanvasProjection;
+	  cluster({
+	    markers,
+	    map,
+	    mapCanvasProjection
+	  }) {
 	    this.clusters = [];
 	    markers.forEach(marker => {
 	      this.addToClosestCluster(marker, map, mapCanvasProjection);
@@ -3926,10 +3489,11 @@ var markerClusterer = (function (exports) {
 	    var options = __rest(_a, []);
 	    super(options);
 	  }
-	  calculate(_ref) {
-	    let markers = _ref.markers,
-	      map = _ref.map,
-	      mapCanvasProjection = _ref.mapCanvasProjection;
+	  calculate({
+	    markers,
+	    map,
+	    mapCanvasProjection
+	  }) {
 	    return {
 	      clusters: this.cluster({
 	        markers,
@@ -3941,52 +3505,6 @@ var markerClusterer = (function (exports) {
 	  }
 	  cluster(input) {
 	    return this.noop(input);
-	  }
-	}
-
-	function _arrayLikeToArray(r, a) {
-	  (null == a || a > r.length) && (a = r.length);
-	  for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
-	  return n;
-	}
-	function _arrayWithHoles(r) {
-	  if (Array.isArray(r)) return r;
-	}
-	function _iterableToArrayLimit(r, l) {
-	  var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-	  if (null != t) {
-	    var e,
-	      n,
-	      i,
-	      u,
-	      a = [],
-	      f = true,
-	      o = false;
-	    try {
-	      if (i = (t = t.call(r)).next, 0 === l) ; else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0);
-	    } catch (r) {
-	      o = true, n = r;
-	    } finally {
-	      try {
-	        if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
-	      } finally {
-	        if (o) throw n;
-	      }
-	    }
-	    return a;
-	  }
-	}
-	function _nonIterableRest() {
-	  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-	}
-	function _slicedToArray(r, e) {
-	  return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest();
-	}
-	function _unsupportedIterableToArray(r, a) {
-	  if (r) {
-	    if ("string" == typeof r) return _arrayLikeToArray(r, a);
-	    var t = {}.toString.call(r).slice(8, -1);
-	    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0;
 	  }
 	}
 
@@ -4786,9 +4304,10 @@ var markerClusterer = (function (exports) {
 	 */
 	class SuperClusterAlgorithm extends AbstractAlgorithm {
 	  constructor(_a) {
-	    var maxZoom = _a.maxZoom,
-	      _a$radius = _a.radius,
-	      radius = _a$radius === void 0 ? 60 : _a$radius,
+	    var {
+	        maxZoom,
+	        radius = 60
+	      } = _a,
 	      options = __rest(_a, ["maxZoom", "radius"]);
 	    super({
 	      maxZoom
@@ -4855,17 +4374,19 @@ var markerClusterer = (function (exports) {
 	      changed: clustersChanged
 	    };
 	  }
-	  cluster(_ref) {
-	    let map = _ref.map;
+	  cluster({
+	    map
+	  }) {
 	    const zoom = map.getZoom();
 	    assertNotNull(zoom);
 	    return this.superCluster.getClusters([-180, -90, 180, 90], Math.round(zoom)).map(feature => this.transformCluster(feature));
 	  }
-	  transformCluster(_ref2) {
-	    let _ref2$geometry$coordi = _slicedToArray(_ref2.geometry.coordinates, 2),
-	      lng = _ref2$geometry$coordi[0],
-	      lat = _ref2$geometry$coordi[1],
-	      properties = _ref2.properties;
+	  transformCluster({
+	    geometry: {
+	      coordinates: [lng, lat]
+	    },
+	    properties
+	  }) {
 	    if (properties.cluster) {
 	      return new Cluster({
 	        markers: this.superCluster.getLeaves(properties.cluster_id, Infinity).map(leaf => leaf.properties.marker),
@@ -4890,11 +4411,11 @@ var markerClusterer = (function (exports) {
 	 */
 	class SuperClusterViewportAlgorithm extends AbstractViewportAlgorithm {
 	  constructor(_a) {
-	    var maxZoom = _a.maxZoom,
-	      _a$radius = _a.radius,
-	      radius = _a$radius === void 0 ? 60 : _a$radius,
-	      _a$viewportPadding = _a.viewportPadding,
-	      viewportPadding = _a$viewportPadding === void 0 ? 60 : _a$viewportPadding,
+	    var {
+	        maxZoom,
+	        radius = 60,
+	        viewportPadding = 60
+	      } = _a,
 	      options = __rest(_a, ["maxZoom", "radius", "viewportPadding"]);
 	    super({
 	      maxZoom,
@@ -4954,11 +4475,12 @@ var markerClusterer = (function (exports) {
 	    const state = this.getViewportState(input);
 	    return this.superCluster.getClusters(state.view, state.zoom).map(feature => this.transformCluster(feature));
 	  }
-	  transformCluster(_ref) {
-	    let _ref$geometry$coordin = _slicedToArray(_ref.geometry.coordinates, 2),
-	      lng = _ref$geometry$coordin[0],
-	      lat = _ref$geometry$coordin[1],
-	      properties = _ref.properties;
+	  transformCluster({
+	    geometry: {
+	      coordinates: [lng, lat]
+	    },
+	    properties
+	  }) {
 	    if (properties.cluster) {
 	      return new Cluster({
 	        markers: this.superCluster.getLeaves(properties.cluster_id, Infinity).map(leaf => leaf.properties.marker),
@@ -4987,6 +4509,33 @@ var markerClusterer = (function (exports) {
 	}
 
 	var es_array_includes = {};
+
+	var addToUnscopables;
+	var hasRequiredAddToUnscopables;
+	function requireAddToUnscopables() {
+	  if (hasRequiredAddToUnscopables) return addToUnscopables;
+	  hasRequiredAddToUnscopables = 1;
+	  var wellKnownSymbol = requireWellKnownSymbol();
+	  var create = requireObjectCreate();
+	  var defineProperty = requireObjectDefineProperty().f;
+	  var UNSCOPABLES = wellKnownSymbol('unscopables');
+	  var ArrayPrototype = Array.prototype;
+
+	  // Array.prototype[@@unscopables]
+	  // https://tc39.es/ecma262/#sec-array.prototype-@@unscopables
+	  if (ArrayPrototype[UNSCOPABLES] === undefined) {
+	    defineProperty(ArrayPrototype, UNSCOPABLES, {
+	      configurable: true,
+	      value: create(null)
+	    });
+	  }
+
+	  // add a key to Array.prototype[@@unscopables]
+	  addToUnscopables = function (key) {
+	    ArrayPrototype[UNSCOPABLES][key] = true;
+	  };
+	  return addToUnscopables;
+	}
 
 	var hasRequiredEs_array_includes;
 	function requireEs_array_includes() {
@@ -5182,14 +4731,20 @@ var markerClusterer = (function (exports) {
 	   * });
 	   * ```
 	   */
-	  render(_ref, stats, map) {
-	    let count = _ref.count,
-	      position = _ref.position;
+	  render({
+	    count,
+	    position
+	  }, stats, map) {
 	    // change color if this cluster has more markers than the mean cluster
 	    const color = count > Math.max(10, stats.clusters.markers.mean) ? "#ff0000" : "#0000ff";
 	    // create svg literal with fill color
-	    const svg = "<svg fill=\"".concat(color, "\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 240 240\" width=\"50\" height=\"50\">\n<circle cx=\"120\" cy=\"120\" opacity=\".6\" r=\"70\" />\n<circle cx=\"120\" cy=\"120\" opacity=\".3\" r=\"90\" />\n<circle cx=\"120\" cy=\"120\" opacity=\".2\" r=\"110\" />\n<text x=\"50%\" y=\"50%\" style=\"fill:#fff\" text-anchor=\"middle\" font-size=\"50\" dominant-baseline=\"middle\" font-family=\"roboto,arial,sans-serif\">").concat(count, "</text>\n</svg>");
-	    const title = "Cluster of ".concat(count, " markers"),
+	    const svg = `<svg fill="${color}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="50" height="50">
+<circle cx="120" cy="120" opacity=".6" r="70" />
+<circle cx="120" cy="120" opacity=".3" r="90" />
+<circle cx="120" cy="120" opacity=".2" r="110" />
+<text x="50%" y="50%" style="fill:#fff" text-anchor="middle" font-size="50" dominant-baseline="middle" font-family="roboto,arial,sans-serif">${count}</text>
+</svg>`;
+	    const title = `Cluster of ${count} markers`,
 	      // adjust zIndex to be above other markers
 	      zIndex = Number(google.maps.Marker.MAX_ZINDEX) + count;
 	    if (MarkerUtils.isAdvancedMarkerAvailable(map)) {
@@ -5211,7 +4766,7 @@ var markerClusterer = (function (exports) {
 	      zIndex,
 	      title,
 	      icon: {
-	        url: "data:image/svg+xml;base64,".concat(btoa(svg)),
+	        url: `data:image/svg+xml;base64,${btoa(svg)}`,
 	        anchor: new google.maps.Point(25, 25)
 	      }
 	    };
@@ -5280,18 +4835,14 @@ var markerClusterer = (function (exports) {
 	 *
 	 */
 	class MarkerClusterer extends OverlayViewSafe {
-	  constructor(_ref) {
-	    let map = _ref.map,
-	      _ref$markers = _ref.markers,
-	      markers = _ref$markers === void 0 ? [] : _ref$markers,
-	      _ref$algorithmOptions = _ref.algorithmOptions,
-	      algorithmOptions = _ref$algorithmOptions === void 0 ? {} : _ref$algorithmOptions,
-	      _ref$algorithm = _ref.algorithm,
-	      algorithm = _ref$algorithm === void 0 ? new SuperClusterAlgorithm(algorithmOptions) : _ref$algorithm,
-	      _ref$renderer = _ref.renderer,
-	      renderer = _ref$renderer === void 0 ? new DefaultRenderer() : _ref$renderer,
-	      _ref$onClusterClick = _ref.onClusterClick,
-	      onClusterClick = _ref$onClusterClick === void 0 ? defaultOnClusterClickHandler : _ref$onClusterClick;
+	  constructor({
+	    map,
+	    markers = [],
+	    algorithmOptions = {},
+	    algorithm = new SuperClusterAlgorithm(algorithmOptions),
+	    renderer = new DefaultRenderer(),
+	    onClusterClick = defaultOnClusterClickHandler
+	  }) {
 	    super();
 	    /** @see {@link MarkerClustererOptions.map} */
 	    this.map = null;
@@ -5358,13 +4909,14 @@ var markerClusterer = (function (exports) {
 	    const map = this.getMap();
 	    if (map instanceof google.maps.Map && map.getProjection()) {
 	      google.maps.event.trigger(this, exports.MarkerClustererEvents.CLUSTERING_BEGIN, this);
-	      const _this$algorithm$calcu = this.algorithm.calculate({
-	          markers: this.markers,
-	          map,
-	          mapCanvasProjection: this.getProjection()
-	        }),
-	        clusters = _this$algorithm$calcu.clusters,
-	        changed = _this$algorithm$calcu.changed;
+	      const {
+	        clusters,
+	        changed
+	      } = this.algorithm.calculate({
+	        markers: this.markers,
+	        map,
+	        mapCanvasProjection: this.getProjection()
+	      });
 	      // Allow algorithms to return flag on whether the clusters/markers have changed.
 	      if (changed || changed === undefined) {
 	        // Accumulate the markers of the clusters composed of a single marker.
