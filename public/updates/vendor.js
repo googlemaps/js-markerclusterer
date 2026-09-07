@@ -43,7 +43,6 @@ typeof SuppressedError === "function" ? SuppressedError : function (error, suppr
 };
 
 const { getOwnPropertyNames, getOwnPropertySymbols } = Object;
-// eslint-disable-next-line @typescript-eslint/unbound-method
 const { hasOwnProperty } = Object.prototype;
 /**
  * Combine two comparators into a single comparators.
@@ -97,6 +96,9 @@ Object.hasOwn || ((object, property) => hasOwnProperty.call(object, property));
 const PREACT_VNODE = '__v';
 const PREACT_OWNER = '__o';
 const REACT_OWNER = '_owner';
+// `Float16Array` is recent enough that it cannot be referenced unguarded, and capturing its
+// availability once keeps that detail out of the comparison itself.
+const HAS_FLOAT_16_ARRAY = typeof Float16Array !== 'undefined';
 const { getOwnPropertyDescriptor, keys } = Object;
 /**
  * Whether the values passed are equal based on a [SameValue](https://262.ecma-international.org/7.0/#sec-samevalue) basis.
@@ -160,9 +162,19 @@ function areDatesEqual(a, b) {
 }
 /**
  * Whether the errors passed are equal in value.
+ *
+ * @note
+ * `name`, `message` and `stack` are own properties but are not enumerable, so they are compared
+ * explicitly. `cause` is compared by value rather than by reference, matching how every other
+ * nested value in the comparison is treated. Own enumerable properties (which custom `Error`
+ * subclasses commonly add) are compared by composing this with the object comparator in the
+ * comparator config, so that the strict and circular variants apply to them as well.
  */
-function areErrorsEqual(a, b) {
-    return a.name === b.name && a.message === b.message && a.cause === b.cause && a.stack === b.stack;
+function areErrorsEqual(a, b, state) {
+    return (a.name === b.name
+        && a.message === b.message
+        && a.stack === b.stack
+        && state.equals(a.cause, b.cause, 'cause', 'cause', a, b, state));
 }
 /**
  * Whether the `Map`s are equal in value.
@@ -328,6 +340,19 @@ function areTypedArraysEqual(a, b) {
     if (b.length !== index || a.byteOffset !== b.byteOffset) {
         return false;
     }
+    // Only float-backed views can hold `NaN`, and the additional check needed to treat it as equal
+    // to itself measurably slows the loop, so integer views keep the plain comparison. This is
+    // hoisted out of the loop so the cost is paid once per call rather than once per element.
+    if (a instanceof Float64Array || a instanceof Float32Array || (HAS_FLOAT_16_ARRAY && a instanceof Float16Array)) {
+        while (index-- > 0) {
+            // `NaN` is the only value not equal to itself, and it is treated as equal here to match
+            // the SameValueZero semantics used for every other numeric comparison in the library.
+            if (a[index] !== b[index] && (a[index] === a[index] || b[index] === b[index])) {
+                return false;
+            }
+        }
+        return true;
+    }
     while (index-- > 0) {
         if (a[index] !== b[index]) {
             return false;
@@ -339,13 +364,45 @@ function areTypedArraysEqual(a, b) {
  * Whether the URL instances are equal in value.
  */
 function areUrlsEqual(a, b) {
-    return (a.hostname === b.hostname
-        && a.pathname === b.pathname
-        && a.protocol === b.protocol
-        && a.port === b.port
-        && a.hash === b.hash
+    // `href` is the normalized serialization of every component, so matching hrefs are equal without
+    // any further work. Only a difference in query parameter ordering can survive a mismatch here.
+    if (a.href === b.href) {
+        return true;
+    }
+    return (a.protocol === b.protocol
         && a.username === b.username
-        && a.password === b.password);
+        && a.password === b.password
+        // `host` covers both the hostname and the port.
+        && a.host === b.host
+        && a.pathname === b.pathname
+        && a.hash === b.hash
+        && areSearchParamsEqual(a.searchParams, b.searchParams));
+}
+/**
+ * Whether the search params passed are equal in value.
+ *
+ * @note
+ * Order is not significant, matching how the other unordered collections in the library are
+ * compared. Repeated keys are, so this is a comparison of multisets rather than of sets:
+ * `a=1&a=2` is equal to `a=2&a=1`, but not to `a=1&a=1`.
+ */
+function areSearchParamsEqual(a, b) {
+    const serializedA = a.toString();
+    const serializedB = b.toString();
+    // Identical serializations are equal under any ordering, and this is by far the common case, so
+    // it is worth checking before sorting anything.
+    return serializedA === serializedB || sortSearchParams(serializedA) === sortSearchParams(serializedB);
+}
+/**
+ * Reorder a serialized query string so that params holding the same pairs compare as equal
+ * regardless of the order they appear in.
+ *
+ * @note
+ * The serializer percent-encodes `&` and `=` wherever they appear inside a name or a value, so
+ * splitting on `&` recovers exactly the pairs and nothing else.
+ */
+function sortSearchParams(serialized) {
+    return serialized.split('&').sort().join('&');
 }
 function isPropertyEqual(a, b, state, property) {
     if ((property === REACT_OWNER || property === PREACT_OWNER || property === PREACT_VNODE)
@@ -355,7 +412,6 @@ function isPropertyEqual(a, b, state, property) {
     return hasOwn(b, property) && state.equals(a[property], b[property], property, property, a, b, state);
 }
 
-// eslint-disable-next-line @typescript-eslint/unbound-method
 const toString = Object.prototype.toString;
 /**
  * Create a comparator method based on the type-specific equality comparators passed.
@@ -468,7 +524,13 @@ function createEqualityComparatorConfig({ circular, createCustomConfig, strict, 
         areArraysEqual: strict ? areObjectsEqualStrict : areArraysEqual,
         areDataViewsEqual,
         areDatesEqual: areDatesEqual,
-        areErrorsEqual: areErrorsEqual,
+        // `Error` subclasses routinely carry their own enumerable properties (`status`, `code`, ...),
+        // which the error comparator alone does not see, so it is composed with the object comparator.
+        // `name` / `message` / `stack` are own but not enumerable, which is why errors need a
+        // comparator of their own rather than being treated as plain objects in the first place.
+        areErrorsEqual: strict
+            ? combineComparators(areErrorsEqual, areObjectsEqualStrict)
+            : combineComparators(areErrorsEqual, areObjectsEqual),
         areFunctionsEqual: strictEqual,
         areMapsEqual: strict ? combineComparators(areMapsEqual, areObjectsEqualStrict) : areMapsEqual,
         areNumbersEqual: sameValueEqual,
@@ -487,11 +549,15 @@ function createEqualityComparatorConfig({ circular, createCustomConfig, strict, 
     }
     if (circular) {
         const areArraysEqual = createIsCircular(config.areArraysEqual);
+        // Errors are included because comparing `cause` and own properties by value means an error
+        // that references itself would otherwise recurse without bound.
+        const areErrorsEqual = createIsCircular(config.areErrorsEqual);
         const areMapsEqual = createIsCircular(config.areMapsEqual);
         const areObjectsEqual = createIsCircular(config.areObjectsEqual);
         const areSetsEqual = createIsCircular(config.areSetsEqual);
         config = Object.assign({}, config, {
             areArraysEqual,
+            areErrorsEqual,
             areMapsEqual,
             areObjectsEqual,
             areSetsEqual,
@@ -546,13 +612,13 @@ function createIsEqual({ circular, comparator, createState, equals, strict }) {
 /**
  * Create a map of `toString()` values to their respective handlers for `tag`-based lookups.
  */
-function createSupportedComparatorMap({ areArrayBuffersEqual, areArraysEqual, areDataViewsEqual, areDatesEqual, areErrorsEqual, areFunctionsEqual, areMapsEqual, areNumbersEqual, areObjectsEqual, arePrimitiveWrappersEqual, areRegExpsEqual, areSetsEqual, areTypedArraysEqual, areUrlsEqual, }) {
+function createSupportedComparatorMap({ areArrayBuffersEqual, areArraysEqual, areDataViewsEqual, areDatesEqual, areErrorsEqual, areFunctionsEqual, areMapsEqual, areObjectsEqual, arePrimitiveWrappersEqual, areRegExpsEqual, areSetsEqual, areTypedArraysEqual, areUrlsEqual, }) {
     return {
         '[object Arguments]': areObjectsEqual,
         '[object Array]': areArraysEqual,
         '[object ArrayBuffer]': areArrayBuffersEqual,
         '[object AsyncGeneratorFunction]': areFunctionsEqual,
-        '[object BigInt]': areNumbersEqual,
+        '[object BigInt]': arePrimitiveWrappersEqual,
         '[object BigInt64Array]': areTypedArraysEqual,
         '[object BigUint64Array]': areTypedArraysEqual,
         '[object Boolean]': arePrimitiveWrappersEqual,
