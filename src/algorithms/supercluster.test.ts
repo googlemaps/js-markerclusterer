@@ -99,6 +99,35 @@ describe.each(testMarkerTypes)(
       expect(cluster.markers[0]).toBe(marker);
     });
 
+    test("should expose aggregated properties on Cluster", () => {
+      const superCluster = new SuperClusterAlgorithm({});
+      const marker: Marker = new markerClass();
+      const clusterFeature = {
+        type: "Feature",
+        geometry: { coordinates: [0, 0], type: "Point" },
+        properties: {
+          marker,
+          cluster: true,
+          cluster_id: 100,
+          point_count: 2,
+          point_count_abbreviated: 2,
+          highRiskCount: 1,
+          totalRisk: 3,
+        },
+      } as unknown as ClusterFeature<{ marker: Marker }>;
+
+      jest
+        .spyOn(superCluster["superCluster"], "getLeaves")
+        .mockImplementation(() => [clusterFeature]);
+
+      const cluster = superCluster["transformCluster"](clusterFeature);
+
+      expect(cluster.properties).toMatchObject({
+        highRiskCount: 1,
+        totalRisk: 3,
+      });
+    });
+
     test("should not cluster if zoom didn't change", () => {
       const mapCanvasProjection =
         jest.fn() as unknown as google.maps.MapCanvasProjection;
