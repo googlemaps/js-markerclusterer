@@ -127,6 +127,7 @@ export class SuperClusterAlgorithm extends AbstractAlgorithm {
           .getLeaves(properties.cluster_id, Infinity)
           .map((leaf) => leaf.properties.marker),
         position: { lat, lng },
+        properties,
       });
     }
 
