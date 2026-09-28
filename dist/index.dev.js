@@ -3180,7 +3180,7 @@ var markerClusterer = (function (exports) {
 	        // Checks are listed in order of commonality of use-case:
 	        //   1. Common complex object types (plain object, array)
 	        //   2. Common data values (date, regexp)
-	        //   3. Less-common complex object types (map, set)
+	        //   3. Less-common complex object types (map, set, null-prototype object)
 	        //   4. Less-common data values (promise, primitive wrappers)
 	        // Inherently this is both subjective and assumptive, however
 	        // when reviewing comparable libraries in the wild this order
@@ -3212,6 +3212,10 @@ var markerClusterer = (function (exports) {
 	        }
 	        if (constructor === Set) {
 	            return areSetsEqual(a, b, state);
+	        }
+	        if (constructor == null) {
+	            // Objects with a prototype of `null` are plain objects.
+	            return areObjectsEqual(a, b, state);
 	        }
 	        if (constructor === Promise) {
 	            // Avoid tag checks for promise values, since we know if they are not referentially equal
