@@ -16,18 +16,24 @@
 
 import { MarkerUtils, Marker } from "./marker-utils";
 
+export type ClusterProperties = Record<string, unknown>;
+
 export interface ClusterOptions {
   position?: google.maps.LatLng | google.maps.LatLngLiteral;
   markers?: Marker[];
+  /** Algorithm-specific properties associated with this cluster. */
+  properties?: ClusterProperties;
 }
 
 export class Cluster {
   public marker?: Marker;
   public readonly markers: Marker[] = [];
+  public readonly properties?: ClusterProperties;
   protected _position?: google.maps.LatLng;
 
-  constructor({ markers, position }: ClusterOptions) {
+  constructor({ markers, position, properties }: ClusterOptions) {
     if (markers) this.markers = markers;
+    this.properties = properties;
     if (position) {
       if (position instanceof google.maps.LatLng) {
         this._position = position;
