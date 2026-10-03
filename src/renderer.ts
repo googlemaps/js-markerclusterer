@@ -33,17 +33,63 @@ export class ClusterStats {
   };
 
   constructor(markers: Marker[], clusters: Cluster[]) {
-    this.markers = { sum: markers.length };
-    const clusterMarkerCounts = clusters.map((a) => a.count);
-    const clusterMarkerSum = clusterMarkerCounts.reduce((a, b) => a + b, 0);
+    this.markers = {
+      get sum() {
+        return markers.length;
+      },
+    };
+
+    let clusterMarkersCache: {
+      mean: number;
+      sum: number;
+      min: number;
+      max: number;
+    } | null = null;
+
+    const computeClusterStats = () => {
+      if (!clusterMarkersCache) {
+        let min = Infinity;
+        let max = -Infinity;
+        let sum = 0;
+
+        for (let i = 0; i < clusters.length; i++) {
+          const count = clusters[i].count;
+          sum += count;
+          if (count < min) {
+            min = count;
+          }
+          if (count > max) {
+            max = count;
+          }
+        }
+
+        clusterMarkersCache = {
+          mean: sum / clusters.length,
+          sum,
+          min,
+          max,
+        };
+      }
+      return clusterMarkersCache;
+    };
 
     this.clusters = {
-      count: clusters.length,
+      get count() {
+        return clusters.length;
+      },
       markers: {
-        mean: clusterMarkerSum / clusters.length,
-        sum: clusterMarkerSum,
-        min: Math.min(...clusterMarkerCounts),
-        max: Math.max(...clusterMarkerCounts),
+        get mean() {
+          return computeClusterStats().mean;
+        },
+        get sum() {
+          return computeClusterStats().sum;
+        },
+        get min() {
+          return computeClusterStats().min;
+        },
+        get max() {
+          return computeClusterStats().max;
+        },
       },
     };
   }
