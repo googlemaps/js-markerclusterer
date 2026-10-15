@@ -80,3 +80,18 @@ describe.each(testMarkerTypes)(
     });
   }
 );
+
+test.each([
+  { lat: 0, lng: 1 },
+  { lat: 1, lng: 0 },
+  { lat: 0, lng: 0 },
+])("gets an AdvancedMarker position containing zero: %p", (position) => {
+  const marker = new google.maps.marker.AdvancedMarkerElement();
+  marker.position = position;
+
+  const result = MarkerUtils.getPosition(marker);
+
+  expect(result).toBeInstanceOf(google.maps.LatLng);
+  expect(result.lat()).toBe(position.lat);
+  expect(result.lng()).toBe(position.lng);
+});
