@@ -42,8 +42,41 @@ typeof SuppressedError === "function" ? SuppressedError : function (error, suppr
     return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
 };
 
-const { getOwnPropertyNames, getOwnPropertySymbols } = Object;
-const { hasOwnProperty } = Object.prototype;
+const { getOwnPropertyDescriptor, getOwnPropertyNames, getOwnPropertySymbols } = Object;
+const { hasOwnProperty, toString: toString$1 } = Object.prototype;
+const OBJECT_TAG = '[object Object]';
+/**
+ * Whether the own properties from `end` onward are equal with strict property checking, where the
+ * caller has already verified that both objects have the same number of own properties.
+ */
+function areStrictPropertiesEqual(a, b, state, properties, end) {
+    let index = properties.length;
+    let property;
+    let descriptorA;
+    let descriptorB;
+    // Decrementing `while` showed faster results than either incrementing or
+    // decrementing `for` loop and than an incrementing `while` loop. Declarative
+    // methods like `some` / `every` were not used to avoid incurring the garbage
+    // cost of anonymous callbacks.
+    while (index-- > end) {
+        property = properties[index];
+        if (!isReactProperty(a, b, property)
+            && (!hasOwn(b, property) || !state.equals(a[property], b[property], property, property, a, b, state))) {
+            return false;
+        }
+        descriptorA = getOwnPropertyDescriptor(a, property);
+        descriptorB = getOwnPropertyDescriptor(b, property);
+        if ((descriptorA || descriptorB)
+            && (!descriptorA
+                || !descriptorB
+                || descriptorA.configurable !== descriptorB.configurable
+                || descriptorA.enumerable !== descriptorB.enumerable
+                || descriptorA.writable !== descriptorB.writable)) {
+            return false;
+        }
+    }
+    return true;
+}
 /**
  * Combine two comparators into a single comparators.
  */
@@ -87,19 +120,62 @@ function getStrictProperties(object) {
         : getOwnPropertyNames(object);
 }
 /**
+ * Identify the element type of TypedArrays across realms and subclasses.
+ */
+const getTypedArrayTag = getOwnPropertyDescriptor(Object.getPrototypeOf(Int8Array.prototype), Symbol.toStringTag).get;
+/**
  * Whether the object contains the property passed as an own property.
  */
 const hasOwn = 
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 Object.hasOwn || ((object, property) => hasOwnProperty.call(object, property));
+/**
+ * Whether a null-prototype object is being compared with a plain object. Only one side can be
+ * null-prototype when the constructors differ. The other side must be a plain object by
+ * constructor, or by tag when it comes from another realm.
+ */
+function isNullPrototypeComparable(a, b) {
+    const aConstructor = a.constructor;
+    const bConstructor = b.constructor;
+    if (aConstructor == null) {
+        return bConstructor === Object || toString$1.call(b) === OBJECT_TAG;
+    }
+    if (bConstructor == null) {
+        return aConstructor === Object || toString$1.call(a) === OBJECT_TAG;
+    }
+    return false;
+}
+/**
+ * Whether the property passed is a property specific to React/Preact elements. These are ignored in comparison, as they
+ * are deeply circular and will return frequent false negatives for the comparison that matters, which is often the
+ * React element's aspects (`props`, `type`, etc.).
+ */
+function isReactProperty(a, b, property) {
+    return (
+    // _owner -> React owner
+    // __o -> Preact owner
+    // __v -> Preact vnode
+    (property === '_owner' || property === '__o' || property === '__v') && !!(a.$$typeof || b.$$typeof));
+}
+/**
+ * Reorder a serialized query string so that params holding the same pairs compare as equal
+ * regardless of the order they appear in.
+ *
+ * @note
+ * The serializer percent-encodes `&` and `=` wherever they appear inside a name or a value, so
+ * splitting on `&` recovers exactly the pairs and nothing else.
+ */
+function sortSearchParams(serialized) {
+    return serialized.split('&').sort().join('&');
+}
 
-const PREACT_VNODE = '__v';
-const PREACT_OWNER = '__o';
-const REACT_OWNER = '_owner';
-// `Float16Array` is recent enough that it cannot be referenced unguarded, and capturing its
-// availability once keeps that detail out of the comparison itself.
-const HAS_FLOAT_16_ARRAY = typeof Float16Array !== 'undefined';
-const { getOwnPropertyDescriptor, keys } = Object;
+/**
+ * Above this many keys, out-of-position keys are checked with `propertyIsEnumerable` rather than by
+ * scanning the other object's keys. Measured in V8: scanning wins up to 50 keys and loses from 100.
+ */
+const MAX_SCANNED_PROPERTIES = 64;
+const { keys } = Object;
+const { propertyIsEnumerable } = Object.prototype;
 /**
  * Whether the values passed are equal based on a [SameValue](https://262.ecma-international.org/7.0/#sec-samevalue) basis.
  * Simplified, this maps to if the two values are referentially equal to one another (`a === b`) or both are `NaN`.
@@ -165,16 +241,68 @@ function areDatesEqual(a, b) {
  *
  * @note
  * `name`, `message` and `stack` are own properties but are not enumerable, so they are compared
- * explicitly. `cause` is compared by value rather than by reference, matching how every other
- * nested value in the comparison is treated. Own enumerable properties (which custom `Error`
- * subclasses commonly add) are compared by composing this with the object comparator in the
- * comparator config, so that the strict and circular variants apply to them as well.
+ * explicitly. `cause` and `errors` are compared by value rather than by reference, matching how
+ * every other nested value in the comparison is treated. They are compared exactly once, regardless
+ * of whether they were assigned (enumerable) or set by the constructor (non-enumerable). Other own
+ * enumerable properties (which custom `Error` subclasses commonly add) are compared afterward.
+ *
+ * The own property comparison is inlined rather than extracted, which measured faster in V8 when
+ * recursing through `cause`. Keep the bytecode under V8's 460-byte TurboFan inlining limit (383 bytes
+ * at time of writing; check with `node --print-bytecode --print-bytecode-filter=areErrorsEqual`), or
+ * this stops being inlined into its callers.
  */
 function areErrorsEqual(a, b, state) {
-    return (a.name === b.name
-        && a.message === b.message
-        && a.stack === b.stack
-        && state.equals(a.cause, b.cause, 'cause', 'cause', a, b, state));
+    if (a.name !== b.name || a.message !== b.message || a.stack !== b.stack) {
+        return false;
+    }
+    const causeA = a.cause;
+    const causeB = b.cause;
+    if (causeA !== causeB && !state.equals(causeA, causeB, 'cause', 'cause', a, b, state)) {
+        return false;
+    }
+    const errorsA = a.errors;
+    const errorsB = b.errors;
+    if (errorsA !== errorsB && !state.equals(errorsA, errorsB, 'errors', 'errors', a, b, state)) {
+        return false;
+    }
+    const propertiesA = keys(a);
+    const propertiesB = keys(b);
+    let index = propertiesA.length;
+    // Constructed errors rarely have enumerable own properties.
+    if (!index && !propertiesB.length) {
+        return true;
+    }
+    let compared = 0;
+    let property;
+    while (index-- > 0) {
+        property = propertiesA[index];
+        // Already compared above regardless of enumerability, so we can ignore them.
+        if (property === 'cause' || property === 'errors') {
+            continue;
+        }
+        // `propertyIsEnumerable` rather than `hasOwn`, so that a non-enumerable own property on `b` cannot
+        // stand in for an enumerable one. Keys in the same position are trivially enumerable on `b`.
+        if ((property !== propertiesB[index] && !propertyIsEnumerable.call(b, property))
+            || !state.equals(a[property], b[property], property, property, a, b, state)) {
+            return false;
+        }
+        ++compared;
+    }
+    // Every compared key is enumerable on `b`, so any of `b`'s keys left over must be `cause` / `errors`.
+    const remaining = propertiesB.length - compared;
+    return (!remaining
+        || remaining === (propertyIsEnumerable.call(b, 'cause') ? 1 : 0) + (propertyIsEnumerable.call(b, 'errors') ? 1 : 0));
+}
+/**
+ * Whether the errors passed are equal in value.
+ *
+ * @note
+ * `name`, `message` and `stack` are own properties but are not enumerable, so they are compared
+ * explicitly. `cause` and `errors` are own properties, so `areObjectsEqualStrict` compares them along
+ * with every other own property; they are not compared explicitly to avoid comparing them twice.
+ */
+function areErrorsEqualStrict(a, b, state) {
+    return a.name === b.name && a.message === b.message && a.stack === b.stack && areObjectsEqualStrict(a, b, state);
 }
 /**
  * Whether the `Map`s are equal in value.
@@ -187,7 +315,7 @@ function areMapsEqual(a, b, state) {
     if (!size) {
         return true;
     }
-    const matchedIndices = new Uint8Array(size);
+    const matchedIndices = new Array(size);
     const aIterable = a.entries();
     let aResult;
     let bResult;
@@ -198,7 +326,7 @@ function areMapsEqual(a, b, state) {
             break;
         }
         const bIterable = b.entries();
-        let hasMatch = 0;
+        let hasMatch = false;
         let matchIndex = 0;
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         while ((bResult = bIterable.next())) {
@@ -213,7 +341,7 @@ function areMapsEqual(a, b, state) {
             const bEntry = bResult.value;
             if (state.equals(aEntry[0], bEntry[0], index, matchIndex, a, b, state)
                 && state.equals(aEntry[1], bEntry[1], aEntry[0], bEntry[0], a, b, state)) {
-                hasMatch = matchedIndices[matchIndex] = 1;
+                hasMatch = matchedIndices[matchIndex] = true;
                 break;
             }
             matchIndex++;
@@ -230,16 +358,30 @@ function areMapsEqual(a, b, state) {
  */
 function areObjectsEqual(a, b, state) {
     const properties = keys(a);
+    const propertiesB = keys(b);
     let index = properties.length;
-    if (keys(b).length !== index) {
+    if (propertiesB.length !== index) {
         return false;
     }
+    const isScannable = index <= MAX_SCANNED_PROPERTIES;
+    let property;
     // Decrementing `while` showed faster results than either incrementing or
     // decrementing `for` loop and than an incrementing `while` loop. Declarative
     // methods like `some` / `every` were not used to avoid incurring the garbage
     // cost of anonymous callbacks.
     while (index-- > 0) {
-        if (!isPropertyEqual(a, b, state, properties[index])) {
+        property = properties[index];
+        if (isReactProperty(a, b, property)) {
+            continue;
+        }
+        // Objects built the same way list their keys in the same order, in which case the key is
+        // already known to be an own enumerable property of `b` and the lookup can be skipped.
+        // Otherwise, `propertiesB` is exactly `b`'s own enumerable keys. Scanning it is faster than
+        // `propertyIsEnumerable` for smaller objects, but it is linear per key, so larger objects
+        // (where reordering would make it quadratic) use the lookup instead.
+        if ((property !== propertiesB[index]
+            && !(isScannable ? propertiesB.includes(property) : propertyIsEnumerable.call(b, property)))
+            || !state.equals(a[property], b[property], property, property, a, b, state)) {
             return false;
         }
     }
@@ -250,34 +392,7 @@ function areObjectsEqual(a, b, state) {
  */
 function areObjectsEqualStrict(a, b, state) {
     const properties = getStrictProperties(a);
-    let index = properties.length;
-    if (getStrictProperties(b).length !== index) {
-        return false;
-    }
-    let property;
-    let descriptorA;
-    let descriptorB;
-    // Decrementing `while` showed faster results than either incrementing or
-    // decrementing `for` loop and than an incrementing `while` loop. Declarative
-    // methods like `some` / `every` were not used to avoid incurring the garbage
-    // cost of anonymous callbacks.
-    while (index-- > 0) {
-        property = properties[index];
-        if (!isPropertyEqual(a, b, state, property)) {
-            return false;
-        }
-        descriptorA = getOwnPropertyDescriptor(a, property);
-        descriptorB = getOwnPropertyDescriptor(b, property);
-        if ((descriptorA || descriptorB)
-            && (!descriptorA
-                || !descriptorB
-                || descriptorA.configurable !== descriptorB.configurable
-                || descriptorA.enumerable !== descriptorB.enumerable
-                || descriptorA.writable !== descriptorB.writable)) {
-            return false;
-        }
-    }
-    return true;
+    return getStrictProperties(b).length === properties.length && areStrictPropertiesEqual(a, b, state, properties, 0);
 }
 /**
  * Whether the primitive wrappers passed are equal in value.
@@ -292,6 +407,21 @@ function areRegExpsEqual(a, b) {
     return a.source === b.source && a.flags === b.flags;
 }
 /**
+ * Whether the search params passed are equal in value.
+ *
+ * @note
+ * Order is not significant, matching how the other unordered collections in the library are
+ * compared. Repeated keys are, so this is a comparison of multisets rather than of sets:
+ * `a=1&a=2` is equal to `a=2&a=1`, but not to `a=1&a=1`.
+ */
+function areSearchParamsEqual(a, b) {
+    const serializedA = a.toString();
+    const serializedB = b.toString();
+    // Identical serializations are equal under any ordering, and this is by far the common case, so
+    // it is worth checking before sorting anything.
+    return serializedA === serializedB || sortSearchParams(serializedA) === sortSearchParams(serializedB);
+}
+/**
  * Whether the `Set`s are equal in value.
  */
 function areSetsEqual(a, b, state) {
@@ -302,7 +432,7 @@ function areSetsEqual(a, b, state) {
     if (!size) {
         return true;
     }
-    const matchedIndices = new Uint8Array(size);
+    const matchedIndices = new Array(size);
     const aIterable = a.values();
     let aResult;
     let bResult;
@@ -312,7 +442,7 @@ function areSetsEqual(a, b, state) {
             break;
         }
         const bIterable = b.values();
-        let hasMatch = 0;
+        let hasMatch = false;
         let matchIndex = 0;
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         while ((bResult = bIterable.next())) {
@@ -321,7 +451,7 @@ function areSetsEqual(a, b, state) {
             }
             if (!matchedIndices[matchIndex]
                 && state.equals(aResult.value, bResult.value, aResult.value, bResult.value, a, b, state)) {
-                hasMatch = matchedIndices[matchIndex] = 1;
+                hasMatch = matchedIndices[matchIndex] = true;
                 break;
             }
             matchIndex++;
@@ -343,7 +473,8 @@ function areTypedArraysEqual(a, b) {
     // Only float-backed views can hold `NaN`, and the additional check needed to treat it as equal
     // to itself measurably slows the loop, so integer views keep the plain comparison. This is
     // hoisted out of the loop so the cost is paid once per call rather than once per element.
-    if (a instanceof Float64Array || a instanceof Float32Array || (HAS_FLOAT_16_ARRAY && a instanceof Float16Array)) {
+    const tag = getTypedArrayTag.call(a);
+    if (tag === 'Float64Array' || tag === 'Float32Array' || tag === 'Float16Array') {
         while (index-- > 0) {
             // `NaN` is the only value not equal to itself, and it is treated as equal here to match
             // the SameValueZero semantics used for every other numeric comparison in the library.
@@ -359,6 +490,21 @@ function areTypedArraysEqual(a, b) {
         }
     }
     return true;
+}
+/**
+ * Whether the TypedArray instances are equal in value with strict property checking.
+ *
+ * @note
+ * Indexed elements are also own properties, listed first and in order, with descriptors fixed by the
+ * spec. They are compared once by `areTypedArraysEqual`, so only the own properties after them
+ * (including symbols) are compared with strict property checking.
+ */
+function areTypedArraysEqualStrict(a, b, state) {
+    if (!areTypedArraysEqual(a, b)) {
+        return false;
+    }
+    const properties = getStrictProperties(a);
+    return (getStrictProperties(b).length === properties.length && areStrictPropertiesEqual(a, b, state, properties, a.length));
 }
 /**
  * Whether the URL instances are equal in value.
@@ -378,47 +524,43 @@ function areUrlsEqual(a, b) {
         && a.hash === b.hash
         && areSearchParamsEqual(a.searchParams, b.searchParams));
 }
-/**
- * Whether the search params passed are equal in value.
- *
- * @note
- * Order is not significant, matching how the other unordered collections in the library are
- * compared. Repeated keys are, so this is a comparison of multisets rather than of sets:
- * `a=1&a=2` is equal to `a=2&a=1`, but not to `a=1&a=1`.
- */
-function areSearchParamsEqual(a, b) {
-    const serializedA = a.toString();
-    const serializedB = b.toString();
-    // Identical serializations are equal under any ordering, and this is by far the common case, so
-    // it is worth checking before sorting anything.
-    return serializedA === serializedB || sortSearchParams(serializedA) === sortSearchParams(serializedB);
-}
-/**
- * Reorder a serialized query string so that params holding the same pairs compare as equal
- * regardless of the order they appear in.
- *
- * @note
- * The serializer percent-encodes `&` and `=` wherever they appear inside a name or a value, so
- * splitting on `&` recovers exactly the pairs and nothing else.
- */
-function sortSearchParams(serialized) {
-    return serialized.split('&').sort().join('&');
-}
-function isPropertyEqual(a, b, state, property) {
-    if ((property === REACT_OWNER || property === PREACT_OWNER || property === PREACT_VNODE)
-        && (a.$$typeof || b.$$typeof)) {
-        return true;
-    }
-    return hasOwn(b, property) && state.equals(a[property], b[property], property, property, a, b, state);
-}
 
-const toString = Object.prototype.toString;
+const { toString } = Object.prototype;
 /**
  * Create a comparator method based on the type-specific equality comparators passed.
  */
 function createEqualityComparator(config) {
     const supportedComparatorMap = createSupportedComparatorMap(config);
-    const { areArraysEqual, areDatesEqual, areFunctionsEqual, areMapsEqual, areNumbersEqual, areObjectsEqual, areRegExpsEqual, areSetsEqual, getUnsupportedCustomComparator, } = config;
+    const { areArraysEqual, areDatesEqual, areFunctionsEqual, areMapsEqual, areNumbersEqual, areObjectsEqual, areRegExpsEqual, areSetsEqual, getUnsupportedCustomComparator, strictNullPrototypeComparison, } = config;
+    /**
+     * Whether the custom objects are equal in value, based on their string tag. If not matching any tags
+     * that require a specific type of comparison, then we hard-code false because the only thing remaining
+     * is strict equality, which has already been compared. This is for a few reasons:
+     *   - Certain types that cannot be introspected (e.g., `WeakMap`). For these types, this is the only
+     *     comparison that can be made.
+     *   - For types that can be introspected but do not have an objective definition of what
+     *     equality is (`Error`, etc.), the subjective decision is to be conservative and strictly compare.
+     * In all cases, these decisions should be reevaluated based on changes to the language and
+     * common development practices.
+     *
+     * Capturing the tag is reasonably performant in modern environments like v8 and SpiderMonkey. This is
+     * kept out of the main comparator so that it stays within the engine's bytecode budget for inlining.
+     * See [#207](https://github.com/planttheidea/fast-equals/pull/207) for more details.
+     */
+    const areTaggedObjectsEqual = getUnsupportedCustomComparator
+        ? function areTaggedObjectsEqual(a, b, state) {
+            const tag = toString.call(a);
+            const supportedComparator = supportedComparatorMap[tag];
+            if (supportedComparator) {
+                return supportedComparator(a, b, state);
+            }
+            const unsupportedCustomComparator = getUnsupportedCustomComparator(a, b, state, tag);
+            return unsupportedCustomComparator ? unsupportedCustomComparator(a, b, state) : false;
+        }
+        : function areTaggedObjectsEqual(a, b, state) {
+            const supportedComparator = supportedComparatorMap[toString.call(a)];
+            return supportedComparator ? supportedComparator(a, b, state) : false;
+        };
     /**
      * compare the value of the two objects and return true if they are equivalent in values
      */
@@ -458,7 +600,7 @@ function createEqualityComparator(config) {
         // Constructors should match, otherwise there is potential for false positives
         // between class and subclass or custom object and POJO.
         if (constructor !== b.constructor) {
-            return false;
+            return strictNullPrototypeComparison ? false : isNullPrototypeComparable(a, b) && areObjectsEqual(a, b, state);
         }
         // Try to fast-path equality checks for other complex object types in the
         // same realm to avoid capturing the string tag. Strict equality is used
@@ -497,44 +639,26 @@ function createEqualityComparator(config) {
         if (Array.isArray(a)) {
             return areArraysEqual(a, b, state);
         }
-        // Since this is a custom object, capture the string tag to determining its type.
-        // This is reasonably performant in modern environments like v8 and SpiderMonkey.
-        const tag = toString.call(a);
-        const supportedComparator = supportedComparatorMap[tag];
-        if (supportedComparator) {
-            return supportedComparator(a, b, state);
-        }
-        const unsupportedCustomComparator = getUnsupportedCustomComparator && getUnsupportedCustomComparator(a, b, state, tag);
-        if (unsupportedCustomComparator) {
-            return unsupportedCustomComparator(a, b, state);
-        }
-        // If not matching any tags that require a specific type of comparison, then we hard-code false because
-        // the only thing remaining is strict equality, which has already been compared. This is for a few reasons:
-        //   - Certain types that cannot be introspected (e.g., `WeakMap`). For these types, this is the only
-        //     comparison that can be made.
-        //   - For types that can be introspected but do not have an objective definition of what
-        //     equality is (`Error`, etc.), the subjective decision is to be conservative and strictly compare.
-        // In all cases, these decisions should be reevaluated based on changes to the language and
-        // common development practices.
-        return false;
+        // Since this is a custom object, use the string tag to determine its type.
+        return areTaggedObjectsEqual(a, b, state);
     };
 }
 /**
  * Create the configuration object used for building comparators.
  */
-function createEqualityComparatorConfig({ circular, createCustomConfig, strict, }) {
+function createEqualityComparatorConfig({ circular, createCustomConfig, strict, strictNullPrototypeComparison = true, }) {
     let config = {
         areArrayBuffersEqual,
         areArraysEqual: strict ? areObjectsEqualStrict : areArraysEqual,
         areDataViewsEqual,
-        areDatesEqual: areDatesEqual,
-        // `Error` subclasses routinely carry their own enumerable properties (`status`, `code`, ...),
-        // which the error comparator alone does not see, so it is composed with the object comparator.
-        // `name` / `message` / `stack` are own but not enumerable, which is why errors need a
-        // comparator of their own rather than being treated as plain objects in the first place.
-        areErrorsEqual: strict
-            ? combineComparators(areErrorsEqual, areObjectsEqualStrict)
-            : combineComparators(areErrorsEqual, areObjectsEqual),
+        areDatesEqual: strict
+            ? combineComparators(areDatesEqual, areObjectsEqualStrict)
+            : areDatesEqual,
+        // `name` / `message` / `stack` / `cause` / `errors` are not enumerable (unless assigned), which is why
+        // errors need a comparator of their own rather than being treated as plain objects. Each variant also
+        // compares the own properties that `Error` subclasses routinely carry (`status`, `code`, ...):
+        // enumerable ones in loose mode, and all of them (via `areObjectsEqualStrict`) in strict mode.
+        areErrorsEqual: strict ? areErrorsEqualStrict : areErrorsEqual,
         areFunctionsEqual: strictEqual,
         areMapsEqual: strict ? combineComparators(areMapsEqual, areObjectsEqualStrict) : areMapsEqual,
         areNumbersEqual: sameValueEqual,
@@ -542,29 +666,32 @@ function createEqualityComparatorConfig({ circular, createCustomConfig, strict, 
         arePrimitiveWrappersEqual: arePrimitiveWrappersEqual,
         areRegExpsEqual: areRegExpsEqual,
         areSetsEqual: strict ? combineComparators(areSetsEqual, areObjectsEqualStrict) : areSetsEqual,
-        areTypedArraysEqual: strict
-            ? combineComparators(areTypedArraysEqual, areObjectsEqualStrict)
-            : areTypedArraysEqual,
+        areTypedArraysEqual: strict ? areTypedArraysEqualStrict : areTypedArraysEqual,
         areUrlsEqual: areUrlsEqual,
         getUnsupportedCustomComparator: undefined,
+        strictNullPrototypeComparison,
     };
     if (createCustomConfig) {
         config = Object.assign({}, config, createCustomConfig(config));
     }
     if (circular) {
         const areArraysEqual = createIsCircular(config.areArraysEqual);
+        const areDatesEqual = strict ? createIsCircular(config.areDatesEqual) : config.areDatesEqual;
         // Errors are included because comparing `cause` and own properties by value means an error
         // that references itself would otherwise recurse without bound.
         const areErrorsEqual = createIsCircular(config.areErrorsEqual);
         const areMapsEqual = createIsCircular(config.areMapsEqual);
         const areObjectsEqual = createIsCircular(config.areObjectsEqual);
         const areSetsEqual = createIsCircular(config.areSetsEqual);
+        const areTypedArraysEqual = strict ? createIsCircular(config.areTypedArraysEqual) : config.areTypedArraysEqual;
         config = Object.assign({}, config, {
             areArraysEqual,
+            areDatesEqual,
             areErrorsEqual,
             areMapsEqual,
             areObjectsEqual,
             areSetsEqual,
+            areTypedArraysEqual,
         });
     }
     return config;
