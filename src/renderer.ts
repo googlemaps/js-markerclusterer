@@ -75,8 +75,8 @@ export class DefaultRenderer implements Renderer {
    * // change color if this cluster has more markers than the mean cluster
    * const color =
    *   count > Math.max(10, stats.clusters.markers.mean)
-   *     ? "#ff0000"
-   *     : "#0000ff";
+   *     ? this.overMeanColor // "#ff0000"
+   *     : this.underMeanColor; // "#ff0000"
    *
    * // create svg url with fill color
    * const svg = window.btoa(`
@@ -104,6 +104,16 @@ export class DefaultRenderer implements Renderer {
    * });
    * ```
    */
+  underMeanColor: string
+  overMeanColor: string
+
+   constructor(underMeanColor = "#0000ff", overMeanColor = "#ff0000") {
+    super()
+
+    this.underMeanColor = underMeanColor
+    this.overMeanColor = overMeanColor
+  }
+
   public render(
     { count, position }: Cluster,
     stats: ClusterStats,
@@ -111,7 +121,7 @@ export class DefaultRenderer implements Renderer {
   ): Marker {
     // change color if this cluster has more markers than the mean cluster
     const color =
-      count > Math.max(10, stats.clusters.markers.mean) ? "#ff0000" : "#0000ff";
+      count > Math.max(10, stats.clusters.markers.mean) ? this.overMeanColor : this.underMeanColor;
 
     // create svg literal with fill color
     const svg = `<svg fill="${color}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="50" height="50">
