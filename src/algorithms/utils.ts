@@ -78,6 +78,19 @@ export const getPaddedViewport = (
   const ne = extended.getNorthEast();
   const sw = extended.getSouthWest();
 
+  const longitudeDifference =
+    bounds.getNorthEast().lng() - bounds.getSouthWest().lng();
+  const longitudeSpan =
+    longitudeDifference < 0 ? longitudeDifference + 360 : longitudeDifference;
+  const worldWidth = projection.getWorldWidth();
+  const paddingSpan = worldWidth > 0 ? (2 * pixels * 360) / worldWidth : 0;
+
+  // The inverse projection can wrap a world-spanning viewport into a narrow
+  // longitude range. Give Supercluster the full longitude range in this case.
+  if (longitudeSpan === 360 || longitudeSpan + paddingSpan >= 360) {
+    return [-180, sw.lat(), 180, ne.lat()];
+  }
+
   return [sw.lng(), sw.lat(), ne.lng(), ne.lat()];
 };
 
