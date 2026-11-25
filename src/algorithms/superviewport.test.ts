@@ -20,7 +20,7 @@ import {
   testMarkerTypes,
   setupMapBounds,
 } from "../test-helpers";
-import { MapCanvasProjection } from "@googlemaps/jest-mocks";
+import { LatLngBounds, MapCanvasProjection } from "@googlemaps/jest-mocks";
 import { Marker } from "../marker-utils";
 import { ClusterFeature } from "supercluster";
 import { Cluster } from "../cluster";
@@ -95,6 +95,59 @@ describe.each(testMarkerTypes)(
 
       expect(clusters).toHaveLength(1);
     });
+
+    test.each([
+      { west: -180, east: 180, padding: 0 },
+      { west: -170, east: 170, padding: 60 },
+    ])(
+      "should include markers throughout a world-spanning padded viewport (%j)",
+      ({ west, east, padding }) => {
+        const marker: Marker = new markerClass();
+        map.getZoom = jest.fn().mockReturnValue(1);
+        setupMapBounds(map, { west, south: -60, east, north: 60 });
+
+        // A zoom-1 world is 512 pixels wide. The inverse projection wraps
+        // longitude, including the +180 endpoint.
+        mapCanvasProjection.getWorldWidth.mockReturnValue(512);
+        mapCanvasProjection.fromLatLngToDivPixel.mockImplementation(
+          (position: google.maps.LatLng) =>
+            new google.maps.Point((position.lng() * 512) / 360, -position.lat())
+        );
+        mapCanvasProjection.fromDivPixelToLatLng.mockImplementation(
+          (point: google.maps.Point) => {
+            const longitude = (point.x * 360) / 512;
+            const wrapped = ((((longitude + 180) % 360) + 360) % 360) - 180;
+            return new google.maps.LatLng(-point.y, wrapped);
+          }
+        );
+
+        // The stock mock ignores the constructor's corners.
+        const boundsConstructor = jest
+          .spyOn(google.maps, "LatLngBounds")
+          .mockImplementation((sw, ne) => {
+            const bounds = new LatLngBounds();
+            bounds.getSouthWest.mockReturnValue(sw);
+            bounds.getNorthEast.mockReturnValue(ne);
+            return bounds;
+          });
+
+        try {
+          const algorithm = new SuperClusterViewportAlgorithm({
+            viewportPadding: padding,
+          });
+          const { clusters } = algorithm.calculate({
+            markers: [marker],
+            map,
+            mapCanvasProjection,
+          });
+          expect(clusters.flatMap((cluster) => cluster.markers)).toEqual([
+            marker,
+          ]);
+        } finally {
+          boundsConstructor.mockRestore();
+        }
+      }
+    );
 
     test("should transform to Cluster with single marker if not cluster", () => {
       const superCluster = new SuperClusterViewportAlgorithm({});
