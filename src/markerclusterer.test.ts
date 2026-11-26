@@ -260,11 +260,6 @@ describe.each(markerClasses)(
 
       clusters.forEach((cluster) => {
         expect(MarkerUtils.setMap).toHaveBeenCalledWith(cluster.marker, map);
-        expect(cluster.marker?.addListener).toHaveBeenCalledWith(
-          // legacy Marker uses 'click' events, whereas AdvancedMarkerElement uses 'gmp-click'
-          MarkerUtils.isAdvancedMarker(cluster.marker!) ? "gmp-click" : "click",
-          expect.any(Function)
-        );
       });
 
       expect(renderer.render).toHaveBeenCalledWith(
@@ -272,6 +267,63 @@ describe.each(markerClasses)(
         expect.any(ClusterStats),
         map
       );
+    });
+
+    test("cluster activation fires one click and fits the cluster bounds", () => {
+      const markers: Marker[] = [new markerClass(), new markerClass()];
+      const clusterMarker: Marker = new markerClass();
+      const advanced = MarkerUtils.isAdvancedMarker(clusterMarker);
+      const position = new google.maps.LatLng(1, 2);
+      const cluster = new Cluster({ markers, position });
+      const bounds = new google.maps.LatLngBounds();
+      const markerClusterer = new MarkerClusterer({ markers, renderer });
+      const onClusterClick = jest.spyOn(markerClusterer, "onClusterClick");
+
+      if (advanced) clusterMarker.position = position;
+
+      render.mockReturnValueOnce(clusterMarker);
+      jest.spyOn(cluster, "bounds", "get").mockReturnValue(bounds);
+      markerClusterer.getMap = jest.fn().mockReturnValue(map);
+      markerClusterer["clusters"] = [cluster];
+      markerClusterer["renderClusters"]();
+
+      const domEvent = new Event(advanced ? "gmp-click" : "click");
+      const stop = jest.spyOn(domEvent, "stopPropagation");
+
+      if (advanced) {
+        expect(clusterMarker.addListener).not.toHaveBeenCalled();
+        expect(clusterMarker.gmpClickable).toBe(true);
+        clusterMarker.dispatchEvent(domEvent);
+      } else {
+        expect(clusterMarker.addListener).toHaveBeenCalledTimes(1);
+        const [[eventName, listener]] = jest.mocked(clusterMarker.addListener)
+          .mock.calls;
+        expect(eventName).toBe("click");
+        listener({
+          domEvent,
+          latLng: position,
+          stop: () => domEvent.stopPropagation(),
+        });
+      }
+
+      expect(onClusterClick).toHaveBeenCalledTimes(1);
+      const [[event, clickedCluster, target]] = onClusterClick.mock.calls;
+      expect(event.domEvent).toBe(domEvent);
+      expect(event.latLng).toBe(position);
+      expect(clickedCluster).toBe(cluster);
+      expect(target).toBe(map);
+      event.stop();
+      expect(stop).toHaveBeenCalledTimes(1);
+      expect(
+        jest
+          .mocked(google.maps.event.trigger)
+          .mock.calls.filter(
+            ([instance, eventName]) =>
+              instance === markerClusterer && eventName === "click"
+          )
+      ).toEqual([[markerClusterer, "click", cluster]]);
+      expect(map.fitBounds).toHaveBeenCalledTimes(1);
+      expect(map.fitBounds).toHaveBeenCalledWith(bounds);
     });
 
     test("markerClusterer renderClusters remove all individual markers from the map", () => {
