@@ -262,25 +262,34 @@ export class MarkerClusterer extends OverlayViewSafe {
         // Make sure all individual markers are removed from the map.
         cluster.markers.forEach((marker) => MarkerUtils.setMap(marker, null));
         if (this.onClusterClick) {
-          // legacy Marker uses 'click' events, whereas AdvancedMarkerElement uses 'gmp-click'
-          const markerClickEventName = MarkerUtils.isAdvancedMarker(
-            cluster.marker
-          )
-            ? MarkerClustererEvents.GMP_CLICK
-            : MarkerClustererEvents.CLUSTER_CLICK;
+          const marker = cluster.marker;
+          const onClick = (event: google.maps.MapMouseEvent) => {
+            google.maps.event.trigger(
+              this,
+              MarkerClustererEvents.CLUSTER_CLICK,
+              cluster
+            );
+            this.onClusterClick(event, cluster, map);
+          };
 
-          cluster.marker.addListener(
-            markerClickEventName,
-            /* istanbul ignore next */
-            (event: google.maps.MapMouseEvent) => {
-              google.maps.event.trigger(
-                this,
-                MarkerClustererEvents.CLUSTER_CLICK,
-                cluster
-              );
-              this.onClusterClick(event, cluster, map);
-            }
-          );
+          // Advanced markers use the DOM gmp-click event.
+          if (MarkerUtils.isAdvancedMarker(marker)) {
+            marker.gmpClickable = true;
+            marker.addEventListener(
+              MarkerClustererEvents.GMP_CLICK,
+              (event) => {
+                onClick({
+                  domEvent: event,
+                  latLng: marker.position
+                    ? MarkerUtils.getPosition(marker)
+                    : null,
+                  stop: () => event.stopPropagation(),
+                });
+              }
+            );
+          } else {
+            marker.addListener(MarkerClustererEvents.CLUSTER_CLICK, onClick);
+          }
         }
       }
       MarkerUtils.setMap(cluster.marker, map);
